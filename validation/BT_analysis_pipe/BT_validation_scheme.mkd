@@ -1,0 +1,17 @@
+# Brain Tumour Validation Scheme
+
+USwLesion validation, the algorithm segments tissues using spatial priors in template (MNI) space. What is required is to provide a template with tissue claases and a mask of the lesion that will be moved into MNI space, first using an affine transform.
+
+## BRAT
+
+The data we are using has been acquired from the Multimodal Brain Tumour Image Segmentation Benchmark (BRATS) challenge. This venture was organised in 2012/2013 to assess and compare state-of-the-art automated brain tumour segmentation methods, and involved application of twenty algorithms to a dataset of low- and high-grade glioma patients (with the tumours manually delineated by up to four human expert raters), as well as 65 simulated synthetic scans. The study indicated that different algorithms were particularly successful for specific tumour sub-regions, with the associated errors being comparable to human inter-rater variability. No single algorithm performed best for all sub-regions simultaneously, and fusing different algorithms was found to improve performance significantly.
+
+### Creation of masks and comparison to ground truth
+
+For each patient, we create a rough mask of the tumour using the 3D fill tool in MRICROn. This is then visually checked against the ground truth and the compute the overlap metrics to get an idea of overalp and distribution in the quality of the masks as well as volumes of tumours for masks and ground truth.
+
+*_overlap metrics_*:
+
+Modified Jaccard Index (mJ)- measures similarity between finite sample sets, and is defined as the size of the intersection divided by the size of the union of the sample sets.
+
+mean Hausdorff distance (mHd)- mathematical construct to measure the 'closeness' of two sets of points that are subsets of a metric space.
