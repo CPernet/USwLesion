@@ -11,7 +11,7 @@ imgs{1} = T1name; imgs{2} = FLAIRname;
 matlabbatch{1}.spm.tools.USwLtools.uswl.imgStruc = imgs';
 matlabbatch{1}.spm.tools.USwLtools.uswl.imgOth = '';
 matlabbatch{1}.spm.tools.USwLtools.uswl.options.imgTpm = {[fileparts(which('spm')) filesep 'tpm' filesep 'TPM.nii']};
-matlabbatch{1}.spm.tools.USwLtools.uswl.options.NbGaussian = [2 2 nbGaussian 2 2 0 2]; 
+matlabbatch{1}.spm.tools.USwLtools.uswl.options.NbGaussian = [2 2 nbGaussian 2 2 0 1]; 
 matlabbatch{1}.spm.tools.USwLtools.uswl.options.tpm4lesion = affectedtissue;
 matlabbatch{1}.spm.tools.USwLtools.uswl.options.bias.bias_yes.biasreg = 0.001;
 matlabbatch{1}.spm.tools.USwLtools.uswl.options.bias.bias_yes.biasfwhm = 60;
