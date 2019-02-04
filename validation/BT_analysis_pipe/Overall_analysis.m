@@ -23,8 +23,11 @@ end
 
 
 
-%% Step 1: for each patient, runs the function image_overlap which computes the similarity between two 3D images based on a number of measures 
-% mean Jaccard index, mean Hausdorrf distance, overlap based on voxel/cluster matching -- plus the Dice coefficient
+%% Step 1: Establish baseline measurment between the ground truth and manual masks
+% for each patient, runs the function image_overlap which computes
+% the similarity between two 3D images based on a number of measures mean Jaccard index,
+% mean Hausdorrf distance, overlap based on voxel/cluster matching -- plus the Dice coefficient
+
 
 index = 1;
 for tumour_type = 1:2
@@ -42,7 +45,7 @@ for tumour_type = 1:2
         % loop for each patient
         % ---------------------
         patient_dir = [BRAT_dir filesep folders(patient+2).name];
-        tmp = dir([patient_dir filesep 'VSD.Brain_*more*']); 
+        tmp = dir([patient_dir filesep 'VSD.Brain_*more*']);
         ground_truth = [patient_dir filesep tmp.name filesep 'VSD.nii'];
         tmp = dir([patient_dir filesep '*Flair*']);
         [mJ1(index),mHd1(index),overlap1(index)] = image_overlap([patient_dir filesep tmp.name filesep 'voi1.nii'],ground_truth);
@@ -54,15 +57,13 @@ for tumour_type = 1:2
     end
 end
 
-% figure
-x = 1:index;
-plot(x,Dice1,'g',x,Dice2,'o');
+% save as csv file
 
 
-%% Step 2: call the segmentation routine
+%% Step 2: perform segmentation to obtain new tumour masks
+% call the segmentation routine in parallel loop (+clean up)
 % parameters we change are T1name, FLAIRname, voi mask, nbGaussian and affected tissues
 
-count = 1;
 Gaussian_param = [2 3 Inf];
 for tumour_type = 1:2
     % loop in High Grade Glioma or Low Grade Glioma
@@ -74,8 +75,8 @@ for tumour_type = 1:2
     else
         folders = folders(1:10);
     end
-       
-    for patient = 1:size(folders,1)-2;
+    
+    parfor patient = 1:size(folders,1)-2
         % loop for each patient
         % ---------------------
         patient_dir = [BRAT_dir filesep folders(patient+2).name];
@@ -83,24 +84,88 @@ for tumour_type = 1:2
         T1name = [patient_dir filesep tmp.name filesep 'VSD.nii'];
         
         tmp = dir([patient_dir filesep '*Flair*']);
-        FLAIRname = [patient_dir filesep tmp.name filesep 'VSD.nii']; 
-                            
-        index = 1;
-        for voi = 1:2;
+        FLAIRname = [patient_dir filesep tmp.name filesep 'VSD.nii'];
+        
+        for voi = 1:2
             mask = [patient_dir filesep tmp.name filesep 'voi' num2str(voi) '.nii'];
-            for nbGaussian = 1:3;
+            for nbGaussian = 1:3
                 for affectedtissue = 1:2 % add +1 for GM+WM or GM+WM+CSF
-                    out{index} = segmentation_routine(T1name,FLAIRname,mask,Gaussian_param(nbGaussian),affectedtissue+1);
-                    index = index+1;
+                    out = segmentation_routine(T1name,FLAIRname,mask,Gaussian_param(nbGaussian),affectedtissue+1);
+                    % clean up
+                    cd(fileparts(T1name))
+                    destination = [pwd filesep 'segmentation_voi' num2str(voi) '_nbG' num2str(Gaussian_param(nbGaussian)) '_tissue' num2str(affectedtissue+1)];
+                    mkdir(destination)
+                    movefile(cell2mat(out{1}.segmImg.wc1),[destination filesep 'c1kVSD.nii']);
+                    movefile(cell2mat(out{1}.segmImg.c2),[destination filesep 'c2kVSD.nii']);
+                    movefile(cell2mat(out{1}.segmImg.c3),[destination filesep 'c3kVSD.nii']);
+                    movefile(cell2mat(out{1}.segmImg.c4),[destination filesep 'c4kVSD.nii']);
+                    delete(cell2mat(out{1}.ICVmsk));
+                    delete(cell2mat(out{1}.wICVmsk));
+                    delete(cell2mat(out{1}.Struc_1));
+                    delete(cell2mat(out{1}.Struc_2));
+                    delete(cell2mat(out{1}.wStruc_1));
+                    delete(cell2mat(out{1}.wStruc_1));
+                    delete(cell2mat(out{1}.TPMl{1}));
+                    delete(cell2mat(out{1}.segmImg.wc1{1}));
+                    delete(cell2mat(out{1}.segmImg.wc2{1}));
+                    delete(cell2mat(out{1}.segmImg.wc3{1}));
+                    delete(cell2mat(out{1}.segmImg.wc4{1}));
+                    delete(cell2mat(out{1}.segmImg.mwc1{1}));
+                    delete(cell2mat(out{1}.segmImg.mwc2{1}));
+                    delete(cell2mat(out{1}.segmImg.mwc3{1}));
+                    delete(cell2mat(out{1}.segmImg.mwc4{1}));
+                    delete(cell2mat(out{1}.segmImg.rc1{1}));
+                    delete(cell2mat(out{1}.segmImg.rc2{1}));
+                    delete(cell2mat(out{1}.segmImg.rc3{1}));
                 end
             end
         end
-%         
-%         % clean-up
-%         mkdir()
-%         movefile(out(..)) 
-%         delete
-%         
-    count = count+1;
     end
 end
+
+
+%% step 3: compute the similarity between ground truth and masks
+mJ    = NaN(30,12);
+mHd   = NaN(30,12);
+Dice  = NaN(30,12);
+mcc   = NaN(30,12);
+kappa = NaN(30,12);
+
+subj_index  = 1;
+param_index = 1;
+for tumour_type = 1:2
+    BRAT_dir = eval(['BRAT_dir' num2str(tumour_type)]);
+    cd(BRAT_dir); folders = dir;
+    if tumour_type == 1
+        folders = folders(1:20);
+    else
+        folders = folders(1:10);
+    end
+    
+    for patient = 1:size(folders,1)-2
+        ground_truth = [];
+        for voi = 1:2
+            for nbGaussian = 1:3
+                for affectedtissue = 1:2 % add +1 for GM+WM or GM+WM+CSF
+                    % get the files
+                    root = [pwd filesep 'segmentation_voi' num2str(voi) '_nbG' num2str(Gaussian_param(nbGaussian)) '_tissue' num2str(affectedtissue+1)];
+                    name = [];
+                    c1 = [root filesep 'kc1' name '.nii'];
+                    c2 = [];
+                    c3 = [];
+                    c4 = [];
+                    
+                    % compute similarity
+                    [mJ(subj_index,param_index),mHd(subj_index,param_index),overlap,Dice(subj_index,param_index)] = compare2gdtruth(c1,c2,c3,c4,ground_truth,'on');
+                    mcc(subj_index,param_index) = overlap.voxel.mcc;
+                    kappa(subj_index,param_index) = overlap.voxel.CK;
+                end
+            end
+            param_index = param_index+1;
+        end
+        subj_index = subj_index+1;
+    end
+end
+
+
+%% step 4: statistically test which masks are the best and in which conditions
