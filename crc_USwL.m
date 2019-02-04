@@ -581,15 +581,19 @@ fn_TPM = fullfile(pth,[fnam,ext]); % ensuring I load all TPMs together.
 Vtpm     = spm_vol(fn_TPM);
 tpm_orig = spm_read_vols(Vtpm);
 Ntpm_o = numel(Vtpm);
-if Ntpm_o==6
-    % Standard TPM
-    tpm_std = true;
-elseif Ntpm_o==7
-    % Special TPM for MPM (with separate GM class for subcortical areas)
-    tpm_std = false;
+
+if Ntpm_o < 3
+    error('The TPM appears to have less than 3 classes, impossible to compute further - consider changing your TPM')
 else
-    error('Wrong number of TPM''s.');
+    if Ntpm_o==7
+        % Special TPM for MPM (with separate GM class for subcortical areas)
+        tpm_std = false;
+    else
+        % Standard TPM
+        tpm_std = true;
+    end
 end
+
 if tpm_std
     tpm_GM   = squeeze(tpm_orig(:,:,:,1));
     tpm_WM   = squeeze(tpm_orig(:,:,:,2)); % used later on to define ICV
@@ -746,16 +750,19 @@ tpm_ext(:,:,:,6) = 1 - sum(tpm_ext(:,:,:,ltpm),4);
 fn_TPMl = fullfile(spm_file(fn_swtMsk,'path'), ...
     spm_file(spm_file(fn_TPM,'filename'),'suffix','_les'));
 Vtpm_l = Vtpm;
+
 % adding 1 tpm
 Vtpm_l(Ntpm_o+1) = Vtpm(Ntpm_o);
 mem_sz = Vtpm(2).pinfo(3)-Vtpm(1).pinfo(3);
 Vtpm_l(Ntpm_o+1).pinfo(3) = Vtpm_l(Ntpm_o+1).pinfo(3) + mem_sz;
 Vtpm_l(Ntpm_o+1).n(1) = Ntpm_o+1;
 if tpm_std
-    tc_order = [1 2 7 3 4 5 6]; % the lesion class is inserted in 3rd position!
+    tc_order = [1 2 (Ntpm_o+1) 3:Ntpm_o]; % the lesion class is inserted in 3rd position!
 else
-    tc_order = [1 2 8 3 4 5 6 7]; % the lesion class is inserted in 3rd position!
+    tc_order = [1 2 (Ntpm_o+2) 3:(Ntpm_o+1)]; % the lesion class is inserted in 3rd position!
 end
+
+% write
 for ii=1:Ntpm_o+1
     Vtpm_l(ii).fname = fn_TPMl;
     Vtpm_l(ii) = spm_create_vol(Vtpm_l(ii));
@@ -814,16 +821,20 @@ if nP>1
         matlabbatch{1}.spm.spatial.preproc.channel(ii).write = b_write(ii,:);
     end
 end
+
 % Define TPM's
-if nG==7
-    cr_native = [1 1 ; 1 1 ; 1 1 ; 1 0 ; 1 0 ; 1 0 ; 0 0 ];
-    cr_warped = [1 1 ; 1 1 ; 1 1 ; 1 1 ; 0 0 ; 0 0 ; 0 0 ];
-elseif nG==8 % Using TPM with specific GM of basal Ganglia
-    cr_native = [1 1 ; 1 1 ; 1 1 ; 1 0 ; 1 0 ; 1 0 ; 0 0 ; 1 1 ];
-    cr_warped = [1 1 ; 1 1 ; 1 1 ; 1 1 ; 0 0 ; 0 0 ; 0 0 ; 1 1 ];
-else
-    error('USwL:multichanSegm','Wrong number of Gaussians/tissue classes.');
+try
+    if nG==8 % Using TPM with specific GM of basal Ganglia
+        cr_native = [1 1 ; 1 1 ; 1 1 ; 1 0 ; 1 0 ; 1 0 ; 0 0 ; 1 1 ];
+        cr_warped = [1 1 ; 1 1 ; 1 1 ; 1 1 ; 0 0 ; 0 0 ; 0 0 ; 1 1 ];
+    else 
+        cr_native = [1 1 ; 1 1 ; 1 1 ; repmat([1 0],nG-4,1); 0 0 ];
+        cr_warped = [1 1 ; 1 1 ; 1 1 ; 1 1 ; repmat([0 0],nG-4,1)];
+    end
+catch
+    error('USwL:multichanSegm','Wrong number of Gaussians/tissue classes to generate.');
 end
+
 for ii = 1:nG
     matlabbatch{1}.spm.spatial.preproc.tissue(ii).tpm = {[Ptpm_l,',',num2str(ii)]};
     matlabbatch{1}.spm.spatial.preproc.tissue(ii).ngaus = opt.nGauss(ii);
