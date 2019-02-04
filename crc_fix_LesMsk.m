@@ -73,6 +73,7 @@ vMsk = round(vMsk);
 % minVol mm3 -> vx
 vx_vol = abs(det(Vmsk.mat(1:3,1:3)));
 minNrVx = floor(opt.minVol/vx_vol); 
+
 % Using 'floor' to round off minimum number of voxels
 
 %% 1. removing too small cluster
