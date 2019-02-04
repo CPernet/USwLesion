@@ -10,7 +10,7 @@ function USwLtools = tbx_cfg_USwLesion
 % Written by C. Phillips.
 % Cyclotron Research Centre, University of Liege, Belgium
 
-if ~isdeployed,
+if ~isdeployed
     addpath(fullfile(spm('Dir'),'toolbox','USwLesion'));
 end
 

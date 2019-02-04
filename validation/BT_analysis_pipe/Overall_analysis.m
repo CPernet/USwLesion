@@ -95,12 +95,7 @@ for tumour_type = 1:2
                 end
             end
         end
-%         
-%         % clean-up
-%         mkdir()
-%         movefile(out(..)) 
-%         delete
-%         
+        
     count = count+1;
     end
 end
