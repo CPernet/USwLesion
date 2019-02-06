@@ -136,10 +136,10 @@ end
 
 %% step 3: compute the similarity between ground truth and masks
 mJ    = NaN(30,12,5);
-mHd   = NaN(30,12,4);
-Dice  = NaN(30,12,4);
-mcc   = NaN(30,12,4);
-kappa = NaN(30,12,4);
+mHd   = NaN(30,12,5);
+Dice  = NaN(30,12,5);
+mcc   = NaN(30,12,5);
+kappa = NaN(30,12,5);
 
 subj_index  = 1;
 param_index = 1;
@@ -170,7 +170,7 @@ for tumour_type = 1:2
                     
                     % compute similarity
                     [mJ(subj_index,param_index,:),mHd(subj_index,param_index,:),overlap,Dice(subj_index,param_index,:)] = compare2gdtruth(c1,c2,c3,c4,ground_truth,'on');
-                    for m=1:4
+                    for m=1:5
                         mcc(subj_index,param_index,m) = overlap(m).voxel.mcc;
                         kappa(subj_index,param_index,m) = overlap(m).voxel.CK;
                     end

@@ -88,15 +88,15 @@ end
 
 % tumour > 50%
 c3e = c3_vol > 0.5;
-c3e= extent_thresold(c3d);
+c3e = extent_thresold(c3e);
 if strcmp(save_option,'on')
     V3e = V3;
     [root,filename,ext]=fileparts(V3.fname);
-    V3e.fname = [root filesep filename '_bigger_than_99' ext];
+    V3e.fname = [root filesep filename '_bigger_than_50' ext];
     V3e.descrip = 'c3 > 50';
-    spm_write_vol(V3e,c3d);
+    spm_write_vol(V3e,c3e);
 end
-
+ 
 
 clear c1 c2 c3 c4
 
@@ -116,8 +116,8 @@ Dice(3) = 2*overlap(3).voxel.tp / (2*overlap(3).voxel.tp+2*overlap(3).voxel.fp+2
 [mJ(4),mHd(4),overlap(4)] = image_overlap(c3d,GT);
 Dice(4) = 2*overlap(4).voxel.tp / (2*overlap(4).voxel.tp+2*overlap(4).voxel.fp+2*overlap(4).voxel.fn);
 
-[mJ(4),mHd(4),overlap(4)] = image_overlap(c3d,GT);
-Dice(4) = 2*overlap(4).voxel.tp / (2*overlap(4).voxel.tp+2*overlap(4).voxel.fp+2*overlap(4).voxel.fn);
+[mJ(5),mHd(5),overlap(5)] = image_overlap(c3e,GT);
+Dice(5) = 2*overlap(5).voxel.tp / (2*overlap(5).voxel.tp+2*overlap(5).voxel.fp+2*overlap(5).voxel.fn);
 
 
 end
