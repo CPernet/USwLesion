@@ -21,44 +21,42 @@ else
 end
 
 
-
-
 %% Step 1: Establish baseline measurement between the ground truth and manual masks
 % for each patient, runs the function image_overlap which computes
 % the similarity between two 3D images based on a number of measures mean Jaccard index,
 % mean Hausdorrf distance, overlap based on voxel/cluster matching -- plus the Dice coefficient
 
 
-index = 1;
-for tumour_type = 1:2
-    % loop in High Grade Glioma or Low Grade Glioma
-    % --------------------------------------------
-    BRAT_dir = eval(['BRAT_dir' num2str(tumour_type)]);
-    cd(BRAT_dir); folders = dir;
-    if tumour_type == 1
-        folders = folders(1:20);
-    else
-        folders = folders(1:10);
-    end
-    
-    for patient = 1:size(folders,1)-2
-        % loop for each patient
-        % ---------------------
-        patient_dir = [BRAT_dir filesep folders(patient+2).name];
-        tmp = dir([patient_dir filesep 'VSD.Brain_*more*']);
-        ground_truth = [patient_dir filesep tmp.name filesep 'VSD.nii'];
-        tmp = dir([patient_dir filesep '*Flair*']);
-        [mJ1(index),mHd1(index),overlap1(index)] = image_overlap([patient_dir filesep tmp.name filesep 'voi1.nii'],ground_truth);
-        Dice1(index) = 2*overlap1(index).voxel.tp / (2*overlap1(index).voxel.tp+2*overlap1(index).voxel.fp+2*overlap1(index).voxel.fn);
-        [mJ2(index),mHd2(index),overlap2(index)] = image_overlap([patient_dir filesep tmp.name filesep 'voi2.nii'],ground_truth);
-        Dice2(index) = 2*overlap2(index).voxel.tp / (2*overlap2(index).voxel.tp+2*overlap2(index).voxel.fp+2*overlap2(index).voxel.fn);
-        
-%         index = index+1;
-    end
-end
-
-% save as csv file
-which()
+% index = 1;
+% for tumour_type = 1:2
+%     % loop in High Grade Glioma or Low Grade Glioma
+%     % --------------------------------------------
+%     BRAT_dir = eval(['BRAT_dir' num2str(tumour_type)]);
+%     cd(BRAT_dir); folders = dir;
+%     if tumour_type == 1
+%         folders = folders(1:20);
+%     else
+%         folders = folders(1:10);
+%     end
+%     
+%     for patient = 1:size(folders,1)-2
+%         % loop for each patient
+%         % ---------------------
+%         patient_dir = [BRAT_dir filesep folders(patient+2).name];
+%         tmp = dir([patient_dir filesep 'VSD.Brain_*more*']);
+%         ground_truth = [patient_dir filesep tmp.name filesep 'VSD.nii'];
+%         tmp = dir([patient_dir filesep '*Flair*']);
+%         [mJ1(index),mHd1(index),overlap1(index)] = image_overlap([patient_dir filesep tmp.name filesep 'voi1.nii'],ground_truth);
+%         Dice1(index) = 2*overlap1(index).voxel.tp / (2*overlap1(index).voxel.tp+2*overlap1(index).voxel.fp+2*overlap1(index).voxel.fn);
+%         [mJ2(index),mHd2(index),overlap2(index)] = image_overlap([patient_dir filesep tmp.name filesep 'voi2.nii'],ground_truth);
+%         Dice2(index) = 2*overlap2(index).voxel.tp / (2*overlap2(index).voxel.tp+2*overlap2(index).voxel.fp+2*overlap2(index).voxel.fn);
+%         
+% %         index = index+1;
+%     end
+% end
+% 
+% % save as csv file
+% which()
 
 %% Step 2: perform segmentation to obtain new tumour masks
 % call the segmentation routine in parallel loop (+clean up)
@@ -170,7 +168,7 @@ for tumour_type = 1:2
                     
                     % compute similarity
                     [mJ(subj_index,param_index,:),mHd(subj_index,param_index,:),overlap,Dice(subj_index,param_index,:)] = compare2gdtruth(c1,c2,c3,c4,ground_truth,'on');
-                    for m=1:5
+                    for m=1:5;
                         mcc(subj_index,param_index,m) = overlap(m).voxel.mcc;
                         kappa(subj_index,param_index,m) = overlap(m).voxel.CK;
                     end

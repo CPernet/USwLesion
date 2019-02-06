@@ -88,7 +88,7 @@ end
 
 % tumour > 50%
 c3e = c3_vol > 0.5;
-c3e = extent_thresold(c3e);
+c3e= extent_thresold(c3e);
 if strcmp(save_option,'on')
     V3e = V3;
     [root,filename,ext]=fileparts(V3.fname);
@@ -96,7 +96,7 @@ if strcmp(save_option,'on')
     V3e.descrip = 'c3 > 50';
     spm_write_vol(V3e,c3e);
 end
- 
+
 
 clear c1 c2 c3 c4
 
