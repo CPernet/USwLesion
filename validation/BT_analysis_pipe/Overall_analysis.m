@@ -95,10 +95,12 @@ for tumour_type = 1:2
                     cd(fileparts(T1name))
                     destination = [pwd filesep 'segmentation_voi' num2str(voi) '_nbG' num2str(Gaussian_param(nbGaussian)) '_tissue' num2str(affectedtissue+1)];
                     mkdir(destination)
-                    movefile(cell2mat(out{1}.segmImg.wc1),[destination filesep 'c1kVSD.nii']);
+                    movefile(cell2mat(out{1}.segmImg.c1),[destination filesep 'c1kVSD.nii']);
                     movefile(cell2mat(out{1}.segmImg.c2),[destination filesep 'c2kVSD.nii']);
                     movefile(cell2mat(out{1}.segmImg.c3),[destination filesep 'c3kVSD.nii']);
                     movefile(cell2mat(out{1}.segmImg.c4),[destination filesep 'c4kVSD.nii']);
+                    delete([pwd filesep 'c5kVSD.nii']);
+                    delete([pwd filesep 'c6kVSD.nii']);
                     delete(cell2mat(out{1}.ICVmsk));
                     delete(cell2mat(out{1}.wICVmsk));
                     delete(cell2mat(out{1}.Struc_1));
@@ -117,6 +119,14 @@ for tumour_type = 1:2
                     delete(cell2mat(out{1}.segmImg.rc1));
                     delete(cell2mat(out{1}.segmImg.rc2));
                     delete(cell2mat(out{1}.segmImg.rc3));
+                    delete([pwd filesep 'BiasField_kVSD.nii']);
+                    delete([pwd filesep 'iy_kVSD.nii']);
+                    delete([pwd filesep 'kVSD.nii']);
+                    delete([pwd filesep 'kVSD_seg8.mat']);
+                    delete([pwd filesep 'mkVSD.nii']);
+                    delete([pwd filesep 'swicv_kVSD.nii']);
+                    delete([pwd filesep 'wmkVSD.nii']);
+                    delete([pwd filesep 'y_kVSD.nii']);
                 end
             end
         end
@@ -125,11 +135,11 @@ end
 
 
 %% step 3: compute the similarity between ground truth and masks
-mJ    = NaN(30,12);
-mHd   = NaN(30,12);
-Dice  = NaN(30,12);
-mcc   = NaN(30,12);
-kappa = NaN(30,12);
+mJ    = NaN(30,12,5);
+mHd   = NaN(30,12,4);
+Dice  = NaN(30,12,4);
+mcc   = NaN(30,12,4);
+kappa = NaN(30,12,4);
 
 subj_index  = 1;
 param_index = 1;
@@ -146,7 +156,6 @@ for tumour_type = 1:2
         patient_dir = [BRAT_dir filesep folders(patient+2).name];
         tmp = dir([patient_dir filesep 'VSD.Brain_*more*']);
         ground_truth = [patient_dir filesep tmp.name filesep 'VSD.nii'];
-        
         tmp = dir([patient_dir filesep 'VSD.Brain.XX.O.MR_T1.*']);
         
         for voi = 1:2
@@ -160,10 +169,11 @@ for tumour_type = 1:2
                     c4 = [root filesep 'c4kVSD.nii'];
                     
                     % compute similarity
-                     
-                    [mJ(subj_index,param_index),mHd(subj_index,param_index),overlap,Dice(subj_index,param_index)] = compare2gdtruth(c1,c2,c3,c4,ground_truth,'on');
-                    mcc(subj_index,param_index) = overlap.voxel.mcc;
-                    kappa(subj_index,param_index) = overlap.voxel.CK;
+                    [mJ(subj_index,param_index,:),mHd(subj_index,param_index,:),overlap,Dice(subj_index,param_index,:)] = compare2gdtruth(c1,c2,c3,c4,ground_truth,'on');
+                    for m=1:4
+                        mcc(subj_index,param_index,m) = overlap(m).voxel.mcc;
+                        kappa(subj_index,param_index,m) = overlap(m).voxel.CK;
+                    end
                 end
             end
             param_index = param_index+1;
