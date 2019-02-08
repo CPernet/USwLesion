@@ -69,9 +69,9 @@ for tumour_type = 1:2
     BRAT_dir = eval(['BRAT_dir' num2str(tumour_type)]);
     cd(BRAT_dir); folders = dir;
     if tumour_type == 1
-        folders = folders(1:20);
+        folders = folders(1:22);
     else
-        folders = folders(1:10);
+        folders = folders(1:12);
     end
     
     parfor patient = 1:size(folders,1)-2
