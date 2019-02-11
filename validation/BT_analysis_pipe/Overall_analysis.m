@@ -53,18 +53,7 @@ for tumour_type = 1:2
              
         index = index+1;
     end
-    
-    % save as csv file
-    
-    csvwrite('Dice1.txt',Dice1);
-    csvwrite('Dice2.txt',Dice2);
-    csvwrite('mJ1.txt',mJ1);
-    csvwrite('mJ2.txt',mJ2);
-    csvwrite('mHd1.txt',mHd1);
-    csvwrite('mHd2.txt',mHd2);
-    csvwrite('overlap1.txt',overlap1);
-    csvwrite('overlap2.txt',overlap2);
-    
+  
 end
 
 
@@ -155,9 +144,9 @@ for tumour_type = 1:2
     BRAT_dir = eval(['BRAT_dir' num2str(tumour_type)]);
     cd(BRAT_dir); folders = dir;
     if tumour_type == 1
-        folders = folders(1:20);
+        folders = folders(1:22);
     else
-        folders = folders(1:10);
+        folders = folders(1:12);
     end
     
     for patient = 1:size(folders,1)-2
@@ -183,12 +172,14 @@ for tumour_type = 1:2
                         kappa(subj_index,param_index,m) = overlap(m).voxel.CK;
                     end
                 end
-            end
+            end           
             param_index = param_index+1;
         end
         subj_index = subj_index+1;
     end
 end
+
+
 
 
 %% step 4: statistically test which masks are the best and in which conditions
