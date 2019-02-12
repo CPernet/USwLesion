@@ -6,6 +6,8 @@
 current = pwd;
 global defaults
 defaults = spm('defaults','FMRI');
+
+% data dir
 BRAT_dir = uigetdir(pwd,'Select BRAT directory');
 if BRAT_dir == 0
     return
@@ -20,6 +22,11 @@ else
     end
 end
 
+% result dir
+toolbox_dir = fileparts(which('crc_USwL.m'));
+save_in = [toolbox_dir filesep 'validation' filesep 'BT_analysis_pipe'];
+
+cd(BRAT_dir); save temp_data
 
 %% Step 1: Establish baseline measurement between the ground truth and manual masks
 % for each patient, runs the function image_overlap which computes
@@ -53,8 +60,22 @@ for tumour_type = 1:2
              
         index = index+1;
     end
-  
 end
+
+% save as mJ1 mJ2 mHd1 mHd2 Dice1 Dice2 MCC1 MCC2 Kappa1 Kappa2
+
+for subject=1:30
+        MCC1(subject) = overlap1(subject).voxel.mcc;
+        Kappa1(subject) = overlap1(subject).voxel.CK;
+        MCC2(subject) = overlap1(subject).voxel.mcc;
+        Kappa2(subject) = overlap1(subject).voxel.CK;
+end
+
+baseline = table(mJ1', mJ2', mHd1', mHd2', Dice1', Dice2', MCC1', MCC2', Kappa1', Kappa2', ...
+    'VariableNames',{'Jaccard1', 'Jaccard2', 'Hausdorff1', 'Hausdorff2', 'Dice1', 'Dice2', 'MatthewCorrCoef1', 'MatthewCorrCoef2', 'KappaCoef1', 'KappaCoef2'});
+writetable(baseline,[save_in filesep 'baseline_measures.csv'])
+
+cd(BRAT_dir); save temp_data
 
 
 %% Step 2: perform segmentation to obtain new tumour masks
@@ -130,6 +151,8 @@ for tumour_type = 1:2
     end
 end
 
+cd(BRAT_dir); save temp_data
+
 
 %% step 3: compute the similarity between ground truth and masks
 mJ    = NaN(30,12,5);
@@ -139,7 +162,6 @@ mcc   = NaN(30,12,5);
 kappa = NaN(30,12,5);
 
 subj_index  = 1;
-param_index = 1;
 for tumour_type = 1:2
     BRAT_dir = eval(['BRAT_dir' num2str(tumour_type)]);
     cd(BRAT_dir); folders = dir;
@@ -154,7 +176,9 @@ for tumour_type = 1:2
         tmp = dir([patient_dir filesep 'VSD.Brain_*more*']);
         ground_truth = [patient_dir filesep tmp.name filesep 'VSD.nii'];
         tmp = dir([patient_dir filesep 'VSD.Brain.XX.O.MR_T1.*']);
-        
+
+        % set indexing at 1 for each subject
+        param_index = 1;
         for voi = 1:2
             for nbGaussian = 1:3
                 for affectedtissue = 1:2 % add +1 for GM+WM or GM+WM+CSF
@@ -171,16 +195,62 @@ for tumour_type = 1:2
                         mcc(subj_index,param_index,m) = overlap(m).voxel.mcc;
                         kappa(subj_index,param_index,m) = overlap(m).voxel.CK;
                     end
+                    
+                   % update parameter indexing voi*nbGaussian*affectedtissue
+                   param_index = param_index+1;
                 end
-            end           
-            param_index = param_index+1;
+            end
         end
         subj_index = subj_index+1;
     end
 end
 
+cd(BRAT_dir); save temp_data
 
+param_index = 1;
+Names = cell(1,60);
+for th = 1:5
+    for voi = 1:2
+        for nbGaussian = 1:3
+            for affectedtissue = 1:2 % add +1 for GM+WM or GM+WM+CSF
+                Names{param_index} = ['voi' num2str(voi) '_nbG' num2str(nbGaussian) '_tissue' num2str(affectedtissue+1) '_threshold' num2str(th)];
+                param_index = param_index+1;
+            end
+        end
+    end
+end
+
+% MJ = reshape(mJ,[30,60]);
+% mJ_results = table(MJ,'VariableNames',Names);
+% writetable(mJ_results,[save_in filesep 'mJ_results.csv',Names])
+
+% MHD = reshape(mHd,[30,60]);
+% mHd_results = table(MHD,'VariableNames',Names);
+% writetable(mHd_results,[save_in filesep 'mHd_results.csv',Names])
+
+% DICE = reshape(Dice,[30,60]);
+% Dice_results = table(DICE,'VariableNames',Names);
+% writetable(Dice_results,[save_in filesep 'Dice_results.csv',Names])
+
+% MCC = reshape(mcc,[30,60]);
+% overlap_mcc_results = table(MCC,'VariableNames',Names);
+% writetable(overlap_mcc_results,[save_in filesep 'overlap_mcc_results.csv',Names])
+
+% KAPPA = reshape(kappa,[30,60]);
+% overlap_kappa_results = table(KAPPA,'VariableNames',Names);
+% writetable(overlap_kappa_results,[save_in filesep 'overlap_kappa_results.csv',Names])
 
 
 %% step 4: statistically test which masks are the best and in which conditions
+IMP = importdata([save_in filesep 'baseline_measures.csv']); 
 
+% x = [1:30];
+% y = IMP.data(:,1);
+% z = IMP.data(:,2);
+% g = gramm('x',x,'y',y);
+% g.geom_point();
+% g.stat_glm();
+% g.set_names('x','Patient','y','mJ');
+% g.set_title('Mean Jaccard');
+% g.draw();
+    
