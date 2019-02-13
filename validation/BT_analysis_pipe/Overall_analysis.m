@@ -33,7 +33,6 @@ cd(BRAT_dir); save temp_data
 % the similarity between two 3D images based on a number of measures mean Jaccard index,
 % mean Hausdorrf distance, overlap based on voxel/cluster matching -- plus the Dice coefficient
 
-
 index = 1;
 for tumour_type = 1:2
     % loop in High Grade Glioma or Low Grade Glioma
@@ -220,37 +219,45 @@ for th = 1:5
     end
 end
 
-% MJ = reshape(mJ,[30,60]);
-% mJ_results = table(MJ,'VariableNames',Names);
-% writetable(mJ_results,[save_in filesep 'mJ_results.csv',Names])
+MJ = reshape(mJ,[30,60]);
+mJ_results = array2table(MJ,'VariableNames',Names);
+writetable(mJ_results,[save_in filesep 'mJ_results.csv']);
 
-% MHD = reshape(mHd,[30,60]);
-% mHd_results = table(MHD,'VariableNames',Names);
-% writetable(mHd_results,[save_in filesep 'mHd_results.csv',Names])
+MHD = reshape(mHd,[30,60]);
+mHd_results = array2table(MHD,'VariableNames',Names);
+writetable(mHd_results,[save_in filesep 'mHd_results.csv'])
 
-% DICE = reshape(Dice,[30,60]);
-% Dice_results = table(DICE,'VariableNames',Names);
-% writetable(Dice_results,[save_in filesep 'Dice_results.csv',Names])
+DICE = reshape(Dice,[30,60]);
+Dice_results = array2table(DICE,'VariableNames',Names);
+writetable(Dice_results,[save_in filesep 'Dice_results.csv'])
 
-% MCC = reshape(mcc,[30,60]);
-% overlap_mcc_results = table(MCC,'VariableNames',Names);
-% writetable(overlap_mcc_results,[save_in filesep 'overlap_mcc_results.csv',Names])
+MCC = reshape(mcc,[30,60]);
+overlap_mcc_results = array2table(MCC,'VariableNames',Names);
+writetable(overlap_mcc_results,[save_in filesep 'overlap_mcc_results.csv'])
 
-% KAPPA = reshape(kappa,[30,60]);
-% overlap_kappa_results = table(KAPPA,'VariableNames',Names);
-% writetable(overlap_kappa_results,[save_in filesep 'overlap_kappa_results.csv',Names])
+KAPPA = reshape(kappa,[30,60]);
+overlap_kappa_results = array2table(KAPPA,'VariableNames',Names);
+writetable(overlap_kappa_results,[save_in filesep 'overlap_kappa_results.csv'])
 
 
 %% step 4: statistically test which masks are the best and in which conditions
-IMP = importdata([save_in filesep 'baseline_measures.csv']); 
 
+
+% IMP = importdata([save_in filesep 'mJ_results.csv']); 
+% IMP2 = importdata([save_in filesep 'baseline_measures.csv']);
 % x = [1:30];
-% y = IMP.data(:,1);
-% z = IMP.data(:,2);
-% g = gramm('x',x,'y',y);
-% g.geom_point();
-% g.stat_glm();
-% g.set_names('x','Patient','y','mJ');
-% g.set_title('Mean Jaccard');
-% g.draw();
-    
+% y1 = IMP.data(:,1); 
+% y2 = IMP2.data(:,1);
+% scatter(x,y1,'filled');
+% hold on;
+% scatter(x,y2,'filled');
+
+IMP = importdata([save_in filesep 'baseline_measures.csv']);
+x = [1:30];
+y = IMP.data(:,1); 
+g = gramm('x',x,'y',y);
+g.geom_point();
+g.stat_glm();
+g.set_names('x','Patient','y','mJ');
+g.set_title('Mean Jaccard');
+g.draw();
