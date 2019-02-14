@@ -242,22 +242,22 @@ writetable(overlap_kappa_results,[save_in filesep 'overlap_kappa_results.csv'])
 
 %% step 4: statistically test which masks are the best and in which conditions
 
+% creating figures to visualise via scatter plots the similarity scores for each measure
 
-% IMP = importdata([save_in filesep 'mJ_results.csv']); 
-% IMP2 = importdata([save_in filesep 'baseline_measures.csv']);
-% x = [1:30];
-% y1 = IMP.data(:,1); 
-% y2 = IMP2.data(:,1);
-% scatter(x,y1,'filled');
-% hold on;
-% scatter(x,y2,'filled');
-
-IMP = importdata([save_in filesep 'baseline_measures.csv']);
+IMP = importdata([save_in filesep 'mJ_results.csv']);
 x = [1:30];
-y = IMP.data(:,1); 
+y = IMP.data(:,26); 
 g = gramm('x',x,'y',y);
 g.geom_point();
 g.stat_glm();
 g.set_names('x','Patient','y','mJ');
-g.set_title('Mean Jaccard');
+g.set_title('Mean Jaccard Index - VOI1_nbG1_tissue3_threshold3');
 g.draw();
+
+% running the Robust Correlation Toolbox
+
+IMP1 = importdata([save_in filesep 'baseline_measures.csv']);
+IMP2 = importdata([save_in filesep 'mJ_results.csv']);
+X = IMP1.data(:,1);
+Y = IMP2.data(:,1);
+results = robust_correlation(X,Y);
