@@ -1,6 +1,6 @@
 # Brain Tumour Validation Scheme
 
-USwLesion validation, the algorithm segments tissues using spatial priors in template (MNI) space. What is required is to provide a template with tissue claases and a mask of the lesion that will be moved into MNI space, first using an affine transform.
+USwLesion validation. The algorithm segments tissues using spatial priors in template (MNI) space. What is required is to provide a template with tissue classes and a mask of the lesion that will be moved into MNI space, first using an affine transform.
 
 ## BRAT
 
@@ -8,10 +8,37 @@ The data we are using has been acquired from the Multimodal Brain Tumour Image S
 
 ### Creation of masks and comparison to ground truth
 
-For each patient, we create a rough mask of the tumour using the 3D fill tool in MRICROn. This is then visually checked against the ground truth and the compute the overlap metrics to get an idea of overalp and distribution in the quality of the masks as well as volumes of tumours for masks and ground truth.
+For each patient, we create two rough masks of the tumour using the 3D fill tool in MRICROn (one is of regular size and the second overshoots). These are visually checked against the ground truth, with overlap metrics then computed to get an idea of overlap and distribution in the quality of the masks as well as volumes of tumours for masks and ground truth.
 
-*_overlap metrics_*:
+*_Overlap Metrics_*:
 
 Modified Jaccard Index (mJ)- measures similarity between finite sample sets, and is defined as the size of the intersection divided by the size of the union of the sample sets.
 
-mean Hausdorff distance (mHd)- mathematical construct to measure the 'closeness' of two sets of points that are subsets of a metric space.
+Mean Hausdorff distance (mHd)- mathematical construct to measure the 'closeness' of two sets of points that are subsets of a metric space.
+
+Matthews correlation coefficient (overlap.mcc) - MCC has a range from -1 to 1, where -1 indicates a completely incorrect binary classifier whereas 1 indicates a completely correct binary classifier. MCC takes into account true and false positives and negatives.
+
+Cohen's Kappa coefficient (overlap.CK) - measures inter-rater agreement for categorical items.
+
+Dice coefficient (Dice)- Does not satisfy the triangle inequality, and can therefore be considered a semimetric version of the Jaccard index.
+
+#### Running segmentation routine
+
+The segmentation routine is called in order to obtain the new lesion masks. For the two initial lesion masks of each patient, the segmentation routine runs with a variation of input parameter combinations and thresholding options: parameters that are changed at each iteration are the number of Gaussians applied to the lesion, the number of tissues that can be classified as 'affected' (i.e. 1 for GM+WM or 2 for GM+WM+CSF), and the thresholding method (5 different methods used - probability of lesion being higher than 50%, higher than 99%, higher than the probability of any other tissue, higher than the probability of each of the other tissues, or higher than the probability of the other tissues combined).
+
+This means that for each patient there will be 60 different lesion masks generated following application of the segmentation routine (12 parameter combinations multiplied by 5 thresholding methods).
+
+##### Computing similarity of new lesion masks to the ground truth
+
+For each of the new lesion masks, the similarity to the ground truth data is once again computed using the same overlap metrics as before.
+
+###### Statistically testing which combination of parameters/thresholding method gives the best match to ground truth
+
+We use the Robust Correlation Toolbox which performs a number of correlation analyses - Pearson's, Spearman's, percentage-bend and skipped Pearson's/Spearman's. The latter two are described in (Pernet et al. 2012) as robust alternatives to the former two standard correlation methods.
+
+The purpose of running the stats is to establish which combination of parameters (input and thresholding) generate the greatest increase in similarity between the lesion masks and the ground truth.
+
+We run the test for each similarity measure, calculating the correlation between similarity at baseline and post-segmentation for each of the 60 parameter variations.
+
+If there were to be no difference between similarity before and after segmentation, the result for correlation would be r=1.
+If the segmentation routine increases similarity to ground truth, the correlation between baseline and post-segmentation similarity scores will reduce.
