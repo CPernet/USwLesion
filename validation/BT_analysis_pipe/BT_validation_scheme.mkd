@@ -42,3 +42,5 @@ We run the test for each similarity measure, calculating the correlation between
 
 If there were to be no difference between similarity before and after segmentation, the result for correlation would be r=1.
 If the segmentation routine increases similarity to ground truth, the correlation between baseline and post-segmentation similarity scores will reduce.
+
+**not completed 
