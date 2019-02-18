@@ -12,9 +12,9 @@ For each patient, we create two rough masks of the tumour using the 3D fill tool
 
 *_Overlap Metrics_*:
 
-Modified Jaccard Index (mJ)- measures similarity between finite sample sets, and is defined as the size of the intersection divided by the size of the union of the sample sets.
+Modified Jaccard Index (mJ)- overlap ratio measure that calculates similarity between finite sample sets, and is defined as the size of the intersection divided by the size of the union of the sample sets.
 
-Mean Hausdorff distance (mHd)- mathematical construct to measure the 'closeness' of two sets of points that are subsets of a metric space.
+Mean Hausdorff distance (mHd)- mathematical construct to measure the 'closeness' of two sets of points that are subsets of a metric space, i.e. a surface distance measure.
 
 Matthews correlation coefficient (overlap.mcc) - MCC has a range from -1 to 1, where -1 indicates a completely incorrect binary classifier whereas 1 indicates a completely correct binary classifier. MCC takes into account true and false positives and negatives.
 
@@ -37,10 +37,3 @@ For each of the new lesion masks, the similarity to the ground truth data is onc
 We use the Robust Correlation Toolbox which performs a number of correlation analyses - Pearson's, Spearman's, percentage-bend and skipped Pearson's/Spearman's. The latter two are described in (Pernet et al. 2012) as robust alternatives to the former two standard correlation methods.
 
 The purpose of running the stats is to establish which combination of parameters (input and thresholding) generate the greatest increase in similarity between the lesion masks and the ground truth.
-
-We run the test for each similarity measure, calculating the correlation between similarity at baseline and post-segmentation for each of the 60 parameter variations.
-
-If there were to be no difference between similarity before and after segmentation, the result for correlation would be r=1.
-If the segmentation routine increases similarity to ground truth, the correlation between baseline and post-segmentation similarity scores will reduce.
-
-**not completed 
