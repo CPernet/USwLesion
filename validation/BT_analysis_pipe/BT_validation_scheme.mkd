@@ -12,7 +12,9 @@ For each of the 30 patients, we create two rough masks of the tumour using the 3
 
 *_Overlap Metrics_*:
 
-Modified Jaccard Index (mJ)- overlap ratio measure that calculates similarity between finite sample sets, and is defined as the size of the intersection divided by the size of the union of the sample sets.
+Modified Jaccard Index (mJ)- overlap ratio measure that calculates similarity between two masks (computed vs ground thruth), and is defined as the size of the intersection divided by the size of the union of the masks.  
+
+Dice coefficient (Dice)- This is a semimetric version of the Jaccard index, defined as twice the intersection divided by the sum of the masks.
 
 Mean Hausdorff distance (mHd)- mathematical construct to measure the 'closeness' of two sets of points that are subsets of a metric space, i.e. a surface distance measure.
 
@@ -20,7 +22,7 @@ Matthews correlation coefficient (overlap.mcc) - MCC has a range from -1 to 1, w
 
 Cohen's Kappa coefficient (overlap.CK) - measures inter-rater agreement for categorical items.
 
-Dice coefficient (Dice)- Does not satisfy the triangle inequality, and can therefore be considered a semimetric version of the Jaccard index.
+
 
 #### Running segmentation routine
 
