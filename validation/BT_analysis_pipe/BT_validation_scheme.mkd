@@ -22,6 +22,8 @@ Matthews correlation coefficient (overlap.mcc) - MCC has a range from -1 to 1, w
 
 Cohen's Kappa coefficient (overlap.CK) - measures inter-rater agreement for categorical items.
 
+### why using multiple metrics?
+
 ## Running segmentation routine
 
 The segmentation routine is called in order to obtain the new lesion masks:  
