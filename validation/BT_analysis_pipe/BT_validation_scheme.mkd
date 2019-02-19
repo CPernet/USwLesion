@@ -24,7 +24,10 @@ Dice coefficient (Dice)- Does not satisfy the triangle inequality, and can there
 
 #### Running segmentation routine
 
-The segmentation routine is called in order to obtain the new lesion masks. For the two initial lesion masks of each patient, the segmentation routine runs with a variation of input parameter combinations and thresholding options: parameters that are changed at each iteration are the number of Gaussians applied to the lesion, the number of tissues that can be classified as 'affected' (i.e. 1 for GM+WM or 2 for GM+WM+CSF), and the thresholding method (5 different methods used - probability of lesion being higher than 50%, higher than 99%, higher than the probability of any other tissue, higher than the probability of each of the other tissues, or higher than the probability of the other tissues combined).
+The segmentation routine is called in order to obtain the new lesion masks:  
+- We start with two lesion masks of each patient, either smaller than ground truth or larger.  
+- the segmentation routine runs with a variation of input parameter combinations: number of Gaussians (2 mor 3). the number of tissues that can be classified as 'affected' (i.e. GM+WM or GM+WM+CSF)
+- from the mask outputs, different thresholding of the probabilistic lesion mask are performed: similarity to the ground truth is computed with binary masks defined as 1. probability of lesion being higher than 50%, 2. higher than 99%, 3. higher than the probability of any other tissue, 4. higher than the probability of each of the other tissues, 5. higher than the probability of the other tissues combined.  
 
 This means that for each patient there will be 60 different lesion masks generated following application of the segmentation routine (12 parameter combinations multiplied by 5 thresholding methods).
 
