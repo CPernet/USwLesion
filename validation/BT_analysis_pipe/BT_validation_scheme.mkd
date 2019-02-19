@@ -12,13 +12,7 @@ For each of the 30 patients, we create two rough masks of the tumour using the 3
 
 *_Overlap Metrics_*:
 
-<<<<<<< HEAD
-Five measures of overlap are applied to compare the lesion masks to the ground truth.
-
-Modified Jaccard Index (mJ)- overlap ratio measure that calculates similarity between finite sample sets, and is defined as the size of the intersection divided by the size of the union of the sample sets.
-=======
-Modified Jaccard Index (mJ)- overlap ratio measure that calculates similarity between two masks (computed vs ground thruth), and is defined as the size of the intersection divided by the size of the union of the masks.  
->>>>>>> f995448deb6d84d7898d99ee81a5d32712d731ff
+Modified Jaccard Index (mJ)- overlap ratio measure that calculates similarity between two masks (computed vs ground truth), and is defined as the size of the intersection divided by the size of the union of the masks.
 
 Dice coefficient (Dice)- This is a semimetric version of the Jaccard index, defined as twice the intersection divided by the sum of the masks.
 
@@ -32,16 +26,16 @@ Cohen's Kappa coefficient (overlap.CK) - measures inter-rater agreement for cate
 
 ## Running segmentation routine
 
-The segmentation routine is called in order to obtain the new lesion masks:  
-- We start with two lesion masks of each patient, either smaller than ground truth or larger.  
+The segmentation routine is called in order to obtain the new lesion masks:
+- We start with two lesion masks of each patient, either smaller than ground truth or larger.
 - the segmentation routine runs with a variation of input parameter combinations: number of Gaussians (2, 3 or non parametric). the number of tissues that can be classified as 'affected' (i.e. GM+WM or GM+WM+CSF)
-- from the mask outputs, different thresholding of the probabilistic lesion mask are performed: similarity to the ground truth is computed with binary masks defined as 1. probability of lesion being higher than 50%, 2. higher than 99%, 3. higher than the probability of any other tissue, 4. higher than the probability of each of the other tissues, 5. higher than the probability of the other tissues combined.  
+- from the mask outputs, different thresholding of the probabilistic lesion mask are performed: similarity to the ground truth is computed with binary masks defined as 1. probability of lesion being higher than 50%, 2. higher than 99%, 3. higher than the probability of any other tissue, 4. higher than the probability of each of the other tissues, 5. higher than the probability of the other tissues combined.
 
 This means that for each patient there will be 60 different lesion masks generated following application of the segmentation routine (12 parameter combinations multiplied by 5 thresholding methods).
 
 ## Statistically testing which combination of parameters/thresholding method gives the best match to ground truth
 
-The purpose of running stats on the data is to identify which of the 60 possible parameter combinations applied during segmentation generates a lesion mask that is best-matched to the ground truth.  
+The purpose of running stats on the data is to identify which of the 60 possible parameter combinations applied during segmentation generates a lesion mask that is best-matched to the ground truth.
 
 The independant variables are mask size, number of gaussian, tissue model, and thresholding, leading to 60 possibilities per subject.The dependant variables are the 5 measures of similarity (change from pre- to post-segmentation; mJ, mHd, mcc, kappa, Dice).
 
@@ -51,23 +45,4 @@ Ranking
 
 Clustering
 
-<<<<<<< HEAD
-The purpose of running stats on the data is to identify which of the 60 possible parameter combinations applied during segmentation generates a lesion mask that is best-matched to the ground truth.
-There are four independant variables: the size of the VOI, the number of gaussians for the lesion, the number of affected tissues, and the thresholding method.
-There are five dependant variables: similarity as measured by mJ, mHd, mcc, kappa and Dice.
-=======
 ## Variance partitioning
-
-The MANOVA (multivariate analysis of variance) can be used when comparing two or more continuous response variables by a single factor; this is therefore an appropriate statistical test to detect differences in the average values of the dependent variables between the different levels of the independent variable.
-The MANOVA test can also detect differences in correlations among the dependent variables between the different levels of the independent variable. A MANOVA analysis generates a p value that is used to determine whether or not the null hypothesis can be rejected.
-
-Using the MANOVA, we can determine whether one parameter combination yields a change in mean similarity scores that is significantly different from the average of the other parameter combinations OR whether one parameter combination yields a change in mean similarity scores that is significantly different from another specific parameter combination OR the differences in correlation between the change in similarity scores.
-
-Identifying how the average similarity scores differ between parameter combinations, we will be able to rank the parameter combinations in order of the greatest to least effect on change in similarity.
-We could then check whether the change in different similarity scores for specific parameter combinations are correlated or not.
-Assuming that each parameter combination generates a lesion mask that is more similar to ground truth than the mask pre-segmentation, this process will identify the exact combination that gives the best results.
-
-If we wanted to test for differences in the means of any one of the similarity measures across the different levels of the independant variable, we could use a one-way ANOVA.
-
-If we wanted to test the effect of each independant variable (number of gaussians for the lesion, number of affected tissues, VOI size, thresholding method) on the change in similarity, we could use a multivariate multiple linear regression. 
->>>>>>> f995448deb6d84d7898d99ee81a5d32712d731ff
