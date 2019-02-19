@@ -16,7 +16,7 @@ Modified Jaccard Index (mJ)- overlap ratio measure that calculates similarity be
 
 Dice coefficient (Dice)- This is a semimetric version of the Jaccard index, defined as twice the intersection divided by the sum of the masks.
 
-Mean Hausdorff distance (mHd)- mathematical construct to measure the 'closeness' of two sets of points that are subsets of a metric space, i.e. a surface distance measure.
+Mean Hausdorff distance (mHd)- mathematical construct to measure the 'closeness' of two sets of points that are subsets of a metric space, i.e. a surface distance measure (the contour of the masks).
 
 Matthews correlation coefficient (overlap.mcc) - MCC has a range from -1 to 1, where -1 indicates a completely incorrect binary classifier whereas 1 indicates a completely correct binary classifier. MCC takes into account true and false positives and negatives.
 
