@@ -6,7 +6,7 @@ USwLesion validation. The algorithm segments tissues using spatial priors in tem
 
 The data we are using has been acquired from the Multimodal Brain Tumour Image Segmentation Benchmark (BRATS) challenge. This venture was organised in 2012/2013 to assess and compare state-of-the-art automated brain tumour segmentation methods, and involved application of twenty algorithms to a dataset of low- and high-grade glioma patients (with the tumours manually delineated by up to four human expert raters), as well as 65 simulated synthetic scans. The study indicated that different algorithms were particularly successful for specific tumour sub-regions, with the associated errors being comparable to human inter-rater variability. No single algorithm performed best for all sub-regions simultaneously, and fusing different algorithms was found to improve performance significantly.
 
-### Creation of masks and comparison to ground truth
+## Creation of masks and comparison to ground truth
 
 For each of the 30 patients, we create two rough masks of the tumour using the 3D fill tool in MRICROn (one is of regular size and the second overshoots). These are visually checked against the ground truth, with overlap metrics then computed to get an idea of overlap and distribution in the quality of the masks as well as volumes of tumours for masks and ground truth.
 
@@ -22,9 +22,7 @@ Matthews correlation coefficient (overlap.mcc) - MCC has a range from -1 to 1, w
 
 Cohen's Kappa coefficient (overlap.CK) - measures inter-rater agreement for categorical items.
 
-
-
-#### Running segmentation routine
+## Running segmentation routine
 
 The segmentation routine is called in order to obtain the new lesion masks:  
 - We start with two lesion masks of each patient, either smaller than ground truth or larger.  
@@ -33,14 +31,19 @@ The segmentation routine is called in order to obtain the new lesion masks:
 
 This means that for each patient there will be 60 different lesion masks generated following application of the segmentation routine (12 parameter combinations multiplied by 5 thresholding methods).
 
-##### Computing similarity of new lesion masks to the ground truth
+## Statistically testing which combination of parameters/thresholding method gives the best match to ground truth
 
-For each of the new lesion masks, the similarity to the ground truth data is once again computed using the same overlap metrics as before.
+The purpose of running stats on the data is to identify which of the 60 possible parameter combinations applied during segmentation generates a lesion mask that is best-matched to the ground truth.  
 
-###### Statistically testing which combination of parameters/thresholding method gives the best match to ground truth
+The independant variables are mask size, number of gaussian, tissue model, and thresholding, leading to 60 possibilities per subject.The dependant variables are the 5 measures of similarity (change from pre- to post-segmentation; mJ, mHd, mcc, kappa, Dice).
 
-The purpose of running stats on the data is to identify which of the 60 possible parameter combinations applied during segmentation generates a lesion mask that is best-matched to the ground truth.
-The independant variable is the parameter combination (60 possibilities) and the dependant variables are the 5 measures of similarity (change from pre- to post-segmentation; mJ, mHd, mcc, kappa, Dice).
+### Results Classification
+
+Ranking
+
+Clustering
+
+## Variance partitioning
 
 The MANOVA (multivariate analysis of variance) can be used when comparing two or more continuous response variables by a single factor; this is therefore an appropriate statistical test to detect differences in the average values of the dependent variables between the different levels of the independent variable.
 The MANOVA test can also detect differences in correlations among the dependent variables between the different levels of the independent variable. A MANOVA analysis generates a p value that is used to determine whether or not the null hypothesis can be rejected.
