@@ -12,17 +12,27 @@ For each of the 30 patients, we create two rough masks of the tumour using the 3
 
 *_Overlap Metrics_*:
 
-Modified Jaccard Index (mJ)- overlap ratio measure that calculates similarity between two masks (computed vs ground truth), and is defined as the size of the intersection divided by the size of the union of the masks.
+The Modified Jaccard Index (mJ) is defined as the size of the intersection of the masks divided by the size of their union.
 
-Dice coefficient (Dice)- This is a semimetric version of the Jaccard index, defined as twice the intersection divided by the sum of the masks.
+The Dice coefficient (Dice) is the most commonly used metric in validating medical volume segmentations, and measures the spatial overlap between two binary images. It is a semimetric version of the Jaccard index, defined as twice the intersection of the masks divided by their sum. Dice coefficient values range from 0 (no overlap) to 1 (exact overlap).
 
-Mean Hausdorff distance (mHd)- mathematical construct to measure the 'closeness' of two sets of points that are subsets of a metric space, i.e. a surface distance measure (the contour of the masks).
+The Mean Hausdorff distance (mHd) is a mathematical construct to measure the 'closeness' of two sets of points that are subsets of a metric space, i.e. a surface distance measure. Here, mHd measures the similarity between the contour of the masks.
 
-Matthews correlation coefficient (overlap.mcc) - MCC has a range from -1 to 1, where -1 indicates a completely incorrect binary classifier whereas 1 indicates a completely correct binary classifier. MCC takes into account true and false positives and negatives.
+To understand the following two overlap metrics, it is necessary to define a number of variables associated with the images: true positive (TP), false positive (FP), true negative (TN), and false negative (FN). TP refers to the number of voxels correctly segmented as the lesion by ground truth and the algorithm; FP refers to voxels classified as lesion by the algorithm but not the ground truth, therefore indicating voxels falsely segmented as lesion by the algorithm; TN refers to voxels not classified as lesion by either the ground truth or the algorithm, therefore indicating voxels correctly assigned as background; FN refers to voxels classified as lesion in the ground truth but not by the algorithm, therefore indicating voxels incorrectly assigned as background.
 
-Cohen's Kappa coefficient (overlap.CK) - measures inter-rater agreement for categorical items.
+The Matthews correlation coefficient (overlap.mcc) analyses the lesion mask and ground truth as two sets, utilising TP and TN to calculate a correlation coefficient that ranges from -1 (complete disagreement) to 1 (complete agreement).
+
+Cohen's Kappa coefficient (overlap.CK) is a metric that compares observed accuracy with expected accuracy (random chance). It is calculated by taking the agreement expected by chance away from the observed agreement and dividing by the maximum possible agreement.
 
 ### why using multiple metrics?
+
+No single evaluation metric is consistently the best for validating medical image segmentation algorithms: each will be sensitive to at least one type of segmentation error, e.g. size, location, shape.
+
+Size-based metrics account only for difference in size between the segmentation and ground truth.
+Overlap-based methods account only for the number of correctly classified or misclassified voxels without taking into account their spatial distribution.
+Distance-based metrics take into account only the distance from a point on one boundary to the other boundary, without taking into account the size of the regions involved. 
+
+There is therefore no agreed framework for evaluating the results of segmentation.
 
 ## Running segmentation routine
 
@@ -37,7 +47,7 @@ This means that for each patient there will be 60 different lesion masks generat
 
 The purpose of running stats on the data is to identify which of the 60 possible parameter combinations applied during segmentation generates a lesion mask that is best-matched to the ground truth.
 
-The independant variables are mask size, number of gaussian, tissue model, and thresholding, leading to 60 possibilities per subject.The dependant variables are the 5 measures of similarity (change from pre- to post-segmentation; mJ, mHd, mcc, kappa, Dice).
+The independant variables are the mask size, the number of gaussians for the lesion, the tissue model, and the thresholding method, leading to 60 possibilities per subject. The dependant variables are the 5 measures of similarity (change from pre- to post-segmentation; mJ, mHd, mcc, kappa, Dice).
 
 ### Results Classification
 
