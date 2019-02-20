@@ -254,10 +254,44 @@ g.set_names('x','Patient','y','mJ');
 g.set_title('Mean Jaccard Index - VOI1_nbG1_tissue3_threshold3');
 g.draw();
 
-% running the Robust Correlation Toolbox
+% ranking the data in ascending order of similarity for each patient. for each overlap metric, sd is the sorted data and i is the index.
 
-IMP1 = importdata([save_in filesep 'baseline_measures.csv']);
-IMP2 = importdata([save_in filesep 'mJ_results.csv']);
-X = IMP1.data(:,1);
-Y = IMP2.data(:,1);
-results = robust_correlation(X,Y);
+[sd_mJ,i_mJ] = sort(MJ,2);
+[sd_mHd,i_mHd] = sort(MHD,2);
+[sd_mcc,i_mcc] = sort(MCC,2);
+[sd_kappa,i_kappa] = sort(KAPPA,2);
+[sd_dice,i_dice] = sort(DICE,2);
+
+rst_data_plot(sd_mJ);
+rst_data_plot(sd_mHd);
+rst_data_plot(sd_mcc);
+rst_data_plot(sd_kappa);
+rst_data_plot(sd_dice);
+
+% clustering the data and visualising in a dendrogram 
+
+T = clusterdata(MJ,0.5);
+tree_mJ = linkage(T,'average');
+figure();
+dendrogram(tree_mJ);
+
+T1 = clusterdata(MHD,0.5);
+tree_mHd = linkage(T1,'average');
+figure();
+dendrogram(tree_mHd);
+
+T2 = clusterdata(MCC,0.5);
+tree_mcc = linkage(T2,'average');
+figure();
+dendrogram(tree_mcc);
+
+T3 = clusterdata(KAPPA,0.5);
+tree_kappa = linkage(T3,'average');
+figure();
+dendrogram(tree_kappa);
+
+T4 = clusterdata(DICE,0.5);
+tree_dice = linkage(T4,'average');
+figure();
+dendrogram(tree_dice);
+
