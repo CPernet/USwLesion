@@ -1,6 +1,6 @@
 # Brain Tumour Validation Scheme
 
-USwLesion validation. The algorithm segments tissues using spatial priors in template (MNI) space. What is required is to provide a template with tissue classes and a mask of the lesion that will be moved into MNI space, first using an affine transform.
+The initial step of the project is validation of the USwLesion (Unified Segmentation with Lesion) algorithm. The algorithm segments tissues using spatial priors in template (MNI) space, and requires provision of a template with tissue classes and a mask of the lesion that will be moved into MNI space, first using an affine transform.
 
 ## BRAT
 
@@ -18,7 +18,7 @@ The Dice coefficient (Dice) is the most commonly used metric in validating medic
 
 The Mean Hausdorff distance (mHd) is a mathematical construct to measure the 'closeness' of two sets of points that are subsets of a metric space, i.e. a surface distance measure. Here, mHd measures the similarity between the contour of the masks.
 
-To understand the following two overlap metrics, it is necessary to define a number of variables associated with the images: true positive (TP), false positive (FP), true negative (TN), and false negative (FN). TP refers to the number of voxels correctly segmented as the lesion by ground truth and the algorithm; FP refers to voxels classified as lesion by the algorithm but not the ground truth, therefore indicating voxels falsely segmented as lesion by the algorithm; TN refers to voxels not classified as lesion by either the ground truth or the algorithm, therefore indicating voxels correctly assigned as background; FN refers to voxels classified as lesion in the ground truth but not by the algorithm, therefore indicating voxels incorrectly assigned as background.
+To understand the following two overlap metrics, it is necessary to define a number of variables associated with the images: voxels can be classified as true positive (TP), false positive (FP), true negative (TN), and false negative (FN). TP refers to the number of voxels correctly segmented as the lesion by ground truth and the algorithm; FP refers to voxels classified as lesion by the algorithm but not the ground truth, therefore indicating voxels falsely segmented as lesion by the algorithm; TN refers to voxels not classified as lesion by either the ground truth or the algorithm, therefore indicating voxels correctly assigned as background; FN refers to voxels classified as lesion in the ground truth but not by the algorithm, therefore indicating voxels incorrectly assigned as background.
 
 The Matthews correlation coefficient (overlap.mcc) analyses the lesion mask and ground truth as two sets, utilising TP and TN to calculate a correlation coefficient that ranges from -1 (complete disagreement) to 1 (complete agreement).
 
@@ -30,15 +30,15 @@ No single evaluation metric is consistently the best for validating medical imag
 
 Size-based metrics account only for difference in size between the segmentation and ground truth.
 Overlap-based methods account only for the number of correctly classified or misclassified voxels without taking into account their spatial distribution.
-Distance-based metrics take into account only the distance from a point on one boundary to the other boundary, without taking into account the size of the regions involved. 
+Distance-based metrics take into account only the distance from a point on one boundary to the other boundary, without taking into account the size of the regions involved.
 
 There is therefore no agreed framework for evaluating the results of segmentation.
 
 ## Running segmentation routine
 
 The segmentation routine is called in order to obtain the new lesion masks:
-- We start with two lesion masks of each patient, either smaller than ground truth or larger.
-- the segmentation routine runs with a variation of input parameter combinations: number of Gaussians (2, 3 or non parametric). the number of tissues that can be classified as 'affected' (i.e. GM+WM or GM+WM+CSF)
+- We start with two lesion masks of each patient, either approximately the same size as the ground truth or oversized.
+- the segmentation routine runs with a variation of input parameter combinations: number of Gaussians (2, 3 or non parametric); the number of tissues that can be classified as 'affected' (i.e. GM+WM or GM+WM+CSF)
 - from the mask outputs, different thresholding of the probabilistic lesion mask are performed: similarity to the ground truth is computed with binary masks defined as 1. probability of lesion being higher than 50%, 2. higher than 99%, 3. higher than the probability of any other tissue, 4. higher than the probability of each of the other tissues, 5. higher than the probability of the other tissues combined.
 
 This means that for each patient there will be 60 different lesion masks generated following application of the segmentation routine (12 parameter combinations multiplied by 5 thresholding methods).
@@ -51,8 +51,8 @@ The independant variables are the mask size, the number of gaussians for the les
 
 ### Results Classification
 
-Ranking
+Ranking - Looking at the results for each of the overlap measures, we can rank the results in ascending order (increasing similarity) for each of the patients across the 60 parameter combinations. 
 
-Clustering
+Clustering - We can also apply hierarchical clustering to the data (using Euclidian distance) and apply labels post-clustering to indicate whether there is an underlying structure to the results.
 
 ## Variance partitioning
