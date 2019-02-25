@@ -242,9 +242,12 @@ writetable(overlap_kappa_results,[save_in filesep 'overlap_kappa_results.csv'])
 
 %% step 4: statistically test which masks are the best and in which conditions
 
+stat_analysis(save_in)
+
+
 % creating figures to visualise via scatter plots the similarity scores for each measure
 
-% IMP = importdata([save_in filesep 'mJ_results.csv']);
+% IMP = importdata([save_in filesep name]);
 % x = [1:30];
 % y = IMP.data(:,26); 
 % g = gramm('x',x,'y',y);
@@ -256,6 +259,8 @@ writetable(overlap_kappa_results,[save_in filesep 'overlap_kappa_results.csv'])
 
 % ranking the data in ascending order of similarity for each patient. for each overlap metric, sd is the sorted data and i is the index.
 
+% IMP = importdata('mJ_results.csv');
+% MJ = IMP.data;
 [sd_mJ,i_mJ] = sort(MJ,2);
 [sd_mHd,i_mHd] = sort(MHD,2);
 [sd_mcc,i_mcc] = sort(MCC,2);
