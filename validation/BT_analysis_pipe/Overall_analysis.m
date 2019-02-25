@@ -270,27 +270,27 @@ rst_data_plot(sd_dice);
 
 % clustering the data and visualising in a dendrogram 
 
-T = clusterdata(MJ.','maxclust',4);
+T = clusterdata(MJ.','maxclust',3);
 tree_mJ = linkage(T,'average');
 figure();
 dendrogram(tree_mJ);
 
-T1 = clusterdata(MHD.','maxclust',4);
+T1 = clusterdata(MHD.','maxclust',3);
 tree_mHd = linkage(T1,'average');
 figure();
 dendrogram(tree_mHd);
 
-T2 = clusterdata(MCC.','maxclust',4);
+T2 = clusterdata(MCC.','maxclust',3);
 tree_mcc = linkage(T2,'average');
 figure();
 dendrogram(tree_mcc);
 
-T3 = clusterdata(KAPPA.','maxclust',4);
+T3 = clusterdata(KAPPA.','maxclust',3);
 tree_kappa = linkage(T3,'average');
 figure();
 dendrogram(tree_kappa);
 
-T4 = clusterdata(DICE.','maxclust',4);
+T4 = clusterdata(DICE.','maxclust',3);
 tree_dice = linkage(T4,'average');
 figure();
 dendrogram(tree_dice);
