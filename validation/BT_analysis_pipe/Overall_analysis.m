@@ -244,15 +244,15 @@ writetable(overlap_kappa_results,[save_in filesep 'overlap_kappa_results.csv'])
 
 % creating figures to visualise via scatter plots the similarity scores for each measure
 
-IMP = importdata([save_in filesep 'mJ_results.csv']);
-x = [1:30];
-y = IMP.data(:,26); 
-g = gramm('x',x,'y',y);
-g.geom_point();
-g.stat_glm();
-g.set_names('x','Patient','y','mJ');
-g.set_title('Mean Jaccard Index - VOI1_nbG1_tissue3_threshold3');
-g.draw();
+% IMP = importdata([save_in filesep 'mJ_results.csv']);
+% x = [1:30];
+% y = IMP.data(:,26); 
+% g = gramm('x',x,'y',y);
+% g.geom_point();
+% g.stat_glm();
+% g.set_names('x','Patient','y','mJ');
+% g.set_title('Mean Jaccard Index - VOI1_nbG1_tissue3_threshold3');
+% g.draw();
 
 % ranking the data in ascending order of similarity for each patient. for each overlap metric, sd is the sorted data and i is the index.
 
@@ -270,27 +270,27 @@ rst_data_plot(sd_dice);
 
 % clustering the data and visualising in a dendrogram 
 
-T = clusterdata(MJ,0.5);
+T = clusterdata(MJ.','maxclust',4);
 tree_mJ = linkage(T,'average');
 figure();
 dendrogram(tree_mJ);
 
-T1 = clusterdata(MHD,0.5);
+T1 = clusterdata(MHD.',4);
 tree_mHd = linkage(T1,'average');
 figure();
 dendrogram(tree_mHd);
 
-T2 = clusterdata(MCC,0.5);
+T2 = clusterdata(MCC.',4);
 tree_mcc = linkage(T2,'average');
 figure();
 dendrogram(tree_mcc);
 
-T3 = clusterdata(KAPPA,0.5);
+T3 = clusterdata(KAPPA.',4);
 tree_kappa = linkage(T3,'average');
 figure();
 dendrogram(tree_kappa);
 
-T4 = clusterdata(DICE,0.5);
+T4 = clusterdata(DICE.',4);
 tree_dice = linkage(T4,'average');
 figure();
 dendrogram(tree_dice);
