@@ -53,9 +53,10 @@ for d = 1:5
 
 dist = pdist(data','euclidean');
 figure; subplot(1,2,1); imagesc(squareform(dist))
-L = linkage(dist,'centroid');
-subplot(1,2,2); dendrogram(L,'Labels' ,label);
-T = clusterdata(data','maxclust',3);
+L = linkage(dist,'average');
+subplot(1,2,2); 
+[H,T,cluster_labels] = dendrogram(L,'Orientation','left','Labels' ,label);
+C = cophenet(L,dist);
 
 
 end
