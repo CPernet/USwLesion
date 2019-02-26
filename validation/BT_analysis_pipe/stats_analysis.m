@@ -84,7 +84,7 @@ for m=1:2
         figure; subplot(1,2,1); imagesc(squareform(dist))
         L = linkage(dist,'average');
         subplot(1,2,2);
-        [H,T,cluster_labels] = dendrogram(L,'Orientation','left','Labels' ,label);
+        [~,T] = dendrogram(L,'Orientation','left');
         C = cophenet(L,dist); 
         
     end
