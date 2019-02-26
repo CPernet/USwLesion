@@ -38,7 +38,7 @@ for m=1:2
         end
         
         % data viz and ranking
-        % ranking the data in ascending order of similarity for each patient.
+        % ranking the data in descending order of similarity for each patient.
         
         figure
         subplot(2,1,1); 
@@ -48,7 +48,7 @@ for m=1:2
         else
             title([nname ' Adjusted Data']);
         end
-        % boostrap the data and rank
+        % bootstrap the data and rank
         subplot(2,1,2);
         [o,n] = size(data);
         med = NaN(599,n);
@@ -61,7 +61,7 @@ for m=1:2
         end
         rst_boxplot(med); 
         if m == 1
-            title([nname ' Ranked Data'])
+            title([nname ' Ranked Data']) 
         else
             title([nname ' Adjusted Ranked Data'])
         end
