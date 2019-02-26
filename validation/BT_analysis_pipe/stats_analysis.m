@@ -1,6 +1,6 @@
 function stats_analysis(csv_folder)
 
-csv_folder = '/home/cpernet/Documents/MATLAB/MyToolboxes/SPM/spm12/toolbox/USwLesion/validation/BT_analysis_pipe';
+% csv_folder = '/home/cpernet/Documents/MATLAB/MyToolboxes/SPM/spm12/toolbox/USwLesion/validation/BT_analysis_pipe';
 
 for m=1:2
     for d = 1:5
@@ -43,7 +43,11 @@ for m=1:2
         figure
         subplot(2,1,1); 
         [est,HDI] = rst_data_plot(data,'estimator','trimmed mean','newfig','no');
-        title([nname ' Raw Data']);
+        if m == 1
+            title([nname ' Raw Data']);
+        else
+            title([nname ' Adjusted Data']);
+        end
         % boostrap the data and rank
         subplot(2,1,2);
         [o,n] = size(data);
@@ -55,7 +59,12 @@ for m=1:2
             [~,index] = sort(resample,'descend');
             med(boot,:) = rst_hd(index',0.5);
         end
-        rst_boxplot(med); title([nname ' Ranked Data'])
+        rst_boxplot(med); 
+        if m == 1
+            title([nname ' Ranked Data'])
+        else
+            title([nname ' Adjusted Ranked Data'])
+        end
         med = sort(med);
         prob_coverage = 95/100;
         upper_centile = floor(prob_coverage*size(med,1)); % upper bound
