@@ -219,84 +219,52 @@ for th = 1:5
     end
 end
 
-MJ = reshape(mJ,[30,60]);
-mJ_results = array2table(MJ,'VariableNames',Names);
-writetable(mJ_results,[save_in filesep 'mJ_results.csv']);
+% save the datasets for each similarity measure as 30x60 tables 
 
-MHD = reshape(mHd,[30,60]);
-mHd_results = array2table(MHD,'VariableNames',Names);
-writetable(mHd_results,[save_in filesep 'mHd_results.csv'])
+for sim = 1:5
+    if sim==1
+        sim_name = Dice; sim_nname = 'Dice';
+    elseif sim==2
+        sim_name = mJ; sim_nname = 'mJ';
+    elseif sim==3
+        sim_name = mHd; sim_nname = 'mHd';
+    elseif sim==4
+        sim_name = mcc; sim_nname = 'overlap_mcc';
+    elseif sim== 5
+        sim_name = kappa; sim_nname = 'overlap_kappa';
+    end
+    
+    M = reshape(sim_name,[30,60]);
+    Results = array2table(M,'VariableNames',Names);
+    writetable(Results,[save_in filesep sim_nname '_results.csv']);
+    
+end
 
-DICE = reshape(Dice,[30,60]);
-Dice_results = array2table(DICE,'VariableNames',Names);
-writetable(Dice_results,[save_in filesep 'Dice_results.csv'])
+% generate similarity results postsegmentation RELATIVE to pre-segmentation (i.e. subtract pre-segmentation from post-segmentation).
 
-MCC = reshape(mcc,[30,60]);
-overlap_mcc_results = array2table(MCC,'VariableNames',Names);
-writetable(overlap_mcc_results,[save_in filesep 'overlap_mcc_results.csv'])
-
-KAPPA = reshape(kappa,[30,60]);
-overlap_kappa_results = array2table(KAPPA,'VariableNames',Names);
-writetable(overlap_kappa_results,[save_in filesep 'overlap_kappa_results.csv'])
-
+for t = 1:5
+    if t==1
+        tname = ['Dice_results.csv']; tnname = 'Dice';
+    elseif t==2
+        tname = ['mHd_results.csv']; tnname = 'mHd'; 
+    elseif t==3
+        tname = ['mJ_results.csv']; tnname = 'mJ'; 
+    elseif t==4
+        tname = ['overlap_kappa_results.csv']; tnname = 'kappa'; 
+    elseif t==5
+        tname = ['overlap_mcc_results.csv']; tnname = 'mcc'; 
+    end
+    
+    IMP = importdata([pwd filesep tname]);
+    data = IMP.data;
+    clear IMP
+       
+    voi1_col = data(:,[1:6 13:18 25:30 37:42 49:54]); 
+    voi2_vol = data(:,[7:12 19:24 31:36 43:48 55:60]);
+    
+end
 
 %% step 4: statistically test which masks are the best and in which conditions
 
-stat_analysis(save_in)
-
-
-% creating figures to visualise via scatter plots the similarity scores for each measure
-
-% IMP = importdata([save_in filesep name]);
-% x = [1:30];
-% y = IMP.data(:,26); 
-% g = gramm('x',x,'y',y);
-% g.geom_point();
-% g.stat_glm();
-% g.set_names('x','Patient','y','mJ');
-% g.set_title('Mean Jaccard Index - VOI1_nbG1_tissue3_threshold3');
-% g.draw();
-
-% ranking the data in ascending order of similarity for each patient. for each overlap metric, sd is the sorted data and i is the index.
-
-% IMP = importdata('mJ_results.csv');
-% MJ = IMP.data;
-[sd_mJ,i_mJ] = sort(MJ,2);
-[sd_mHd,i_mHd] = sort(MHD,2);
-[sd_mcc,i_mcc] = sort(MCC,2);
-[sd_kappa,i_kappa] = sort(KAPPA,2);
-[sd_dice,i_dice] = sort(DICE,2);
-
-rst_data_plot(sd_mJ);
-rst_data_plot(sd_mHd);
-rst_data_plot(sd_mcc);
-rst_data_plot(sd_kappa);
-rst_data_plot(sd_dice);
-
-% clustering the data and visualising in a dendrogram 
-
-T = clusterdata(MJ.','maxclust',3);
-tree_mJ = linkage(T,'average');
-figure();
-dendrogram(tree_mJ);
-
-T1 = clusterdata(MHD.','maxclust',3);
-tree_mHd = linkage(T1,'average');
-figure();
-dendrogram(tree_mHd);
-
-T2 = clusterdata(MCC.','maxclust',3);
-tree_mcc = linkage(T2,'average');
-figure();
-dendrogram(tree_mcc);
-
-T3 = clusterdata(KAPPA.','maxclust',3);
-tree_kappa = linkage(T3,'average');
-figure();
-dendrogram(tree_kappa);
-
-T4 = clusterdata(DICE.','maxclust',3);
-tree_dice = linkage(T4,'average');
-figure();
-dendrogram(tree_dice);
+stats_analysis(save_in)
 

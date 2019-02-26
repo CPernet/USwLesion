@@ -1,6 +1,6 @@
 function stats_analysis(csv_folder)
 
-csv_folder = '/home/cpernet/Documents/MATLAB/MyToolboxes/SPM/spm12/toolbox/USwLesion/validation/BT_analysis_pipe';
+% csv_folder = '/home/cpernet/Documents/MATLAB/MyToolboxes/SPM/spm12/toolbox/USwLesion/validation/BT_analysis_pipe';
 
 for m=1:2
     for d = 1:5
@@ -66,17 +66,16 @@ for m=1:2
         RHDI(1,:) = med(index,:);
         RHDI(2,:) = med(index+upper_centile,:);
         
-        % check if HDI/RHDI overlaps for statistical difference 
-        
-        
+        % check if HDI/RHDI overlaps for statistical different 
         
         % clustering the data and visualising in a dendrogram
+        
         dist = pdist(data','euclidean');
         figure; subplot(1,2,1); imagesc(squareform(dist))
         L = linkage(dist,'average');
         subplot(1,2,2);
         [H,T,cluster_labels] = dendrogram(L,'Orientation','left','Labels' ,label);
-        C = cophenet(L,dist); 
+        C = cophenet(L,dist);
         
     end
 end
