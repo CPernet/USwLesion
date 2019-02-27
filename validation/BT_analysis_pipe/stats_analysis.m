@@ -77,7 +77,10 @@ for m=1:2
         
         % check if HDI/RHDI overlaps for statistical difference 
         
+        % check if algorithm has improved or worsened similarity of mask to ground truth
         
+        mask_improved = find(all(HDI>0)); %lists index of parameter combos where lower and upper boundary of HDI are greater than 0
+        mask_worst = find(all(HDI<0)); % lists index of parameter combos where lower and upper boundary of HDI are smaller than 0
         
         % clustering the data and visualising in a dendrogram
         dist = pdist(data','euclidean');
