@@ -240,29 +240,7 @@ for sim = 1:5
     
 end
 
-% generate similarity results postsegmentation RELATIVE to pre-segmentation (i.e. subtract pre-segmentation from post-segmentation).
 
-for t = 1:5
-    if t==1
-        tname = ['Dice_results.csv']; tnname = 'Dice';
-    elseif t==2
-        tname = ['mHd_results.csv']; tnname = 'mHd'; 
-    elseif t==3
-        tname = ['mJ_results.csv']; tnname = 'mJ'; 
-    elseif t==4
-        tname = ['overlap_kappa_results.csv']; tnname = 'kappa'; 
-    elseif t==5
-        tname = ['overlap_mcc_results.csv']; tnname = 'mcc'; 
-    end
-    
-    IMP = importdata([pwd filesep tname]);
-    data = IMP.data;
-    clear IMP
-       
-    voi1_col = data(:,[1:6 13:18 25:30 37:42 49:54]); 
-    voi2_vol = data(:,[7:12 19:24 31:36 43:48 55:60]);
-    
-end
 
 %% step 4: statistically test which masks are the best and in which conditions
 
