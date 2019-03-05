@@ -107,7 +107,9 @@ for m=1:2
             subplot(1,2,2);
             [~,T] = dendrogram(L,'Orientation','left');
             C = cophenet(L,dist); title(sprintf('clustering coef %g',C))
-                        
+            
+            % check clusters at different levels (eg do VOI1 VOI2 get separated?)
+            
         end
         
         % check if algorithm has improved or worsened similarity of mask to ground truth
