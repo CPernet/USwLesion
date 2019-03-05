@@ -1,4 +1,4 @@
-function stats_analysis(csv_folder)
+function [Perf_data, Perf_ranked_data, Perf_adjdata, Perf_ranked_adjdata] = stats_analysis(csv_folder)
 
 % csv_folder = '/home/cpernet/Documents/MATLAB/MyToolboxes/SPM/spm12/toolbox/USwLesion/validation/BT_analysis_pipe';
 
@@ -76,19 +76,61 @@ for m=1:2
         RHDI(2,:) = med(index+upper_centile,:);
         
         % check if HDI/RHDI overlaps for statistical difference 
+        if m == 1
+            if d == 1 % create array to fill
+                Perf_data        = NaN(5,60,60);
+                Perf_ranked_data = zeros(5,60);
+            end
+            
+            % check which params are higher than others
+            for p=1:60
+                Perf_data(d,p,:) = HDI(1,:)>HDI(2,p);
+            end
+            
+            [~,index] = sort(data','descend');
+            Perf_ranked_data(d,:) = rst_hd(index',0.5);
+
+            if d == 5 
+               figure; subplot(1,2,1); imagesc(squeeze(sum(Perf_data,1)));
+               title('frequency of HDI differring')
+               subplot(1,2,2); plot([1:60],Perf_ranked_data); grid on
+               hold on; plot([1:60], mean(Perf_ranked_data),'-k','LineWidth',2);
+               title('Median rank per metric (and mean across metrics)'); 
+            end
+            
+            
+            % compute similarity and clustering
+            dist = pdist(data','euclidean');
+            figure; subplot(1,2,1); 
+            imagesc(squareform(dist)); title(nname)
+            L = linkage(dist,'average');
+            subplot(1,2,2);
+            [~,T] = dendrogram(L,'Orientation','left');
+            C = cophenet(L,dist); title(sprintf('clustering coef %g',C))
+                        
+        end
         
         % check if algorithm has improved or worsened similarity of mask to ground truth
-        
-        mask_improved = find(all(HDI>0)); %lists index of parameter combos where lower and upper boundary of HDI are greater than 0
-        mask_worst = find(all(HDI<0)); % lists index of parameter combos where lower and upper boundary of HDI are smaller than 0
-        
-        % clustering the data and visualising in a dendrogram
-        dist = pdist(data','euclidean');
-        figure; subplot(1,2,1); imagesc(squareform(dist))
-        L = linkage(dist,'average');
-        subplot(1,2,2);
-        [~,T] = dendrogram(L,'Orientation','left');
-        C = cophenet(L,dist); 
+        % improved if lower bound > 0; worsened if upper bound < 0
+        if m == 2
+            if d == 1 % create array to fill
+                Perf_adjdata        = zeros(5,60);
+                Perf_ranked_adjdata = zeros(5,60);
+            end
+            Perf_adjdata(d,HDI(1,:)>0)        = 1;
+            Perf_adjdata(d,HDI(2,:)<0)        = -1;
+            Perf_ranked_adjdata(d,RHDI(1,:)>0) = 1;
+            Perf_ranked_adjdata(d,RHDI(2,:)<0) = -1;
+            
+            if d == 5 
+                figure; subplot(2,1,1); imagesc(Perf_adjdata);
+                subplot(2,1,2); imagesc(Perf_ranked_adjdata);
+                disp('adjusted data')
+                disp(['performing better ' num2str(find(sum(Perf_adjdata == 1)))])
+                disp(['performing worst ' num2str(find(sum(Perf_adjdata == -1)))])
+                disp(['showing both better and worst perf ' num2str(intersect(find(sum(Perf_adjdata == 1)),find(sum(Perf_adjdata == -1))))])
+            end
+        end
         
     end
 end
