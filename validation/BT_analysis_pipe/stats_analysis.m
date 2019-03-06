@@ -38,7 +38,6 @@ for m=1:2
         end
         
         % data viz and ranking
-        % ranking the data in descending order of similarity for each patient.
         
         figure
         subplot(2,1,1); 
@@ -109,6 +108,8 @@ for m=1:2
             C = cophenet(L,dist); title(sprintf('clustering coef %g',C))
             
             % check clusters at different levels (eg do VOI1 VOI2 get separated?)
+            
+            % T = cluster(L,'cutoff',?);
             
         end
         
