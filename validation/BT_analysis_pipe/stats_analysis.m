@@ -26,7 +26,7 @@ for m=1:2
             if d==1 % Dice
                 data = data - repmat([repmat(IMP.data(:,5),[1 6]) repmat(IMP.data(:,6),[1 6]) ],[1,5]);
             elseif d==2 % Hausdorff
-                data = data - repmat([repmat(IMP.data(:,3),[1 6]) repmat(IMP.data(:,4),[1 6]) ],[1,5]);
+                data = repmat([repmat(IMP.data(:,3),[1 6]) repmat(IMP.data(:,4),[1 6]) ],[1,5]) - data;
             elseif d==3 % Jaccard
                 data = data - repmat([repmat(IMP.data(:,1),[1 6]) repmat(IMP.data(:,2),[1 6]) ],[1,5]);
             elseif d==4 % Kappa
