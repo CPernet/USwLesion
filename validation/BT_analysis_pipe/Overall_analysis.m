@@ -271,7 +271,8 @@ for tumour_type = 1:2
         % find volumes of ground truth for each patient
         tmp = dir([patient_dir filesep 'VSD.Brain_*more*']);
         ground_truth = [patient_dir filesep tmp.name filesep 'VSD.nii'];
-        ground_truth_volumes(subj_index,:) = sum(ground_truth(:));
+        ground_truth_vol = spm_read_vols(spm_vol(ground_truth));
+        ground_truth_volumes(subj_index,:) = sum(ground_truth_vol(:));
         writetable(array2table(ground_truth_volumes),[save_in filesep 'ground_truth_volumes.csv']);
 
         %find volume of lesion mask before and after segmentation
@@ -280,19 +281,25 @@ for tumour_type = 1:2
         for voi = 1:2
             for nbGaussian = 1:3
                 for affectedtissue = 1:2
-                    mask_folder = [pwd filesep 'segmentation_voi' num2str(voi) '_nbG' num2str(Gaussian_param(nbGaussian)) '_tissue' num2str(affectedtissue+1)];
-                    c3_vol = [patient_dir filesep tmp.name filesep mask_folder filesep 'c3kVSD.nii'];
+                    mask_folder = ['segmentation_voi' num2str(voi) '_nbG' num2str(Gaussian_param(nbGaussian)) '_tissue' num2str(affectedtissue+1)];
+                    c3_before = [patient_dir filesep tmp.name filesep mask_folder filesep 'c3kVSD.nii'];
                     c3_thresh1 = [patient_dir filesep tmp.name filesep mask_folder filesep 'c3kVSD_bigger_than_sum_of_others.nii'];
-                    c3_thresh2 = [patient_dir filesep tmp.name filesep mask_folder filesep 'c3kVSD_bigger_than_each.nii'];
-                    c3_thresh3 = [patient_dir filesep tmp.name filesep mask_folder filesep 'c3kVSD_bigger_than_at_least_one.nii'];
+                    c3_thresh2 = [patient_dir filesep tmp.name filesep mask_folder filesep 'c3kVSD_bigger_than_at_least_one.nii'];
+                    c3_thresh3 = [patient_dir filesep tmp.name filesep mask_folder filesep 'c3kVSD_bigger_than_each.nii'];
                     c3_thresh4 = [patient_dir filesep tmp.name filesep mask_folder filesep 'c3kVSD_bigger_than_99.nii'];
                     c3_thresh5 = [patient_dir filesep tmp.name filesep mask_folder filesep 'c3kVSD_bigger_than_50.nii'];
+                    c3_vol = spm_read_vols(spm_vol(c3_before));
+                    c3_thresh1_vol = spm_read_vols(spm_vol(c3_thresh1));
+                    c3_thresh2_vol = spm_read_vols(spm_vol(c3_thresh2));
+                    c3_thresh3_vol = spm_read_vols(spm_vol(c3_thresh3));
+                    c3_thresh4_vol = spm_read_vols(spm_vol(c3_thresh4));
+                    c3_thresh5_vol = spm_read_vols(spm_vol(c3_thresh5));
                     mask_volumes(subj_index,param_index,1) = sum(c3_vol(:));
-                    mask_volumes(subj_index,param_index,2) = sum(c3_thresh1(:));
-                    mask_volumes(subj_index,param_index,3) = sum(c3_thresh2(:));
-                    mask_volumes(subj_index,param_index,4) = sum(c3_thresh3(:));
-                    mask_volumes(subj_index,param_index,5) = sum(c3_thresh4(:));
-                    mask_volumes(subj_index,param_index,6) = sum(c3_thresh5(:));
+                    mask_volumes(subj_index,param_index,2) = sum(c3_thresh1_vol(:));
+                    mask_volumes(subj_index,param_index,3) = sum(c3_thresh2_vol(:));
+                    mask_volumes(subj_index,param_index,4) = sum(c3_thresh3_vol(:));
+                    mask_volumes(subj_index,param_index,5) = sum(c3_thresh4_vol(:));
+                    mask_volumes(subj_index,param_index,6) = sum(c3_thresh5_vol(:));
                     
                     param_index = param_index+1;
                 end
