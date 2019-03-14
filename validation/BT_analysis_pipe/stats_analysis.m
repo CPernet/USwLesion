@@ -22,7 +22,7 @@ for m=2:-1:1
         clear IMP
         
         if m == 1
-            data(:,13:24) = []; % remove threshold 2 because we know from lookinhg at the difference it performs badly
+            data(:,13:24) = []; % remove threshold 2 because we know from looking at the difference it performs badly
             label(13:24)  = [];
         elseif m==2
             IMP = importdata([csv_folder filesep 'baseline_measures.csv']);
