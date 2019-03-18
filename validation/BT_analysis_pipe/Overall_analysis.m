@@ -348,16 +348,22 @@ mJ_data = mJ_data - repmat([repmat(baseline_data(:,1),[1 6]) repmat(baseline_dat
 kappa_data = kappa_data - repmat([repmat(baseline_data(:,9),[1 6]) repmat(baseline_data(:,10),[1 6]) ],[1,5]);
 mcc_data = mcc_data - repmat([repmat(baseline_data(:,7),[1 6]) repmat(baseline_data(:,8),[1 6]) ],[1,5]);
 
-[r1,t1,pval1] = Pearson(dice_data,mHd_data); %compute correlation of global metrics
-[r2,t2,pval2] = Pearson(dice_data,mJ_data); 
-[r3,t3,pval3] = Pearson(mJ_data,mHd_data); 
-[r4,t4,pval4] = Pearson(kappa_data,mcc_data); % compute correlation of local metrics
+D = trimmean(reshape(Dice,30,60),0.2,'round',2);
+H = trimmean(reshape(mHd,30,60),0.2,'round',2);
+J = trimmean(reshape(mJ,30,60),0.2,'round',2);
+M = trimmean(reshape(mcc,30,60),0.2,'round',2);
+K = trimmean(reshape(kappa,30,60),0.2,'round',2);
 
-pearson_dice_mHd = table(r1',t1',pval1','VariableNames',{'Dice_mHd_r','Dice_mHd_t','Dice_mHd_pval'});
-pearson_dice_mJ = table(r2',t2',pval2','VariableNames',{'Dice_mJ_r','Dice_mJ_t','Dice_mJ_pval'});
-pearson_mJ_mHd = table(r3',t3',pval3','VariableNames',{'mJ_mHd_r','mJ_mHd_t','mJ_mHd_pval'});
-pearson_kappa_mcc = table(r4',t4',pval4','VariableNames',{'kappa_mcc_r','kappa_mcc_t','kappa_mcc_pval'});
+[r1,t1,h1,outid1,hboot1,CI1] = skipped_correlation(D,H,1); %compute correlation of global metrics
+[r2,t2,h2,outid2,hboot2,CI2] = skipped_correlation(D,J,1);
+[r3,t3,h3,outid3,hboot3,CI3] = skipped_correlation(J,H,1);
+[r4,t4,h4,outid4,hboot4,CI4] = skipped_correlation(M,K,1); % compute correlation of local metrics
 
-correlation_results = horzcat(pearson_dice_mHd,pearson_dice_mJ,pearson_mJ_mHd,pearson_kappa_mcc);
+corr_dice_mHd = table(r1.Pearson,t1.Pearson,h1.Pearson,outid1,hboot1.Pearson,CI1.Pearson,'VariableNames',{'r','t','h','outid','hboot','CI'});
+corr_dice_mJ = table(r2.Pearson,t2.Pearson,h2.Pearson,outid2,hboot2.Pearson,CI2.Pearson,'VariableNames',{'r','t','h','outid','hboot','CI'});
+corr_mJ_mHd = table(r3.Pearson,t3.Pearson,h3.Pearson,outid3,hboot3.Pearson,CI3.Pearson,'VariableNames',{'r','t','h','outid','hboot','CI'});
+corr_kappa_mcc = table(r4.Pearson,t4.Pearson,h4.Pearson,outid4,hboot4.Pearson,CI4.Pearson,'VariableNames',{'r','t','h','outid','hboot','CI'});
+
+correlation_results = vertcat(corr_dice_mHd,corr_dice_mJ,corr_mJ_mHd,corr_kappa_mcc);
 writetable(correlation_results,[save_in filesep 'correlation_results.csv']);
 
