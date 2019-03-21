@@ -41,7 +41,7 @@ for m=2:-1:1 % backward to start with 60 param on difference then 48 of raw
         clear IMP
         
         if m == 1
-            data(:,[13:24 37:48]) = []; % remove threshold 2 because we know from looking at the difference it performs badly
+            data(:,[13:24 37:48]) = []; % remove threshold 2 and 4 because we know from looking at the difference it performs badly
             label([13:24 37:48])  = [];
         elseif m==2
             if d == 1
