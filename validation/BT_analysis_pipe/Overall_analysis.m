@@ -242,7 +242,7 @@ end
 
 % check volumes of the new lesion masks 
 
-mask_volumes = NaN(30,12,6);
+mask_volumes = NaN(30,12,5);
 ground_truth_volumes = NaN(30,1);
 
 subj_index = 1;
