@@ -119,6 +119,7 @@ for m=2:-1:1 % backward to start with 60 param on difference then 48 of raw
                plot([1:48], squeeze(mean(RHDI)),'-k','LineWidth',2);
                plot([1:48], squeeze(mean(RHDI)),'-k','LineWidth',2);
                title('Median rank per metric (and mean across metrics)'); 
+               clear RHDI HDI
             end
             
             % compute similarity and clustering
@@ -161,6 +162,7 @@ for m=2:-1:1 % backward to start with 60 param on difference then 48 of raw
                 disp(['performing better ' num2str(find(sum(Perf_adjdata == 1)))])
                 disp(['performing worst ' num2str(find(sum(Perf_adjdata == -1)))])
                 disp(['showing both better and worst perf ' num2str(intersect(find(sum(Perf_adjdata == 1)),find(sum(Perf_adjdata == -1))))])
+                clear RHDI HDI
             end
         end
         
