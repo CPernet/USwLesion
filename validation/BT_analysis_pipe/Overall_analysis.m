@@ -323,6 +323,15 @@ for tumour_type = 1:2
     writetable(mask_vols_results,[save_in filesep 'mask_volumes.csv']);
 end
 
+gt_vs_mask = NaN(30,60);
+param_index = 1;
+for param = 1:60;
+    gt_mask = mask_vols_reshape(:,param) - ground_truth_volumes; 
+    gt_vs_mask(:,param_index) = gt_mask;
+    
+    param_index = param_index+1;
+end
+
 
 %% step 4: statistically test which masks are the best and in which conditions
 
