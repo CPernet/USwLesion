@@ -323,21 +323,6 @@ for tumour_type = 1:2
     writetable(mask_vols_results,[save_in filesep 'mask_volumes.csv']);
 end
 
-gt_vs_mask = NaN(30,60);
-param_index = 1;
-for param = 1:60;
-    gt_mask = mask_vols_reshape(:,param) - ground_truth_volumes; 
-    gt_vs_mask(:,param_index) = gt_mask;
-    
-    param_index = param_index+1;
-end
-
-mean_gt_vs_mask = mean(gt_vs_mask,1);
-thresh1_gt_mask_mean = mean(mean_gt_vs_mask(:,1:12));
-thresh2_gt_mask_mean = mean(mean_gt_vs_mask(:,13:24));
-thresh3_gt_mask_mean = mean(mean_gt_vs_mask(:,25:36));
-thresh4_gt_mask_mean = mean(mean_gt_vs_mask(:,37:48));
-thresh5_gt_mask_mean = mean(mean_gt_vs_mask(:,49:50));
 
 %% step 4: statistically test which masks are the best and in which conditions
 
@@ -361,11 +346,17 @@ K = trimmean(kappa_data.data,0.2,'round',2);
 [rg,tg,hg,outidg,hbootg,CIg] = skipped_correlation([D D J],[J H H],1); %compute correlations among global metrics
 [rl,tl,hl,outidl,hbootl,CIl] = skipped_correlation(M,K,1); % compute correlation between local metrics
 
-% corr_D_J = table(rg(1),tg(1),hg(1),outidg(1),hbootg(1),CIg(1),'VariableNames',{'R','T','H','outid','hboot','CI'});
-% corr_D_H = table(rg(2),tg(2),hg(2),outidg(2),hbootg(2),CIg(2),'VariableNames',{'R','T','H','outid','hboot','CI'});
-% corr_J_H = table(rg(3),tg(3),hg(3),outidg(3),hbootg(3),CIg(3),'VariableNames',{'R','T','H','outid','hboot','CI'});
-% corr_local = table(rl.Spearman,tl.Spearman,hl.Spearman,outidl,hbootl.Spearman,CIl.Spearman,'VariableNames',{'R','T','H','outid','hboot','CI'});
-% correlation_results = vertcat(corr_D_J,corr_D_H,corr_J_H,corr_local);
+% need to fix table
+% corr_dice_mHd = table(r1.Pearson,t1.Pearson,h1.Pearson,outid1,hboot1.Pearson,CI1.Pearson,'VariableNames',{'r','t','h','outid','hboot','CI'});
+% corr_dice_mJ = table(r2.Pearson,t2.Pearson,h2.Pearson,outid2,hboot2.Pearson,CI2.Pearson,'VariableNames',{'r','t','h','outid','hboot','CI'});
+% corr_mJ_mHd = table(r3.Pearson,t3.Pearson,h3.Pearson,outid3,hboot3.Pearson,CI3.Pearson,'VariableNames',{'r','t','h','outid','hboot','CI'});
+% corr_kappa_mcc = table(r4.Pearson,t4.Pearson,h4.Pearson,outid4,hboot4.Pearson,CI4.Pearson,'VariableNames',{'r','t','h','outid','hboot','CI'});
+% correlation_results = vertcat(corr_dice_mHd,corr_dice_mJ,corr_mJ_mHd,corr_kappa_mcc);
 % writetable(correlation_results,[save_in filesep 'correlation_results.csv']);
 
+% JASP tells us the gaussian and tissue have an influence, with NP
+% performing less well exepct for Hausdorff on LGG -- also threshold 5
+% underestimates a little volumes, while threshold 1 is more variable
+% --> practically this means we can take threshold 3 and run the 4 models
+% and average the resulting maps 
 
