@@ -354,3 +354,9 @@ K = trimmean(kappa_data.data,0.2,'round',2);
 % correlation_results = vertcat(corr_dice_mHd,corr_dice_mJ,corr_mJ_mHd,corr_kappa_mcc);
 % writetable(correlation_results,[save_in filesep 'correlation_results.csv']);
 
+% JASP tells us the gaussian and tissue have an influence, with NP
+% performing less well exepct for Hausdorff on LGG -- also threshold 5
+% underestimates a little volumes, while threshold 1 is more variable
+% --> practically this means we can take threshold 3 and run the 4 models
+% and average the resulting maps 
+
