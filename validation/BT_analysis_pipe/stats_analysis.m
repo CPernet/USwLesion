@@ -1,6 +1,19 @@
 function [Perf_data, Perf_ranked_data, Perf_adjdata, Perf_ranked_adjdata,cluster_labels] = stats_analysis(csv_folder)
 
-% csv_folder = 'C:\Users\s1835343\mri_stuff\spm12\toolbox\USwLesion\validation\BT_analysis_pipe';
+% FORMAT  [Perf_data, Perf_ranked_data, Perf_adjdata, Perf_ranked_adjdata,cluster_labels] = stats_analysis(csv_folder)
+%
+% INPUT csv_folder is where all the results saved as csv are located
+%       e.g. csv_folder = 'C:\Users\s1835343\mri_stuff\spm12\toolbox\USwLesion\validation\BT_analysis_pipe';
+%
+% OUTPUT Perf_data a 5*48*48 binary matrix indicating which metric is
+%                  significantly different from the other
+%        Perf_ranked_data a 5*48 matrix of the median rank of each metric
+%        --> 5 in dim 1 because Dice was removed after checking the adjusted data
+%        --> 48 in dim 2 because thresholding 2 was removed after checking the adjusted data
+%        Perf_adjdata a 6*60 matrix indicating improvement or worsening in performence
+%        Perf_ranked_adjdata a 6*60 matrix indicating if ranking improved or worsend 
+%        cluster_labels a cell array of labels for the dendrograms thresholded at 
+%                       [2 4 3 6 8 12 24] corresponding to our manipulations
 
 % 1 - checking if there are significant increase or decrease in perf 
 % 2 - check how data cluster
