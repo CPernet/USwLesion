@@ -44,7 +44,7 @@ for tumour_type = 1:2
     else
         folders = folders(1:12);
     end
-    
+
     for patient = 1:size(folders,1)-2
         % loop for each patient
         % ---------------------
@@ -56,7 +56,7 @@ for tumour_type = 1:2
         Dice1(index) = 2*overlap1(index).voxel.tp / (2*overlap1(index).voxel.tp+2*overlap1(index).voxel.fp+2*overlap1(index).voxel.fn);
         [mJ2(index),mHd2(index),overlap2(index)] = image_overlap([patient_dir filesep tmp.name filesep 'voi2.nii'],ground_truth);
         Dice2(index) = 2*overlap2(index).voxel.tp / (2*overlap2(index).voxel.tp+2*overlap2(index).voxel.fp+2*overlap2(index).voxel.fn);
-             
+
         index = index+1;
     end
 end
@@ -92,17 +92,17 @@ for tumour_type = 1:2
     else
         folders = folders(1:12);
     end
-    
+
     parfor patient = 1:size(folders,1)-2
         % loop for each patient
         % ---------------------
         patient_dir = [BRAT_dir filesep folders(patient+2).name];
         tmp = dir([patient_dir filesep 'VSD.Brain.XX.O.MR_T1.*']);
         T1name = [patient_dir filesep tmp.name filesep 'VSD.nii'];
-        
+
         tmp = dir([patient_dir filesep '*Flair*']);
         FLAIRname = [patient_dir filesep tmp.name filesep 'VSD.nii'];
-        
+
         for voi = 1:2
             mask = [patient_dir filesep tmp.name filesep 'voi' num2str(voi) '.nii'];
             for nbGaussian = 1:3
@@ -169,7 +169,7 @@ for tumour_type = 1:2
     else
         folders = folders(1:12);
     end
-    
+
     for patient = 1:size(folders,1)-2
         patient_dir = [BRAT_dir filesep folders(patient+2).name];
         tmp = dir([patient_dir filesep 'VSD.Brain_*more*']);
@@ -187,14 +187,14 @@ for tumour_type = 1:2
                     c2 = [root filesep 'c2kVSD.nii'];
                     c3 = [root filesep 'c3kVSD.nii'];
                     c4 = [root filesep 'c4kVSD.nii'];
-                    
+
                     % compute similarity
                     [mJ(subj_index,param_index,:),mHd(subj_index,param_index,:),overlap,Dice(subj_index,param_index,:)] = compare2gdtruth(c1,c2,c3,c4,ground_truth,'on');
                     for m=1:5;
                         mcc(subj_index,param_index,m) = overlap(m).voxel.mcc;
                         kappa(subj_index,param_index,m) = overlap(m).voxel.CK;
                     end
-                    
+
                    % update parameter indexing voi*nbGaussian*affectedtissue
                    param_index = param_index+1;
                 end
@@ -219,7 +219,7 @@ for th = 1:5
     end
 end
 
-% save the datasets for each similarity measure as 30x60 tables 
+% save the datasets for each similarity measure as 30x60 tables
 
 for sim = 1:5
     if sim==1
@@ -233,14 +233,14 @@ for sim = 1:5
     elseif sim== 5
         sim_name = kappa; sim_nname = 'overlap_kappa';
     end
-    
+
     M = reshape(sim_name,[30,60]);
     Results = array2table(M,'VariableNames',Names);
     writetable(Results,[save_in filesep sim_nname '_results.csv']);
-    
+
 end
 
-% check volumes of the new lesion masks 
+% check volumes of the new lesion masks
 
 mask_volumes = NaN(30,12,5);
 ground_truth_volumes = NaN(30,1);
@@ -256,12 +256,12 @@ for tumour_type = 1:2
     else
         folders = folders(1:12);
     end
-    
+
     for patient = 1:size(folders,1)-2
         % loop for each patient
         % ---------------------
         patient_dir = [BRAT_dir filesep folders(patient+2).name];
-        
+
         % find volumes of ground truth for each patient
         tmp                                = dir([patient_dir filesep 'VSD.Brain_*more*']);
         ground_truth                       = [patient_dir filesep tmp.name filesep 'VSD.nii'];
@@ -297,32 +297,47 @@ for tumour_type = 1:2
                     mask_volumes(subj_index,param_index,3) = sum(c3_thresh3_vol(:));
                     mask_volumes(subj_index,param_index,4) = sum(c3_thresh4_vol(:));
                     mask_volumes(subj_index,param_index,5) = sum(c3_thresh5_vol(:));
-                    
+
                     param_index = param_index+1;
                 end
             end
         end
       subj_index = subj_index+1;
     end
-    
+
     param_index = 1;
-    mask_names = cell(1,60); 
-    for th = 1:5 
+    mask_names = cell(1,60);
+    for th = 1:5
         for voi = 1:2
             for nbGaussian = 1:3
-                for affectedtissue = 1:2 
+                for affectedtissue = 1:2
                     mask_names{param_index} = ['voi' num2str(voi) '_nbG' num2str(nbGaussian) '_tissue' num2str(affectedtissue+1) '_threshold' num2str(th)];
                     param_index = param_index+1;
                 end
             end
         end
     end
-        
-    mask_vols_reshape = reshape(mask_volumes,[30,60]); 
+
+    mask_vols_reshape = reshape(mask_volumes,[30,60]);
     mask_vols_results = array2table(mask_vols_reshape,'VariableNames',mask_names);
     writetable(mask_vols_results,[save_in filesep 'mask_volumes.csv']);
 end
 
+gt_vs_mask = NaN(30,60);
+param_index = 1;
+for param = 1:60;
+    gt_mask = mask_vols_reshape(:,param) - ground_truth_volumes;
+    gt_vs_mask(:,param_index) = gt_mask;
+
+    param_index = param_index+1;
+end
+
+mean_gt_vs_mask = mean(gt_vs_mask,1);
+thresh1_gt_mask_mean = mean(mean_gt_vs_mask(:,1:12));
+thresh2_gt_mask_mean = mean(mean_gt_vs_mask(:,13:24));
+thresh3_gt_mask_mean = mean(mean_gt_vs_mask(:,25:36));
+thresh4_gt_mask_mean = mean(mean_gt_vs_mask(:,37:48));
+thresh5_gt_mask_mean = mean(mean_gt_vs_mask(:,49:50));
 
 %% step 4: statistically test which masks are the best and in which conditions
 
@@ -331,11 +346,11 @@ end
 
 % calculating correlation between metrics
 
-dice_data  = importdata([save_in filesep 'Dice_results.csv']); 
-mHd_data   = importdata([save_in filesep 'mHd_results.csv']); 
-mJ_data    = importdata([save_in filesep 'mJ_results.csv']); 
-kappa_data = importdata([save_in filesep 'overlap_kappa_results.csv']); 
-mcc_data   = importdata([save_in filesep 'overlap_mcc_results.csv']); 
+dice_data  = importdata([save_in filesep 'Dice_results.csv']);
+mHd_data   = importdata([save_in filesep 'mHd_results.csv']);
+mJ_data    = importdata([save_in filesep 'mJ_results.csv']);
+kappa_data = importdata([save_in filesep 'overlap_kappa_results.csv']);
+mcc_data   = importdata([save_in filesep 'overlap_mcc_results.csv']);
 
 D = trimmean(dice_data.data ,0.2,'round',2);
 H = trimmean(mHd_data.data  ,0.2,'round',2);
@@ -346,17 +361,9 @@ K = trimmean(kappa_data.data,0.2,'round',2);
 [rg,tg,hg,outidg,hbootg,CIg] = skipped_correlation([D D J],[J H H],1); %compute correlations among global metrics
 [rl,tl,hl,outidl,hbootl,CIl] = skipped_correlation(M,K,1); % compute correlation between local metrics
 
-% need to fix table
-% corr_dice_mHd = table(r1.Pearson,t1.Pearson,h1.Pearson,outid1,hboot1.Pearson,CI1.Pearson,'VariableNames',{'r','t','h','outid','hboot','CI'});
-% corr_dice_mJ = table(r2.Pearson,t2.Pearson,h2.Pearson,outid2,hboot2.Pearson,CI2.Pearson,'VariableNames',{'r','t','h','outid','hboot','CI'});
-% corr_mJ_mHd = table(r3.Pearson,t3.Pearson,h3.Pearson,outid3,hboot3.Pearson,CI3.Pearson,'VariableNames',{'r','t','h','outid','hboot','CI'});
-% corr_kappa_mcc = table(r4.Pearson,t4.Pearson,h4.Pearson,outid4,hboot4.Pearson,CI4.Pearson,'VariableNames',{'r','t','h','outid','hboot','CI'});
-% correlation_results = vertcat(corr_dice_mHd,corr_dice_mJ,corr_mJ_mHd,corr_kappa_mcc);
+% corr_D_J = table(rg(1),tg(1),hg(1),outidg(1),hbootg(1),CIg(1),'VariableNames',{'R','T','H','outid','hboot','CI'});
+% corr_D_H = table(rg(2),tg(2),hg(2),outidg(2),hbootg(2),CIg(2),'VariableNames',{'R','T','H','outid','hboot','CI'});
+% corr_J_H = table(rg(3),tg(3),hg(3),outidg(3),hbootg(3),CIg(3),'VariableNames',{'R','T','H','outid','hboot','CI'});
+% corr_local = table(rl.Spearman,tl.Spearman,hl.Spearman,outidl,hbootl.Spearman,CIl.Spearman,'VariableNames',{'R','T','H','outid','hboot','CI'});
+% correlation_results = vertcat(corr_D_J,corr_D_H,corr_J_H,corr_local);
 % writetable(correlation_results,[save_in filesep 'correlation_results.csv']);
-
-% JASP tells us the gaussian and tissue have an influence, with NP
-% performing less well exepct for Hausdorff on LGG -- also threshold 5
-% underestimates a little volumes, while threshold 1 is more variable
-% --> practically this means we can take threshold 3 and run the 4 models
-% and average the resulting maps 
-
