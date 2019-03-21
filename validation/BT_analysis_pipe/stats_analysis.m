@@ -109,8 +109,8 @@ for m=2:-1:1 % backward to start with 60 param on difference then 48 of raw
         % check if HDI/RHDI overlaps for statistical difference
         if m == 1
             if d == 1 % create array to fill
-                Perf_data        = NaN(6,48,48);
-                Perf_ranked_data = zeros(6,48);
+                Perf_data        = NaN(6,size(data,2),size(data,2));
+                Perf_ranked_data = zeros(6,size(data,2));
             end
             
             % check which params are higher than others
