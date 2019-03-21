@@ -240,12 +240,6 @@ for sim = 1:5
     
 end
 
-
-
-%% step 4: statistically test which masks are the best and in which conditions
-
-[Perf_data, Perf_ranked_data, Perf_adjdata, Perf_ranked_adjdata,cluster_labels] = stats_analysis(save_in);
-
 % check volumes of the new lesion masks 
 
 mask_volumes = NaN(30,12,6);
@@ -332,6 +326,13 @@ for tumour_type = 1:2
     writetable(mask_vols_results,[save_in filesep 'mask_volumes.csv']);
     
 end
+
+
+%% step 4: statistically test which masks are the best and in which conditions
+
+[Perf_data, Perf_ranked_data, Perf_adjdata, Perf_ranked_adjdata,cluster_labels] = ...
+    stats_analysis(save_in);
+
 
 % calculating correlation between metrics
 
