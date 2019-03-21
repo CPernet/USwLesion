@@ -2,22 +2,27 @@ function [Perf_data, Perf_ranked_data, Perf_adjdata, Perf_ranked_adjdata,cluster
 
 % csv_folder = 'C:\Users\s1835343\mri_stuff\spm12\toolbox\USwLesion\validation\BT_analysis_pipe';
 
+% 1 - checking if there are significant increase or decrease in perf 
+% 2 - check how data cluster
+
 for m=2:-1:1
-    for d = 1:5
+    for d = 1:6
         if d==1
-            name = ['Dice_results.csv']; nname = 'Dice';
+            name = ['mask_volumes.csv']; nname = 'Volumes';
         elseif d==2
-            name = ['mHd_results.csv']; nname = 'Hausdorff';
-        elseif d==3
             name = ['mJ_results.csv']; nname = 'Jaccard';
+        elseif d==3
+            name = ['Dice_results.csv']; nname = 'Dice';
         elseif d==4
-            name = ['overlap_kappa_results.csv']; nname = 'Kappa';
+            name = ['mHd_results.csv']; nname = 'Hausdorff';
         elseif d== 5
+            name = ['overlap_kappa_results.csv']; nname = 'Kappa';
+        elseif d==6
             name = ['overlap_mcc_results.csv']; nname = 'Matthew Corr';
         end
         
-        IMP = importdata([csv_folder filesep name]);
-        data = IMP.data;
+        IMP   = importdata([csv_folder filesep name]);
+        data  = IMP.data;
         label = IMP.colheaders;
         clear IMP
         
@@ -25,23 +30,28 @@ for m=2:-1:1
             data(:,13:24) = []; % remove threshold 2 because we know from looking at the difference it performs badly
             label(13:24)  = [];
         elseif m==2
-            IMP = importdata([csv_folder filesep 'baseline_measures.csv']);
-            if d==1 % Dice
-                data = data - repmat([repmat(IMP.data(:,5),[1 6]) repmat(IMP.data(:,6),[1 6]) ],[1,5]);
-            elseif d==2 % Hausdorff
-                data = repmat([repmat(IMP.data(:,3),[1 6]) repmat(IMP.data(:,4),[1 6]) ],[1,5]) - data;
-            elseif d==3 % Jaccard
-                data = data - repmat([repmat(IMP.data(:,1),[1 6]) repmat(IMP.data(:,2),[1 6]) ],[1,5]);
-            elseif d==4 % Kappa
-                data = data - repmat([repmat(IMP.data(:,9),[1 6]) repmat(IMP.data(:,10),[1 6]) ],[1,5]);
-            elseif d== 5 % Matthew Corr
-                data = data - repmat([repmat(IMP.data(:,7),[1 6]) repmat(IMP.data(:,8),[1 6]) ],[1,5]);
+            
+            if d == 1
+                IMP  = importdata([csv_folder filesep 'ground_truth_volumes.csv']);
+                data = data - repmat(IMP.data,1,60);
+            else
+                IMP = importdata([csv_folder filesep 'baseline_measures.csv']);
+                if d==2 % Jaccard
+                    data = data - repmat([repmat(IMP.data(:,1),[1 6]) repmat(IMP.data(:,2),[1 6]) ],[1,5]);
+                elseif d==3 % Dice
+                    data = data - repmat([repmat(IMP.data(:,5),[1 6]) repmat(IMP.data(:,6),[1 6]) ],[1,5]);
+                elseif d==4 % Hausdorff
+                    data = repmat([repmat(IMP.data(:,3),[1 6]) repmat(IMP.data(:,4),[1 6]) ],[1,5]) - data;
+                elseif d==5 % Kappa
+                    data = data - repmat([repmat(IMP.data(:,9),[1 6]) repmat(IMP.data(:,10),[1 6]) ],[1,5]);
+                elseif d== 6 % Matthew Corr
+                    data = data - repmat([repmat(IMP.data(:,7),[1 6]) repmat(IMP.data(:,8),[1 6]) ],[1,5]);
+                end
+                clear IMP
             end
-            clear IMP
         end
         
         % data viz and ranking
-        
         figure
         subplot(2,1,1); 
         [est,HDI] = rst_data_plot(data,'estimator','trimmed mean','newfig','no');
@@ -77,8 +87,8 @@ for m=2:-1:1
         RHDI(d,1,:) = med(index,:);
         RHDI(d,2,:) = med(index+upper_centile,:);
         rst_boxplot(med); hold on
-        plot([1:48],squeeze(RHDI(d,1,:)),'--r','LineWidth',2);
-        plot([1:48],squeeze(RHDI(d,2,:)),'--r','LineWidth',2);
+        plot([1:length(RHDI)],squeeze(RHDI(d,1,:)),'--r','LineWidth',2);
+        plot([1:length(RHDI)],squeeze(RHDI(d,2,:)),'--r','LineWidth',2);
 
        % check if HDI/RHDI overlaps for statistical difference 
         if m == 1
@@ -137,8 +147,8 @@ for m=2:-1:1
                 Perf_adjdata        = zeros(5,60);
                 Perf_ranked_adjdata = zeros(5,60);
             end
-            Perf_adjdata(d,HDI(1,:)>0)        = 1;
-            Perf_adjdata(d,HDI(2,:)<0)        = -1;
+            Perf_adjdata(d,HDI(1,:)>0)           = 1;
+            Perf_adjdata(d,HDI(2,:)<0)           = -1;
             Perf_ranked_adjdata(d,RHDI(d,1,:)>0) = 1;
             Perf_ranked_adjdata(d,RHDI(d,2,:)<0) = -1;
             
