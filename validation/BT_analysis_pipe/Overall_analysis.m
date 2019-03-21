@@ -295,11 +295,11 @@ for tumour_type = 1:2
                     c3_thresh5_vol = spm_read_vols(spm_vol(c3_thresh5));
                     c3_thresh5_vol = c3_thresh5_vol > 0;
                     % mask_volumes(subj_index,param_index,1) = sum(c3_vol(:));
-                    mask_volumes(subj_index,param_index,2) = sum(c3_thresh1_vol(:));
-                    mask_volumes(subj_index,param_index,3) = sum(c3_thresh2_vol(:));
-                    mask_volumes(subj_index,param_index,4) = sum(c3_thresh3_vol(:));
-                    mask_volumes(subj_index,param_index,5) = sum(c3_thresh4_vol(:));
-                    mask_volumes(subj_index,param_index,6) = sum(c3_thresh5_vol(:));
+                    mask_volumes(subj_index,param_index,1) = sum(c3_thresh1_vol(:));
+                    mask_volumes(subj_index,param_index,2) = sum(c3_thresh2_vol(:));
+                    mask_volumes(subj_index,param_index,3) = sum(c3_thresh3_vol(:));
+                    mask_volumes(subj_index,param_index,4) = sum(c3_thresh4_vol(:));
+                    mask_volumes(subj_index,param_index,5) = sum(c3_thresh5_vol(:));
                     
                     param_index = param_index+1;
                 end
