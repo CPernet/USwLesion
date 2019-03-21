@@ -263,10 +263,10 @@ for tumour_type = 1:2
         patient_dir = [BRAT_dir filesep folders(patient+2).name];
         
         % find volumes of ground truth for each patient
-        tmp = dir([patient_dir filesep 'VSD.Brain_*more*']);
-        ground_truth = [patient_dir filesep tmp.name filesep 'VSD.nii'];
-        ground_truth_vol = spm_read_vols(spm_vol(ground_truth));
-        ground_truth_volumes(subj_index,:) = sum(ground_truth_vol(:));
+        tmp                                = dir([patient_dir filesep 'VSD.Brain_*more*']);
+        ground_truth                       = [patient_dir filesep tmp.name filesep 'VSD.nii'];
+        ground_truth_vol                   = spm_read_vols(spm_vol(ground_truth));
+        ground_truth_volumes(subj_index,:) = sum(ground_truth_vol(:)>0);
         writetable(array2table(ground_truth_volumes),[save_in filesep 'ground_truth_volumes.csv']);
 
         %find volume of lesion mask before and after segmentation
@@ -276,14 +276,14 @@ for tumour_type = 1:2
             for nbGaussian = 1:3
                 for affectedtissue = 1:2
                     mask_folder = ['segmentation_voi' num2str(voi) '_nbG' num2str(Gaussian_param(nbGaussian)) '_tissue' num2str(affectedtissue+1)];
-                    c3_before = [patient_dir filesep tmp.name filesep mask_folder filesep 'c3kVSD.nii'];
+                    % c3_before  = [patient_dir filesep tmp.name filesep mask_folder filesep 'c3kVSD.nii'];
                     c3_thresh1 = [patient_dir filesep tmp.name filesep mask_folder filesep 'c3kVSD_bigger_than_sum_of_others.nii'];
                     c3_thresh2 = [patient_dir filesep tmp.name filesep mask_folder filesep 'c3kVSD_bigger_than_at_least_one.nii'];
                     c3_thresh3 = [patient_dir filesep tmp.name filesep mask_folder filesep 'c3kVSD_bigger_than_each.nii'];
                     c3_thresh4 = [patient_dir filesep tmp.name filesep mask_folder filesep 'c3kVSD_bigger_than_99.nii'];
                     c3_thresh5 = [patient_dir filesep tmp.name filesep mask_folder filesep 'c3kVSD_bigger_than_50.nii'];
-                    c3_vol = spm_read_vols(spm_vol(c3_before));
-                    c3_vol = c3_vol>0;
+                    % c3_vol = spm_read_vols(spm_vol(c3_before));
+                    % c3_vol = c3_vol>0;
                     c3_thresh1_vol = spm_read_vols(spm_vol(c3_thresh1));
                     c3_thresh1_vol = c3_thresh1_vol > 0;
                     c3_thresh2_vol = spm_read_vols(spm_vol(c3_thresh2));
@@ -294,7 +294,7 @@ for tumour_type = 1:2
                     c3_thresh4_vol = c3_thresh4_vol > 0;
                     c3_thresh5_vol = spm_read_vols(spm_vol(c3_thresh5));
                     c3_thresh5_vol = c3_thresh5_vol > 0;
-                    mask_volumes(subj_index,param_index,1) = sum(c3_vol(:));
+                    % mask_volumes(subj_index,param_index,1) = sum(c3_vol(:));
                     mask_volumes(subj_index,param_index,2) = sum(c3_thresh1_vol(:));
                     mask_volumes(subj_index,param_index,3) = sum(c3_thresh2_vol(:));
                     mask_volumes(subj_index,param_index,4) = sum(c3_thresh3_vol(:));
@@ -309,8 +309,8 @@ for tumour_type = 1:2
     end
     
     param_index = 1;
-    mask_names = cell(1,72);
-    for th = 0:5 % NB - threshold 0 is the mask before segmentation 
+    mask_names = cell(1,60); 
+    for th = 1:5 
         for voi = 1:2
             for nbGaussian = 1:3
                 for affectedtissue = 1:2 
@@ -321,7 +321,7 @@ for tumour_type = 1:2
         end
     end
         
-    mask_vols_reshape = reshape(mask_volumes,[30,72]);
+    mask_vols_reshape = reshape(mask_volumes,[30,60]); 
     mask_vols_results = array2table(mask_vols_reshape,'VariableNames',mask_names);
     writetable(mask_vols_results,[save_in filesep 'mask_volumes.csv']);
     
