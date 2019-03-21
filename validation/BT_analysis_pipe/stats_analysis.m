@@ -14,6 +14,7 @@ function [Perf_data, Perf_ranked_data, Perf_adjdata, Perf_ranked_adjdata,cluster
 %        Perf_ranked_adjdata a 6*60 matrix indicating if ranking improved or worsend 
 %        cluster_labels a cell array of labels for the dendrograms thresholded at 
 %                       [2 4 3 6 8 12 24] corresponding to our manipulations
+%        For all measures the order is Volumes, Jaccard, Dice Hausdorff, Kappa Matthew Corr
 
 % 1 - checking if there are significant increase or decrease in perf 
 % 2 - check how data cluster
