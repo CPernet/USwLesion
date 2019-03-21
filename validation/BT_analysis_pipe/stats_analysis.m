@@ -5,20 +5,20 @@ function [Perf_data, Perf_ranked_data, Perf_adjdata, Perf_ranked_adjdata,cluster
 % 1 - checking if there are significant increase or decrease in perf 
 % 2 - check how data cluster
 
-for m=2:-1:1
+for m=2:-1:1 % backward to start with 60 param on difference then 48 of raw
     for d = 1:6
         if d==1
-            name = ['mask_volumes.csv']; nname = 'Volumes';
+            name = 'mask_volumes.csv'; nname = 'Volumes';
         elseif d==2
-            name = ['mJ_results.csv']; nname = 'Jaccard';
+            name = 'mJ_results.csv'; nname = 'Jaccard';
         elseif d==3
-            name = ['Dice_results.csv']; nname = 'Dice';
+            name = 'Dice_results.csv'; nname = 'Dice';
         elseif d==4
-            name = ['mHd_results.csv']; nname = 'Hausdorff';
+            name = 'mHd_results.csv'; nname = 'Hausdorff';
         elseif d== 5
-            name = ['overlap_kappa_results.csv']; nname = 'Kappa';
+            name = 'overlap_kappa_results.csv'; nname = 'Kappa';
         elseif d==6
-            name = ['overlap_mcc_results.csv']; nname = 'Matthew Corr';
+            name = 'overlap_mcc_results.csv'; nname = 'Matthew Corr';
         end
         
         IMP   = importdata([csv_folder filesep name]);
@@ -30,7 +30,6 @@ for m=2:-1:1
             data(:,13:24) = []; % remove threshold 2 because we know from looking at the difference it performs badly
             label(13:24)  = [];
         elseif m==2
-            
             if d == 1
                 IMP  = importdata([csv_folder filesep 'ground_truth_volumes.csv']);
                 data = data - repmat(IMP.data,1,60);
@@ -52,14 +51,16 @@ for m=2:-1:1
         end
         
         % data viz and ranking
+        % ---------------------
         figure
-        subplot(2,1,1); 
-        [est,HDI] = rst_data_plot(data,'estimator','trimmed mean','newfig','no');
+        subplot(2,1,1);
+        [~,HDI] = rst_data_plot(data,'estimator','trimmed mean','newfig','no');
         if m == 1
             title([nname ' Raw Data']);
         else
             title([nname ' Adjusted Data']);
         end
+        
         % bootstrap the data and rank
         subplot(2,1,2);
         [o,n] = size(data);
@@ -72,11 +73,6 @@ for m=2:-1:1
             med(boot,:) = rst_hd(index',0.5);
         end
         
-        if m == 1
-            title([nname ' Ranked Data']) 
-        else
-            title([nname ' Adjusted Ranked Data'])
-        end
         med = sort(med);
         prob_coverage = 95/100;
         upper_centile = floor(prob_coverage*size(med,1)); % upper bound
@@ -89,12 +85,18 @@ for m=2:-1:1
         rst_boxplot(med); hold on
         plot([1:length(RHDI)],squeeze(RHDI(d,1,:)),'--r','LineWidth',2);
         plot([1:length(RHDI)],squeeze(RHDI(d,2,:)),'--r','LineWidth',2);
-
-       % check if HDI/RHDI overlaps for statistical difference 
+        if m == 1
+            title([nname ' Ranked Raw Data']) 
+        else
+            title([nname ' Ranked Adjusted Data'])
+        end
+        clear med index nCI ci ciWidth
+        
+        % check if HDI/RHDI overlaps for statistical difference
         if m == 1
             if d == 1 % create array to fill
-                Perf_data        = NaN(5,48,48);
-                Perf_ranked_data = zeros(5,48);
+                Perf_data        = NaN(6,48,48);
+                Perf_ranked_data = zeros(6,48);
             end
             
             % check which params are higher than others
@@ -105,11 +107,11 @@ for m=2:-1:1
             [~,index] = sort(data','descend');
             Perf_ranked_data(d,:) = rst_hd(index',0.5);
             
-           
-            if d == 5 
-               Perf_data(1,:,:) = []; % remove Dice as we know from the difference analysis it performes badly
-               Perf_ranked_data(1,:,:) = []; 
-               RHDI(1,:,:) = [];
+            if d == 6 % when all is analyzed, make a summary figure 
+               Perf_data(3,:,:)        = []; % remove Dice as we know from the difference analysis it performes badly
+               Perf_ranked_data(3,:,:) = []; 
+               RHDI(3,:,:)             = [];
+               
                figure; subplot(1,2,1); imagesc(squeeze(sum(Perf_data,1)));
                title('frequency of HDI differring')
                subplot(1,2,2); plot([1:48],Perf_ranked_data); grid on
@@ -152,7 +154,7 @@ for m=2:-1:1
             Perf_ranked_adjdata(d,RHDI(d,1,:)>0) = 1;
             Perf_ranked_adjdata(d,RHDI(d,2,:)<0) = -1;
             
-            if d == 5 
+            if d == 6 
                 figure; subplot(2,1,1); imagesc(Perf_adjdata);
                 subplot(2,1,2); imagesc(Perf_ranked_adjdata);
                 disp('adjusted data')
