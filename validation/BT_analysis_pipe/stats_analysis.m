@@ -5,11 +5,11 @@ function [Perf_data, Perf_ranked_data, Perf_adjdata, Perf_ranked_adjdata,cluster
 % INPUT csv_folder is where all the results saved as csv are located
 %       e.g. csv_folder = 'C:\Users\s1835343\mri_stuff\spm12\toolbox\USwLesion\validation\BT_analysis_pipe';
 %
-% OUTPUT Perf_data a 5*48*48 binary matrix indicating which metric is
+% OUTPUT Perf_data a 5*36*36 binary matrix indicating which metric is
 %                  significantly different from the other
-%        Perf_ranked_data a 5*48 matrix of the median rank of each metric
+%        Perf_ranked_data a 5*36 matrix of the median rank of each metric
 %        --> 5 in dim 1 because Dice was removed after checking the adjusted data
-%        --> 48 in dim 2 because thresholding 2 was removed after checking the adjusted data
+%        --> 36 in dim 2 because thresholding 2 and 4 were removed after checking the adjusted data
 %        Perf_adjdata a 6*60 matrix indicating improvement or worsening in performence
 %        Perf_ranked_adjdata a 6*60 matrix indicating if ranking improved or worsend 
 %        cluster_labels a cell array of labels for the dendrograms thresholded at 
@@ -41,8 +41,8 @@ for m=2:-1:1 % backward to start with 60 param on difference then 48 of raw
         clear IMP
         
         if m == 1
-            data(:,13:24) = []; % remove threshold 2 because we know from looking at the difference it performs badly
-            label(13:24)  = [];
+            data(:,[13:24 37:48]) = []; % remove threshold 2 because we know from looking at the difference it performs badly
+            label([13:24 37:48])  = [];
         elseif m==2
             if d == 1
                 IMP  = importdata([csv_folder filesep 'ground_truth_volumes.csv']);
@@ -114,7 +114,7 @@ for m=2:-1:1 % backward to start with 60 param on difference then 48 of raw
             end
             
             % check which params are higher than others
-            for p=1:48
+            for p=1:size(data,2)
                 Perf_data(d,p,:) = HDI(1,:)>HDI(2,p);
             end
             
@@ -128,10 +128,10 @@ for m=2:-1:1 % backward to start with 60 param on difference then 48 of raw
                
                figure; subplot(1,2,1); imagesc(squeeze(sum(Perf_data,1)));
                title('frequency of HDI differring')
-               subplot(1,2,2); plot([1:48],Perf_ranked_data); grid on
-               hold on; plot([1:48], mean(Perf_ranked_data),'k','LineWidth',2);
-               plot([1:48], squeeze(mean(RHDI)),'-k','LineWidth',2);
-               plot([1:48], squeeze(mean(RHDI)),'-k','LineWidth',2);
+               subplot(1,2,2); plot([1:size(data,2)],Perf_ranked_data); grid on
+               hold on; plot([1:size(data,2)], mean(Perf_ranked_data),'k','LineWidth',2);
+               plot([1:size(data,2)], squeeze(mean(RHDI)),'-k','LineWidth',2);
+               plot([1:size(data,2)], squeeze(mean(RHDI)),'-k','LineWidth',2);
                title('Median rank per metric (and mean across metrics)'); 
                clear RHDI HDI
             end
