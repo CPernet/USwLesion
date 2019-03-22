@@ -361,9 +361,9 @@ K = trimmean(kappa_data.data,0.2,'round',2);
 [rg,tg,hg,outidg,hbootg,CIg] = skipped_correlation([D D J],[J H H],1); %compute correlations among global metrics
 [rl,tl,hl,outidl,hbootl,CIl] = skipped_correlation(M,K,1); % compute correlation between local metrics
 
-% corr_D_J = table(rg(1),tg(1),hg(1),outidg(1),hbootg(1),CIg(1),'VariableNames',{'R','T','H','outid','hboot','CI'});
-% corr_D_H = table(rg(2),tg(2),hg(2),outidg(2),hbootg(2),CIg(2),'VariableNames',{'R','T','H','outid','hboot','CI'});
-% corr_J_H = table(rg(3),tg(3),hg(3),outidg(3),hbootg(3),CIg(3),'VariableNames',{'R','T','H','outid','hboot','CI'});
-% corr_local = table(rl.Spearman,tl.Spearman,hl.Spearman,outidl,hbootl.Spearman,CIl.Spearman,'VariableNames',{'R','T','H','outid','hboot','CI'});
-% correlation_results = vertcat(corr_D_J,corr_D_H,corr_J_H,corr_local);
-% writetable(correlation_results,[save_in filesep 'correlation_results.csv']);
+corr_D_J = table(rg(1),tg(1),hg(1),outidg(1),hbootg(1),CIg(1),'VariableNames',{'r','t','h','outid','hboot','CI'});
+corr_D_H = table(rg(2),tg(2),hg(2),outidg(2),hbootg(2),CIg(2),'VariableNames',{'r','t','h','outid','hboot','CI'});
+corr_J_H = table(rg(3),tg(3),hg(3),outidg(3),hbootg(3),CIg(3),'VariableNames',{'r','t','h','outid','hboot','CI'});
+corr_local = table(rl.Spearman,tl.Spearman,hl.Spearman,outidl,hbootl,CIl.Spearman,'VariableNames',{'r','t','h','outid','hboot','CI'});
+correlation_results = vertcat(corr_D_J,corr_D_H,corr_J_H,corr_local);
+writetable(correlation_results,[save_in filesep 'correlation_results.csv']);
