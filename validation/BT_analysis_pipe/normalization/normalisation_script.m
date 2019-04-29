@@ -27,8 +27,11 @@ Healthy_dir = uigetdir(pwd,'Select F1000 directory');
 
 % SPM segment into standard space
 
-index = 1;
+cd(Healthy_dir); local = dir;
 for subject = 1:30
+     cd(local(subject+2).name)
+    normalise = normalisation_batch_job();   
+    cd ..
 end
 
 % intensity normalisation

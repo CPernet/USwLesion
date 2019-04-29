@@ -1,9 +1,17 @@
+function normalise = normalisation_batch_job()
+
 %-----------------------------------------------------------------------
 % Job saved on 29-Apr-2019 11:32:37 by cfg_util (rev $Rev: 6942 $)
 % spm SPM - SPM12 (7219)
 % cfg_basicio BasicIO - Unknown
 %-----------------------------------------------------------------------
-matlabbatch{1}.spm.spatial.preproc.channel.vols = {'C:\Users\s1835343\mri_stuff\BRAT\F1000\0025336\anat.nii,1'};
+
+% do the normalisation
+spm_jobman('initcfg')
+
+%% using the batch
+
+matlabbatch{1}.spm.spatial.preproc.channel.vols = {[pwd filesep 'anat.nii']};
 matlabbatch{1}.spm.spatial.preproc.channel.biasreg = 0.001;
 matlabbatch{1}.spm.spatial.preproc.channel.biasfwhm = 60;
 matlabbatch{1}.spm.spatial.preproc.channel.write = [0 0];
@@ -39,7 +47,7 @@ matlabbatch{1}.spm.spatial.preproc.warp.fwhm = 0;
 matlabbatch{1}.spm.spatial.preproc.warp.samp = 3;
 matlabbatch{1}.spm.spatial.preproc.warp.write = [1 1];
 matlabbatch{2}.spm.spatial.normalise.write.subj.def(1) = cfg_dep('Segment: Forward Deformations', substruct('.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1}), substruct('.','fordef', '()',{':'}));
-matlabbatch{2}.spm.spatial.normalise.write.subj.resample = {'C:\Users\s1835343\mri_stuff\BRAT\F1000\0025336\anat.nii,1'};
+matlabbatch{2}.spm.spatial.normalise.write.subj.resample = {[pwd filesep 'anat.nii']};
 matlabbatch{2}.spm.spatial.normalise.write.woptions.bb = [-78 -112 -70
                                                           78 76 85];
 matlabbatch{2}.spm.spatial.normalise.write.woptions.vox = [2 2 2];
@@ -73,3 +81,5 @@ matlabbatch{5}.spm.util.imcalc.options.dmtx = 0;
 matlabbatch{5}.spm.util.imcalc.options.mask = 0;
 matlabbatch{5}.spm.util.imcalc.options.interp = 1;
 matlabbatch{5}.spm.util.imcalc.options.dtype = 4;
+
+normalise = spm_jobman('run', matlabbatch);

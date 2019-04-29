@@ -1,5 +1,6 @@
 function out = segmentation_routine(T1name,FLAIRname,mask,nbGaussian,affectedtissue)
 
+
 % do the segmentation
 spm_jobman('initcfg')
 
