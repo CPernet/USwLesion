@@ -370,7 +370,7 @@ cdep(end).tgt_spec   = cfg_findspec({{'filter','nifti'}});
 % ICV-masked Struc & Other
 if job.options.ICVmsk || ... % masking or bias corrected
         (isfield(job.options.bias,'bias_yes') && ...
-         job.options.bias.bias_yes.biaswr(2))
+        job.options.bias.bias_yes.biaswr(2))
     for ii=1:max(numel(job.imgStruc),1) % At least one image, the Ref struct.
         cdep(end+1)          = cfg_dep; %#ok<*AGROW>
         cdep(end).sname      = sprintf('Corrected Struc #%d',ii);
@@ -432,7 +432,7 @@ end
 % Dartel-ready segmented images in subject space
 for ii=1:3
     cdep(end+1)          = cfg_dep;
-    cdep(end).sname      = sprintf('c%d image',ii);
+    cdep(end).sname      = sprintf('rc%d image',ii);
     cdep(end).src_output = substruct('.','segmImg','.',sprintf('rc%d',ii));
     cdep(end).tgt_spec   = cfg_findspec({{'filter','nifti'}});
 end
