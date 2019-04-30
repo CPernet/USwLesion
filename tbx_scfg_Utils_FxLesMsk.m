@@ -36,8 +36,8 @@ fnOth.val       = {''};
 %--------------------------------------------------------------------------
 minVol         = cfg_entry;
 minVol.tag     = 'minVol';
-minVol.name    = 'Size threshold (mm^3 or Inf)';
-minVol.help    = {'Minimum size (mm^3) of smallest blobs that are keep. Use Inf to keep the largest blob'};
+minVol.name    = 'Size threshold (mm^3)';
+minVol.help    = {'Minimum size (mm^3) of smallest blobs that are kep.'};
 minVol.strtype = 'r';
 minVol.num     = [1 1];
 minVol.def     = @(val)crc_USwL_get_defaults('ImgFix.minVol', val{:});
@@ -61,7 +61,7 @@ FxLesMsk.tag    = 'FxLesMsk';
 FxLesMsk.name   = 'Fixing lesion mask image';
 FxLesMsk.val    = {fnMsk options};
 FxLesMsk.help   = {'Fixing lesion mask image(s) by', ...
-    '1/ removing small blobs below some minimum volume (use Inf to keep the largest)', ...
+    '1/ removing small blobs below some minimum volume', ...
     '2/ if available, removing blobs whos intenisty is too low compared to the lesion mean.', ...
     'For details on 2/ see the main function ''crc_fix_LesMsk.m''. Note also that this is qui experimental'};
 FxLesMsk.prog   = @run_FxLesMsk;

@@ -39,7 +39,6 @@ function fn_tmsk = crc_fix_LesMsk(fn_msk,opt)
 
 % Written by C. Phillips.
 % Cyclotron Research Centre, University of Liege, Belgium
-% C. Pernet - keep biggest cluster only (U.o.Edinburgh)
 
 %% Fixed parameters
 prct_threshold = 95; % percentile threshold
@@ -88,26 +87,14 @@ for ii=1:num
 end
 
 % clusters to remove
-if isinf(minNrVx) % keep only the biggest
-    cluster_size = NaN(num,1);
-    for n=1:num
-        tmp = L==n;
-        cluster_size(n) = sum(tmp(:));
-    end
-    [~,position]=max(cluster_size);
-    tvMsk = zeros(size(vMsk));
-    tvMsk(L(:)==position) = 1; 
-
-else
-    l_clust2rem = find(N<minNrVx); % keep below threashold
-    % Create fixed volume w/o clust2rem
-    tvMsk = zeros(size(vMsk));
-    for ii=1:num
-        if ~any(ii==l_clust2rem)
-            tvMsk(L(:)==ii) = 1; % keep 
-        else
-            L(L(:)==ii) = 0; % remove 
-        end
+l_clust2rem = find(N<minNrVx);
+% Create fixed volume w/o clust2rem
+tvMsk = zeros(size(vMsk));
+for ii=1:num
+    if ~any(ii==l_clust2rem)
+        tvMsk(L(:)==ii) = 1; % keep cluster
+    else
+        L(L(:)==ii) = 0; % remove from clusters
     end
 end
 
