@@ -215,8 +215,54 @@ for tumour_type = 1:2
     subj_index = subj_index+1;
 end
 
-% apply deformation field 
-
 %% create new brains 
 
 % (wT1 - mask) + c3(masked)
+
+for tumour_type = 1:2
+    % loop in High Grade Glioma or Low Grade Glioma
+    % --------------------------------------------
+    BRAT_dir = eval(['BRAT_dir' num2str(tumour_type)]);
+    cd(BRAT_dir); folders = dir;
+    if tumour_type == 1
+        folders = folders(1:22);
+    else
+        folders = folders(1:12);
+    end
+    
+    for subject = 1:size(folders,1)-2
+        % loop for each patient
+        % ---------------------
+        patient_dir = [BRAT_dir filesep folders(subject+2).name];
+        tmp = dir([patient_dir filesep 'VSD.Brain.XX.O.MR_T1.*']);
+        
+        param_index = 1;
+        for nbGaussian = 1:2
+            for affectedtissue = 1:2 % add +1 for GM+WM or GM+WM+CSF
+                % get the patient mask
+                root = [patient_dir filesep tmp.name filesep 'normalization_segmentation_nbG' num2str(Gaussian_param(nbGaussian)) '_tissue' num2str(affectedtissue+1)];
+                c3 = [root filesep 'c3kVSD.nii'];
+                c3_V = spm_vol(c3);
+                c3_mask = spm_read_vols(c3_V);
+                
+                %apply deformation field to patient mask
+                deformation_field = [patient_dir filesep tmp.name filesep 'ykVSD.nii'];
+                c3_warped = c3_mask.*deformation_field;
+                
+                %get the healthy brain
+                cd(Healthy_dir); local = dir;
+                cd(local(subject+2).name)
+                healthy_brain = spm_vol([pwd filesep 'Scaled_T1w_skull_stripped.nii']);
+                
+                %combine healthy brain and patient mask
+                tumour = spm_read_vols(healthy_brain).*c3_mask;
+                healthy_brain.fname = [pwd filesep 'new_brain.nii'];
+                spm_write_vol(healthy_brain,tumour);
+               
+                % update parameter index
+                param_index = param_index+1;
+                
+            end
+        end
+    end
+end
