@@ -47,18 +47,23 @@ for subject = 1:30
     healthy_V   = healthy_V-healthy_min;
     healthy_max = max(healthy_V(:));
     
-    for tumour_type = 1:2
+    if subject < 11
+        tumour_type = 2;
+    else
+        tumour_type = 1;
+    end
         % loop in High Grade Glioma or Low Grade Glioma
         % --------------------------------------------
         BRAT_dir = eval(['BRAT_dir' num2str(tumour_type)]);
-        cd(BRAT_dir); folders = dir;
+        cd(BRAT_dir); folders = dir('brats*');
         if tumour_type == 1
-            folders = folders(1:22);
+            folders = folders(1:20);
+            patient_dir = [BRAT_dir filesep folders(subject-10).name];
         else
-            folders = folders(1:12);
+            folders = folders(1:10);
+            patient_dir = [BRAT_dir filesep folders(subject).name];
         end
-        
-        patient_dir = [BRAT_dir filesep folders(subject+2).name];
+                
         tmp = dir([patient_dir filesep 'VSD.Brain.XX.O.MR_T1.*']);
         patient_VSD = [patient_dir filesep tmp.name filesep 'VSD.nii'];
         PVSD = spm_vol(patient_VSD);
@@ -69,19 +74,19 @@ for subject = 1:30
         
         if patient_max < healthy_max
             scaling     = healthy_max/patient_max;
-            patient_VSD = patient_VSD.*scaling;
-            PVSD.fname  = [PVSD.fname(1:end-7) 'Scaled_VSD.nii'];
-            spm_write_vol(PVSD,patient_VSD);
-        elseif patient_max > healthy_max
-            scaling     = patient_max/healthy_max;
-            healthy_V   = healthy_V.*scaling;
+            healthy_V   = healthy_V./scaling;
             HV.fname    = [HV.fname(1:end-22) 'Scaled_T1w_skull_stripped.nii'];
             spm_write_vol(HV,healthy_V);
+        elseif patient_max > healthy_max
+            scaling     = patient_max/healthy_max;
+            patient_VSD = patient_VSD./scaling;
+            PVSD.fname  = [PVSD.fname(1:end-7) 'Scaled_VSD.nii'];
+            spm_write_vol(PVSD,patient_VSD);
         end
         patient_to_segment{subject} = PVSD.fname;
         control_to_use{subject}     = HV.fname;
-    end
 end
+
 
 %% tumour segmentation to get lesion masks
 
@@ -239,6 +244,7 @@ for tumour_type = 1:2
         param_index = 1;
         for nbGaussian = 1:2
             for affectedtissue = 1:2 % add +1 for GM+WM or GM+WM+CSF
+                
                 % get the patient mask
                 root = [patient_dir filesep tmp.name filesep 'normalization_segmentation_nbG' num2str(Gaussian_param(nbGaussian)) '_tissue' num2str(affectedtissue+1)];
                 c3 = [root filesep 'c3kVSD.nii'];
@@ -246,13 +252,13 @@ for tumour_type = 1:2
                 c3_mask = spm_read_vols(c3_V);
                 
                 %apply deformation field to patient mask
-                deformation_field = [patient_dir filesep tmp.name filesep 'ykVSD.nii'];
+                cd(Healthy_dir); local = dir;
+                cd(local(subject+2).name)
+                deformation_field = [pwd filesep 'y_anat.nii'];
                 c3_warped = c3_mask.*deformation_field;
                 
                 %get the healthy brain
-                cd(Healthy_dir); local = dir;
-                cd(local(subject+2).name)
-                healthy_brain = spm_vol([pwd filesep 'Scaled_T1w_skull_stripped.nii']);
+                healthy_brain = spm_vol(control_to_use{subject});
                 
                 %combine healthy brain and patient mask
                 tumour = spm_read_vols(healthy_brain).*c3_mask;
