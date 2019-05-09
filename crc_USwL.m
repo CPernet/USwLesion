@@ -47,7 +47,7 @@ function fn_out = crc_USwL(fn_in,options)
 %      Grow each cluster volume by nDilate voxel(s) -> dt_Msk image
 %      nDilate is set in the crc_USwL_defaults file!
 %   2. Apply the mask on the reference structural images {2} -> k_sRef
-%   3. Segment the masked structural (k_sRef), normalize the mask (t_Msk) 
+%   3. Segment the masked structural (k_sRef), normalize the mask (t_Msk)
 %      and smooth it
 %      -> new tissue probability map for the lesion
 %   4. Update the TPMs to include a 7th tissue class -> TPMms
@@ -654,8 +654,10 @@ tpm_Lu(l_les_possible) = prob_l_possible(l_les_possible)*opt.min_tpm_icv; % min_
 tpm_Lu(tpm_Lu<opt.min_tpm) = opt.min_tpm; % at least min_tpm everywhere
 tpm_ext = cat(4,tpm_orig,tpm_Lu); % put lesion at the end
 
-switch opt.tpm4lesion % update healthy tissue classes
-    case 0 % GM only
+try
+    
+    switch opt.tpm4lesion % update healthy tissue classes
+        case 0 % GM only
         tpm_GMu = tpm_healthy - tpm_Lu;
         % equiv. to tpm_GMu = tpm_GM .* (1 - (1-1/opt.tpm_ratio) * tpm_l);
         if tpm_std
@@ -672,61 +674,65 @@ switch opt.tpm4lesion % update healthy tissue classes
             tpm_ext(:,:,:,1) = tpm_Gu; % update GM
             tpm_ext(:,:,:,7) = tpm_Pu; % update BG
         end
-    case 1 % WM only
-        tpm_WMu = tpm_healthy - tpm_Lu;
-        % equiv. to tpm_WMu = tpm_WM .* (1 - (1-1/opt.tpm_ratio) * tpm_l);
-        tpm_WMu(tpm_WMu<opt.min_tpm) = opt.min_tpm;
-        tpm_WMu(msk_ICV & tpm_WMu<opt.min_tpm_icv) = opt.min_tpm_icv; % at least min_tpm_icv in ICV
-        tpm_ext(:,:,:,2) = tpm_WMu; % update WM
-    case 2 % WM+GM
-        tpm_WMu = tpm_WM .* (1 - (1-1/opt.tpm_ratio) * tpm_l);
-        tpm_WMu(tpm_WMu<opt.min_tpm) = opt.min_tpm;
-        tpm_WMu(msk_ICV & tpm_WMu<opt.min_tpm_icv) = opt.min_tpm_icv; % at least min_tpm_icv in ICV
-        tpm_GMu = tpm_GM .* (1 - (1-1/opt.tpm_ratio) * tpm_l);
-        if tpm_std
-            tpm_GMu(tpm_GMu<opt.min_tpm) = opt.min_tpm;
-            tpm_GMu(msk_ICV & tpm_GMu<opt.min_tpm_icv) = opt.min_tpm_icv; % at least min_tpm_icv in ICV
-            tpm_ext(:,:,:,1) = tpm_GMu; % update GM
+        
+        case 1 % WM only
+            tpm_WMu = tpm_healthy - tpm_Lu;
+            % equiv. to tpm_WMu = tpm_WM .* (1 - (1-1/opt.tpm_ratio) * tpm_l);
+            tpm_WMu(tpm_WMu<opt.min_tpm) = opt.min_tpm;
+            tpm_WMu(msk_ICV & tpm_WMu<opt.min_tpm_icv) = opt.min_tpm_icv; % at least min_tpm_icv in ICV
             tpm_ext(:,:,:,2) = tpm_WMu; % update WM
-        else
-            tpm_Gu = tpm_GMu./(1+alpha);
-            tpm_Pu = tpm_GMu - tpm_Gu;
-            tpm_Gu(tpm_Gu<opt.min_tpm) = opt.min_tpm;
-            tpm_Gu(msk_ICV & tpm_Gu<opt.min_tpm_icv) = opt.min_tpm_icv; % at least min_tpm_icv in ICV
-            tpm_Pu(tpm_Gu<opt.min_tpm) = opt.min_tpm;
-            tpm_Pu(msk_ICV & tpm_Pu<opt.min_tpm_icv) = opt.min_tpm_icv; % at least min_tpm_icv in ICV
-            tpm_ext(:,:,:,1) = tpm_Gu; % update GM
-            tpm_ext(:,:,:,7) = tpm_Pu; % update BG
-            tpm_ext(:,:,:,2) = tpm_WMu; % update WM
-        end
-    case 3 % WM+GM+CSF
-        tpm_WMu = tpm_WM .* (1 - (1-1/opt.tpm_ratio) * tpm_l);
-        tpm_WMu(tpm_WMu<opt.min_tpm) = opt.min_tpm;
-        tpm_WMu(msk_ICV & tpm_WMu<opt.min_tpm_icv) = opt.min_tpm_icv; % at least min_tpm_icv in ICV
-        tpm_CSFu = tpm_CSF .* (1 - (1-1/opt.tpm_ratio) * tpm_l);
-        tpm_CSFu(tpm_CSFu<opt.min_tpm) = opt.min_tpm;
-        tpm_CSFu(msk_ICV & tpm_CSFu<opt.min_tpm_icv) = opt.min_tpm_icv; % at least min_tpm_icv in ICV
-        tpm_GMu = tpm_GM .* (1 - (1-1/opt.tpm_ratio) * tpm_l);
-        if tpm_std
-            tpm_GMu(tpm_GMu<opt.min_tpm) = opt.min_tpm;
-            tpm_GMu(msk_ICV & tpm_GMu<opt.min_tpm_icv) = opt.min_tpm_icv; % at least min_tpm_icv in ICV
-            tpm_ext(:,:,:,1) = tpm_GMu; % update GM
-            tpm_ext(:,:,:,2) = tpm_WMu; % update WM
-            tpm_ext(:,:,:,3) = tpm_CSFu; % update CSF
-        else
-            tpm_Gu = tpm_GMu./(1+alpha);
-            tpm_Pu = tpm_GMu - tpm_Gu;
-            tpm_Gu(tpm_Gu<opt.min_tpm) = opt.min_tpm;
-            tpm_Gu(msk_ICV & tpm_Gu<opt.min_tpm_icv) = opt.min_tpm_icv; % at least min_tpm_icv in ICV
-            tpm_Pu(tpm_Gu<opt.min_tpm) = opt.min_tpm;
-            tpm_Pu(msk_ICV & tpm_Pu<opt.min_tpm_icv) = opt.min_tpm_icv; % at least min_tpm_icv in ICV
-            tpm_ext(:,:,:,1) = tpm_Gu; % update GM
-            tpm_ext(:,:,:,7) = tpm_Pu; % update BG
-            tpm_ext(:,:,:,2) = tpm_WMu; % update WM
-            tpm_ext(:,:,:,3) = tpm_CSFu; % update CSF
-        end
-    otherwise
-        error('Wrong tissue flag');
+        case 2 % WM+GM
+            tpm_WMu = tpm_WM .* (1 - (1-1/opt.tpm_ratio) * tpm_l);
+            tpm_WMu(tpm_WMu<opt.min_tpm) = opt.min_tpm;
+            tpm_WMu(msk_ICV & tpm_WMu<opt.min_tpm_icv) = opt.min_tpm_icv; % at least min_tpm_icv in ICV
+            tpm_GMu = tpm_GM .* (1 - (1-1/opt.tpm_ratio) * tpm_l);
+            if tpm_std
+                tpm_GMu(tpm_GMu<opt.min_tpm) = opt.min_tpm;
+                tpm_GMu(msk_ICV & tpm_GMu<opt.min_tpm_icv) = opt.min_tpm_icv; % at least min_tpm_icv in ICV
+                tpm_ext(:,:,:,1) = tpm_GMu; % update GM
+                tpm_ext(:,:,:,2) = tpm_WMu; % update WM
+            else
+                tpm_Gu = tpm_GMu./(1+alpha);
+                tpm_Pu = tpm_GMu - tpm_Gu;
+                tpm_Gu(tpm_Gu<opt.min_tpm) = opt.min_tpm;
+                tpm_Gu(msk_ICV & tpm_Gu<opt.min_tpm_icv) = opt.min_tpm_icv; % at least min_tpm_icv in ICV
+                tpm_Pu(tpm_Gu<opt.min_tpm) = opt.min_tpm;
+                tpm_Pu(msk_ICV & tpm_Pu<opt.min_tpm_icv) = opt.min_tpm_icv; % at least min_tpm_icv in ICV
+                tpm_ext(:,:,:,1) = tpm_Gu; % update GM
+                tpm_ext(:,:,:,7) = tpm_Pu; % update BG
+                tpm_ext(:,:,:,2) = tpm_WMu; % update WM
+            end
+        case 3 % WM+GM+CSF
+            tpm_WMu = tpm_WM .* (1 - (1-1/opt.tpm_ratio) * tpm_l);
+            tpm_WMu(tpm_WMu<opt.min_tpm) = opt.min_tpm;
+            tpm_WMu(msk_ICV & tpm_WMu<opt.min_tpm_icv) = opt.min_tpm_icv; % at least min_tpm_icv in ICV
+            tpm_CSFu = tpm_CSF .* (1 - (1-1/opt.tpm_ratio) * tpm_l);
+            tpm_CSFu(tpm_CSFu<opt.min_tpm) = opt.min_tpm;
+            tpm_CSFu(msk_ICV & tpm_CSFu<opt.min_tpm_icv) = opt.min_tpm_icv; % at least min_tpm_icv in ICV
+            tpm_GMu = tpm_GM .* (1 - (1-1/opt.tpm_ratio) * tpm_l);
+            if tpm_std
+                tpm_GMu(tpm_GMu<opt.min_tpm) = opt.min_tpm;
+                tpm_GMu(msk_ICV & tpm_GMu<opt.min_tpm_icv) = opt.min_tpm_icv; % at least min_tpm_icv in ICV
+                tpm_ext(:,:,:,1) = tpm_GMu; % update GM
+                tpm_ext(:,:,:,2) = tpm_WMu; % update WM
+                tpm_ext(:,:,:,3) = tpm_CSFu; % update CSF
+            else
+                tpm_Gu = tpm_GMu./(1+alpha);
+                tpm_Pu = tpm_GMu - tpm_Gu;
+                tpm_Gu(tpm_Gu<opt.min_tpm) = opt.min_tpm;
+                tpm_Gu(msk_ICV & tpm_Gu<opt.min_tpm_icv) = opt.min_tpm_icv; % at least min_tpm_icv in ICV
+                tpm_Pu(tpm_Gu<opt.min_tpm) = opt.min_tpm;
+                tpm_Pu(msk_ICV & tpm_Pu<opt.min_tpm_icv) = opt.min_tpm_icv; % at least min_tpm_icv in ICV
+                tpm_ext(:,:,:,1) = tpm_Gu; % update GM
+                tpm_ext(:,:,:,7) = tpm_Pu; % update BG
+                tpm_ext(:,:,:,2) = tpm_WMu; % update WM
+                tpm_ext(:,:,:,3) = tpm_CSFu; % update CSF
+            end
+        otherwise
+            error('Wrong tissue flag');
+    end
+catch update_error
+    error('TPM not updated, likely an error due to the number of tissue classes')
 end
 
 % list of tissue, without air
@@ -827,7 +833,7 @@ try
     if nG==8 % Using TPM with specific GM of basal Ganglia
         cr_native = [1 1 ; 1 1 ; 1 1 ; 1 0 ; 1 0 ; 1 0 ; 0 0 ; 1 1 ];
         cr_warped = [1 1 ; 1 1 ; 1 1 ; 1 1 ; 0 0 ; 0 0 ; 0 0 ; 1 1 ];
-    else 
+    else
         cr_native = [1 1 ; 1 1 ; 1 1 ; repmat([1 0],nG-4,1); 0 0 ];
         cr_warped = [1 1 ; 1 1 ; 1 1 ; 1 1 ; repmat([0 0],nG-4,1)];
     end
@@ -927,13 +933,13 @@ Vo = spm_imcalc(Vi,Vo,'i1.*(i2>0)');
 
 end
 
-% 
-% %% TESTING: 
+%
+% %% TESTING:
 % % If you want to quickly test the output to sort out the matlabbatch
-% % dependencies, then just 
+% % dependencies, then just
 % % - copy this bit of code *around* the mainpart of the function code
-% % - set the flag 'TESTING' to true. 
-% % No calculationwill be performed but files (which should already exist on 
+% % - set the flag 'TESTING' to true.
+% % No calculationwill be performed but files (which should already exist on
 % % your HD) will be selected instead and passed to any following module.
 % TESTING = false;
 % if ~TESTING
@@ -965,7 +971,7 @@ end
 %     % subject specific TPM with lesion
 %     fn_TPMl = spm_select('FPList',fullfile(pth,'FLAIR'),'^eTPM.*les\.nii');
 %     fn_out.TPMl = {fn_TPMl};
-%     
+%
 %     fn_Cimg = spm_select('FPList',pth,'^c[1234].*_A\.nii');
 %     fn_wCimg = spm_select('FPList',pth,'^wc[1234].*_A\.nii');
 %     fn_mwCimg = spm_select('FPList',pth,'^mwc[1234].*_A\.nii');

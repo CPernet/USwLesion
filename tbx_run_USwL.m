@@ -2,12 +2,12 @@ function fn_out = tbx_run_USwL(varargin)
 % Toolbox USwL job execution function
 % takes a harvested job data structure and calls tbx function to perform
 % computations on the data.
-% 
+%
 % INPUT:
 % job    - harvested job data structure (see matlabbatch help)
-% 
+%
 % OOUTPUT:
-% fn_out - computation results, a struct variable with the filenames of 
+% fn_out - computation results, a struct variable with the filenames of
 %          generated images.
 %_______________________________________________________________________
 % Copyright (C) 2015 Cyclotron Research Centre
