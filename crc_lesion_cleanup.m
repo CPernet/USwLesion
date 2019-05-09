@@ -139,7 +139,7 @@ ends = cumsum(nv);
 inis = ends-nv+1;
 
 % make the new map - if cluster >=k then = 1
-if isinf(k_vx) || ischar(k_vx);
+if isinf(k_vx) || ischar(k_vx)
     [~,pos] = max(nv);
     idx=idxall(inis(pos):ends(pos));
     extent_map(idx)=1;
