@@ -93,67 +93,73 @@ end
 % segmentation
 
 Gaussian_param = [2 3];
-for tumour_type = 1:2
+for subject = 1:30
+    
+    if subject < 11
+        tumour_type = 2;
+    else
+        tumour_type = 1;
+    end
+    
     % loop in High Grade Glioma or Low Grade Glioma
     % --------------------------------------------
     BRAT_dir = eval(['BRAT_dir' num2str(tumour_type)]);
-    cd(BRAT_dir); folders = dir;
+    cd(BRAT_dir); folders = dir('brats*');
     if tumour_type == 1
-        folders = folders(1:22);
-    else
-        folders = folders(1:12);
-    end
-    
-    parfor subject = 1:size(folders,1)-2
-        % loop for each patient
-        % ---------------------
-        patient_dir = [BRAT_dir filesep folders(subject+2).name];
+        folders = folders(1:20);
+        patient_dir = [BRAT_dir filesep folders(subject-10).name];
         T1name = patient_to_segment{subject};
-        tmp = dir([patient_dir filesep '*Flair*']);
-        FLAIRname = [patient_dir filesep tmp.name filesep 'VSD.nii'];
-        tmp = dir([patient_dir filesep 'VSD.Brain_*more*']);
-        mask = [patient_dir filesep tmp.name filesep 'VSD.nii'];
-        for nbGaussian = 1:2
-            for affectedtissue = 1:2 % add +1 for GM+WM or GM+WM+CSF
-                out = segmentation_routine(T1name,FLAIRname,mask,Gaussian_param(nbGaussian),affectedtissue+1);
-                
-                % clean up
-                cd(fileparts(T1name))
-                destination = [pwd filesep 'normalization_segmentation_nbG' num2str(Gaussian_param(nbGaussian)) '_tissue' num2str(affectedtissue+1)];
-                mkdir(destination)
-                movefile(cell2mat(out{1}.segmImg.c1),[destination filesep 'c1kVSD.nii']);
-                movefile(cell2mat(out{1}.segmImg.c2),[destination filesep 'c2kVSD.nii']);
-                movefile(cell2mat(out{1}.segmImg.c3),[destination filesep 'c3kVSD.nii']);
-                movefile(cell2mat(out{1}.segmImg.c4),[destination filesep 'c4kVSD.nii']);
-                delete([pwd filesep 'c5kVSD.nii']);
-                delete([pwd filesep 'c6kVSD.nii']);
-                delete(cell2mat(out{1}.ICVmsk));
-                delete(cell2mat(out{1}.wICVmsk));
-                delete(cell2mat(out{1}.Struc_1));
-                delete(cell2mat(out{1}.Struc_2));
-                delete(cell2mat(out{1}.wStruc_1));
-                delete(cell2mat(out{1}.wStruc_1));
-                delete(cell2mat(out{1}.TPMl));
-                delete(cell2mat(out{1}.segmImg.wc1));
-                delete(cell2mat(out{1}.segmImg.wc2));
-                delete(cell2mat(out{1}.segmImg.wc3));
-                delete(cell2mat(out{1}.segmImg.wc4));
-                delete(cell2mat(out{1}.segmImg.mwc1));
-                delete(cell2mat(out{1}.segmImg.mwc2));
-                delete(cell2mat(out{1}.segmImg.mwc3));
-                delete(cell2mat(out{1}.segmImg.mwc4));
-                delete(cell2mat(out{1}.segmImg.rc1));
-                delete(cell2mat(out{1}.segmImg.rc2));
-                delete(cell2mat(out{1}.segmImg.rc3));
-                delete([pwd filesep 'BiasField_kVSD.nii']);
-                delete([pwd filesep 'iy_kVSD.nii']);
-                delete([pwd filesep 'kVSD.nii']);
-                delete([pwd filesep 'kVSD_seg8.mat']);
-                delete([pwd filesep 'mkVSD.nii']);
-                delete([pwd filesep 'swicv_kVSD.nii']);
-                delete([pwd filesep 'wmkVSD.nii']);
-                %delete([pwd filesep 'y_kVSD.nii']);
-            end
+    else
+        folders = folders(1:10);
+        patient_dir = [BRAT_dir filesep folders(subject).name];
+        T1name = patient_to_segment{subject};
+    end
+     
+    %T1name = patient_to_segment{subject};
+    tmp = dir([patient_dir filesep '*Flair*']);
+    FLAIRname = [patient_dir filesep tmp.name filesep 'VSD.nii'];
+    tmp = dir([patient_dir filesep 'VSD.Brain_*more*']);
+    mask = [patient_dir filesep tmp.name filesep 'VSD.nii'];
+    for nbGaussian = 1:2
+        for affectedtissue = 1:2 % add +1 for GM+WM or GM+WM+CSF
+            out = segmentation_routine(T1name,FLAIRname,mask,Gaussian_param(nbGaussian),affectedtissue+1);
+            
+            % clean up
+            cd(fileparts(T1name))
+            destination = [pwd filesep 'normalization_segmentation_nbG' num2str(Gaussian_param(nbGaussian)) '_tissue' num2str(affectedtissue+1)];
+            mkdir(destination)
+            movefile(cell2mat(out{1}.segmImg.c1),[destination filesep 'c1kVSD.nii']);
+            movefile(cell2mat(out{1}.segmImg.c2),[destination filesep 'c2kVSD.nii']);
+            movefile(cell2mat(out{1}.segmImg.c3),[destination filesep 'c3kVSD.nii']);
+            movefile(cell2mat(out{1}.segmImg.c4),[destination filesep 'c4kVSD.nii']);
+            delete([pwd filesep 'c5kVSD.nii']);
+            delete([pwd filesep 'c6kVSD.nii']);
+            delete(cell2mat(out{1}.ICVmsk));
+            delete(cell2mat(out{1}.wICVmsk));
+            delete(cell2mat(out{1}.Struc_1));
+            delete(cell2mat(out{1}.Struc_2));
+            delete(cell2mat(out{1}.wStruc_1));
+            delete(cell2mat(out{1}.wStruc_1));
+            delete(cell2mat(out{1}.TPMl));
+            delete(cell2mat(out{1}.segmImg.wc1));
+            delete(cell2mat(out{1}.segmImg.wc2));
+            delete(cell2mat(out{1}.segmImg.wc3));
+            delete(cell2mat(out{1}.segmImg.wc4));
+            delete(cell2mat(out{1}.segmImg.mwc1));
+            delete(cell2mat(out{1}.segmImg.mwc2));
+            delete(cell2mat(out{1}.segmImg.mwc3));
+            delete(cell2mat(out{1}.segmImg.mwc4));
+            delete(cell2mat(out{1}.segmImg.rc1));
+            delete(cell2mat(out{1}.segmImg.rc2));
+            delete(cell2mat(out{1}.segmImg.rc3));
+            delete([pwd filesep 'BiasField_kVSD.nii']);
+            delete([pwd filesep 'iy_kVSD.nii']);
+            delete([pwd filesep 'kVSD.nii']);
+            delete([pwd filesep 'kVSD_seg8.mat']);
+            delete([pwd filesep 'mkVSD.nii']);
+            delete([pwd filesep 'swicv_kVSD.nii']);
+            delete([pwd filesep 'wmkVSD.nii']);
+            %delete([pwd filesep 'y_kVSD.nii']);
         end
     end
 end
@@ -228,7 +234,7 @@ for tumour_type = 1:2
     % loop in High Grade Glioma or Low Grade Glioma
     % --------------------------------------------
     BRAT_dir = eval(['BRAT_dir' num2str(tumour_type)]);
-    cd(BRAT_dir); folders = dir;
+     cd(BRAT_dir); folders = dir('brats*');
     if tumour_type == 1
         folders = folders(1:22);
     else
@@ -238,7 +244,7 @@ for tumour_type = 1:2
     for subject = 1:size(folders,1)-2
         % loop for each patient
         % ---------------------
-        patient_dir = [BRAT_dir filesep folders(subject+2).name];
+        patient_dir = [BRAT_dir filesep folders(subject).name];
         tmp = dir([patient_dir filesep 'VSD.Brain.XX.O.MR_T1.*']);
         
         param_index = 1;
@@ -247,24 +253,25 @@ for tumour_type = 1:2
                 
                 % get the patient mask
                 root = [patient_dir filesep tmp.name filesep 'normalization_segmentation_nbG' num2str(Gaussian_param(nbGaussian)) '_tissue' num2str(affectedtissue+1)];
-                c3 = [root filesep 'c3kVSD.nii'];
-                c3_V = spm_vol(c3);
-                c3_mask = spm_read_vols(c3_V);
+                mask_to_deform = [root filesep 'c3kVSD.nii']; 
                 
                 %apply deformation field to patient mask
                 cd(Healthy_dir); local = dir;
                 cd(local(subject+2).name)
-                deformation_field = [pwd filesep 'y_anat.nii'];
-                c3_warped = c3_mask.*deformation_field;
+                deform_field = [pwd filesep 'y_anat.nii'];
+                c3_warped = deformation_job(deform_field,mask_to_deform);
                 
+                %locate new (warped) mask
+                c3_mask = spm_vol([root filesep 'rc3kVSD.nii']);
+                c3_warped_mask = spm_read_vols(c3_mask);
+             
                 %get the healthy brain
-                healthy_brain = spm_vol(control_to_use{subject});
+                healthy_B = spm_vol(control_to_use{subject});
+                healthy_brain = spm_read_vols(healthy_B);
                 
                 %combine healthy brain and patient mask
-                tumour = spm_read_vols(healthy_brain).*c3_mask;
-                healthy_brain.fname = [pwd filesep 'new_brain.nii'];
-                spm_write_vol(healthy_brain,tumour);
-               
+                test_combine = test_combine_job();
+                
                 % update parameter index
                 param_index = param_index+1;
                 
