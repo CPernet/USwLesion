@@ -236,6 +236,13 @@ end
 % (wT1 - mask) + c3(masked)
 
 for subject = 1:30
+    
+    % get deformation field from healthy brains
+    cd(Healthy_dir); local = dir;
+    cd(local(subject+2).name)
+    deform_field = [pwd filesep 'y_anat.nii'];
+    
+    %get the patient mask
     if subject < 11
         tumour_type = 2;
     else
@@ -254,34 +261,30 @@ for subject = 1:30
     end
     
     tmp = dir([patient_dir filesep 'VSD.Brain.XX.O.MR_T1.*']);
-        
-        param_index = 1;
-        for nbGaussian = 1:2
-            for affectedtissue = 1:2 % add +1 for GM+WM or GM+WM+CSF
-                
-                % get the patient mask
-                root = [patient_dir filesep tmp.name filesep 'normalization_segmentation_nbG' num2str(Gaussian_param(nbGaussian)) '_tissue' num2str(affectedtissue+1)];
-                mask_to_deform = [root filesep 'c3kVSD_thresholded.nii']; 
-                
-                %apply deformation field to patient mask
-                cd(Healthy_dir); local = dir;
-                cd(local(subject+2).name)
-                deform_field = [pwd filesep 'y_anat.nii'];
-                c3_warped = deformation_job(deform_field,mask_to_deform);
-                
-                %locate new (warped) mask
-                c3_mask = spm_vol([root filesep 'rc3kVSD.nii']);
-                c3_warped_mask = spm_read_vols(c3_mask);
-             
-                %get the healthy brain
-                healthy_B = spm_vol(control_to_use{subject});
-                healthy_brain = spm_read_vols(healthy_B);
-                
-                %combine healthy brain and patient mask
-                test_combine = test_combine_job();
-                
-                % update parameter index
-                param_index = param_index+1;
-            end
-        end    
+    
+    param_index = 1;
+    for nbGaussian = 1:2
+        for affectedtissue = 1:2 % add +1 for GM+WM or GM+WM+CSF
+            
+            root = [patient_dir filesep tmp.name filesep 'normalization_segmentation_nbG' num2str(Gaussian_param(nbGaussian)) '_tissue' num2str(affectedtissue+1)];
+            mask_to_deform = [root filesep 'c3kVSD_thresholded.nii'];
+            
+            %apply deformation field to patient mask
+            c3_warped = deformation_job(deform_field,mask_to_deform);
+            
+            %locate new (warped) mask
+            c3_mask = spm_vol([root filesep 'rc3kVSD_thresholded.nii']);
+            %c3_warped_mask = spm_read_vols(c3_mask);
+            
+            %get the healthy brain
+            healthy_B = spm_vol(control_to_use{subject});
+            %healthy_brain = spm_read_vols(healthy_B);
+            
+            %combine healthy brain and patient mask
+            subtract = test_combine_job(healthy_B.fname,c3_mask.fname);
+            
+            % update parameter index
+            param_index = param_index+1;
+        end
+    end
 end
