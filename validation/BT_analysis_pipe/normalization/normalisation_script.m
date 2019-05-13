@@ -159,93 +159,101 @@ for subject = 1:30
             delete([pwd filesep 'mkVSD.nii']);
             delete([pwd filesep 'swicv_kVSD.nii']);
             delete([pwd filesep 'wmkVSD.nii']);
-            %delete([pwd filesep 'y_kVSD.nii']);
+            delete([pwd filesep 'y_kVSD.nii']);
         end
     end
 end
 
 % apply thresholding method 3
 
-subj_index  = 1;
-for tumour_type = 1:2
-    BRAT_dir = eval(['BRAT_dir' num2str(tumour_type)]);
-    cd(BRAT_dir); folders = dir;
-    if tumour_type == 1
-        folders = folders(1:22);
+for subject = 1:30
+    if subject < 11
+        tumour_type = 2;
     else
-        folders = folders(1:12);
+        tumour_type = 1;
+    end
+    % loop in High Grade Glioma or Low Grade Glioma
+    % --------------------------------------------
+    BRAT_dir = eval(['BRAT_dir' num2str(tumour_type)]);
+    cd(BRAT_dir); folders = dir('brats*');
+    if tumour_type == 1
+        folders = folders(1:20);
+        patient_dir = [BRAT_dir filesep folders(subject-10).name];
+    else
+        folders = folders(1:10);
+        patient_dir = [BRAT_dir filesep folders(subject).name];
     end
     
-    for patient = 1:size(folders,1)-2
-        patient_dir = [BRAT_dir filesep folders(patient+2).name];
-        tmp = dir([patient_dir filesep 'VSD.Brain_*more*']);
-        ground_truth = [patient_dir filesep tmp.name filesep 'VSD.nii'];
-        tmp = dir([patient_dir filesep 'VSD.Brain.XX.O.MR_T1.*']);
-        
-        % set indexing at 1 for each subject
-        param_index = 1;
-        for nbGaussian = 1:2
-            for affectedtissue = 1:2 % add +1 for GM+WM or GM+WM+CSF
-                % get the files
-                root = [patient_dir filesep tmp.name filesep 'normalization_segmentation_nbG' num2str(Gaussian_param(nbGaussian)) '_tissue' num2str(affectedtissue+1)];
-                c1 = [root filesep 'c1kVSD.nii'];
-                c2 = [root filesep 'c2kVSD.nii'];
-                c3 = [root filesep 'c3kVSD.nii'];
-                c4 = [root filesep 'c4kVSD.nii'];
-                
-                % check dimensions of images match
-                
-                V1 = spm_vol(c1);
-                V2 = spm_vol(c2);
-                V3 = spm_vol(c3);
-                V4 = spm_vol(c4);
-                
-                if isequal(V1.dim,V2.dim,V3.dim,V4.dim);
-                    disp('dimensions do match');
-                else
-                    error('image dimensions do not match');
-                end
-                
-                c1_vol = spm_read_vols(V1);
-                c2_vol = spm_read_vols(V2);
-                c3_vol = spm_read_vols(V3);
-                c4_vol = spm_read_vols(V4);
-                
-                c3_threshold = (c3_vol > c1_vol) & (c3_vol > c2_vol) & (c3_vol > c4_vol);
-                c3_threshold = extent_thresold(c3_threshold); %function to keep only the biggest clusters
-                [root,filename,ext]=fileparts(V3.fname);
-                V3.fname = [root filesep filename '_thresholded' ext];
-                V3.descrip = 'c3 > c1 & c3 > c2 & c3 > c4';
-                spm_write_vol(V3,c3_threshold);
-                
-                % update parameter indexing nbGaussian*affectedtissue
-                param_index = param_index+1;
+    tmp = dir([patient_dir filesep 'VSD.Brain_*more*']);
+    ground_truth = [patient_dir filesep tmp.name filesep 'VSD.nii'];
+    tmp = dir([patient_dir filesep 'VSD.Brain.XX.O.MR_T1.*']);
+    
+    % set indexing at 1 for each subject
+    param_index = 1;
+    for nbGaussian = 1:2
+        for affectedtissue = 1:2 % add +1 for GM+WM or GM+WM+CSF
+            % get the files
+            root = [patient_dir filesep tmp.name filesep 'normalization_segmentation_nbG' num2str(Gaussian_param(nbGaussian)) '_tissue' num2str(affectedtissue+1)];
+            c1 = [root filesep 'c1kVSD.nii'];
+            c2 = [root filesep 'c2kVSD.nii'];
+            c3 = [root filesep 'c3kVSD.nii'];
+            c4 = [root filesep 'c4kVSD.nii'];
+            
+            % check dimensions of images match
+            
+            V1 = spm_vol(c1);
+            V2 = spm_vol(c2);
+            V3 = spm_vol(c3);
+            V4 = spm_vol(c4);
+            
+            if isequal(V1.dim,V2.dim,V3.dim,V4.dim);
+                disp('dimensions do match');
+            else
+                error('image dimensions do not match');
             end
+            
+            c1_vol = spm_read_vols(V1);
+            c2_vol = spm_read_vols(V2);
+            c3_vol = spm_read_vols(V3);
+            c4_vol = spm_read_vols(V4);
+            
+            c3_threshold = (c3_vol > c1_vol) & (c3_vol > c2_vol) & (c3_vol > c4_vol);
+            c3_threshold = extent_thresold(c3_threshold); %function to keep only the biggest clusters
+            [root,filename,ext]=fileparts(V3.fname);
+            V3.fname = [root filesep filename '_thresholded' ext];
+            V3.descrip = 'c3 > c1 & c3 > c2 & c3 > c4';
+            spm_write_vol(V3,c3_threshold);
+            
+            % update parameter indexing nbGaussian*affectedtissue
+            param_index = param_index+1;
         end
     end
-    subj_index = subj_index+1;
+    
 end
 
 %% create new brains 
 
 % (wT1 - mask) + c3(masked)
 
-for tumour_type = 1:2
+for subject = 1:30
+    if subject < 11
+        tumour_type = 2;
+    else
+        tumour_type = 1;
+    end
     % loop in High Grade Glioma or Low Grade Glioma
     % --------------------------------------------
     BRAT_dir = eval(['BRAT_dir' num2str(tumour_type)]);
-     cd(BRAT_dir); folders = dir('brats*');
+    cd(BRAT_dir); folders = dir('brats*');
     if tumour_type == 1
-        folders = folders(1:22);
+        folders = folders(1:20);
+        patient_dir = [BRAT_dir filesep folders(subject-10).name];
     else
-        folders = folders(1:12);
+        folders = folders(1:10);
+        patient_dir = [BRAT_dir filesep folders(subject).name];
     end
     
-    for subject = 1:size(folders,1)-2
-        % loop for each patient
-        % ---------------------
-        patient_dir = [BRAT_dir filesep folders(subject).name];
-        tmp = dir([patient_dir filesep 'VSD.Brain.XX.O.MR_T1.*']);
+    tmp = dir([patient_dir filesep 'VSD.Brain.XX.O.MR_T1.*']);
         
         param_index = 1;
         for nbGaussian = 1:2
@@ -253,7 +261,7 @@ for tumour_type = 1:2
                 
                 % get the patient mask
                 root = [patient_dir filesep tmp.name filesep 'normalization_segmentation_nbG' num2str(Gaussian_param(nbGaussian)) '_tissue' num2str(affectedtissue+1)];
-                mask_to_deform = [root filesep 'c3kVSD.nii']; 
+                mask_to_deform = [root filesep 'c3kVSD_thresholded.nii']; 
                 
                 %apply deformation field to patient mask
                 cd(Healthy_dir); local = dir;
@@ -274,8 +282,6 @@ for tumour_type = 1:2
                 
                 % update parameter index
                 param_index = param_index+1;
-                
             end
-        end
-    end
+        end    
 end
