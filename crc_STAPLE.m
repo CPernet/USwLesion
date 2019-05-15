@@ -123,11 +123,12 @@ D = double(D);
 
 %% write the result image
 R = V(1);
-R.fname = [pwd filesep 'staple_mask.nii'];
+location = fileparts(V(1).fname);
+R.fname = [location filesep 'staple_mask.nii'];
 R.descrip = 'STAPLE from binary images';
 R.private.descrip = R.descrip;
 Img = reshape(W,dim(1,:));
 spm_write_vol(R,Img);
 Img = Img.*(Img>threshold);
-R.fname = [pwd filesep 'tstaple_mask.nii'];
+R.fname = [location filesep 'tstaple_mask.nii'];
 spm_write_vol(R,Img);
