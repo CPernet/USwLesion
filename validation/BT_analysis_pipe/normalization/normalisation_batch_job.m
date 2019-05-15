@@ -48,18 +48,18 @@ matlabbatch{1}.spm.spatial.preproc.warp.samp = 3;
 matlabbatch{1}.spm.spatial.preproc.warp.write = [1 1];
 matlabbatch{2}.spm.spatial.normalise.write.subj.def(1) = cfg_dep('Segment: Forward Deformations', substruct('.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1}), substruct('.','fordef', '()',{':'}));
 matlabbatch{2}.spm.spatial.normalise.write.subj.resample = {[pwd filesep 'anat.nii']};
-matlabbatch{2}.spm.spatial.normalise.write.woptions.bb = [-78 -112 -70
-                                                          78 76 85];
-matlabbatch{2}.spm.spatial.normalise.write.woptions.vox = [2 2 2];
+matlabbatch{2}.spm.spatial.normalise.write.woptions.bb = [-90  -126   -72
+                                                          90    90   108];
+matlabbatch{2}.spm.spatial.normalise.write.woptions.vox = [1.5 1.5 1.5];
 matlabbatch{2}.spm.spatial.normalise.write.woptions.interp = 4;
 matlabbatch{2}.spm.spatial.normalise.write.woptions.prefix = 'w';
 matlabbatch{3}.spm.spatial.normalise.write.subj.def(1) = cfg_dep('Segment: Forward Deformations', substruct('.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1}), substruct('.','fordef', '()',{':'}));
 matlabbatch{3}.spm.spatial.normalise.write.subj.resample(1) = cfg_dep('Segment: c1 Images', substruct('.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1}), substruct('.','tiss', '()',{1}, '.','c', '()',{':'}));
 matlabbatch{3}.spm.spatial.normalise.write.subj.resample(2) = cfg_dep('Segment: c2 Images', substruct('.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1}), substruct('.','tiss', '()',{2}, '.','c', '()',{':'}));
 matlabbatch{3}.spm.spatial.normalise.write.subj.resample(3) = cfg_dep('Segment: c3 Images', substruct('.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1}), substruct('.','tiss', '()',{3}, '.','c', '()',{':'}));
-matlabbatch{3}.spm.spatial.normalise.write.woptions.bb = [-78 -112 -70
-                                                          78 76 85];
-matlabbatch{3}.spm.spatial.normalise.write.woptions.vox = [2 2 2];
+matlabbatch{3}.spm.spatial.normalise.write.woptions.bb = [-90  -126   -72
+                                                          90    90   108];
+matlabbatch{3}.spm.spatial.normalise.write.woptions.vox = [1.5 1.5 1.5];
 matlabbatch{3}.spm.spatial.normalise.write.woptions.interp = 4;
 matlabbatch{3}.spm.spatial.normalise.write.woptions.prefix = 'w';
 matlabbatch{4}.spm.util.imcalc.input(1) = cfg_dep('Normalise: Write: Normalised Images (Subj 1)', substruct('.','val', '{}',{3}, '.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1}), substruct('()',{1}, '.','files'));
