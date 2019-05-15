@@ -189,11 +189,10 @@ for subject = 1:30
  
     tmp = dir([patient_dir filesep 'VSD.Brain_*more*']);
     Tumour = [patient_dir filesep tmp.name filesep 'wtVSD.nii'];%MNI_tumour{1}.xxx;
-     
 
     tmp = dir([patient_dir filesep 'VSD.Brain.XX.O.MR_T1.*']);
-    %Tumour = [patient_dir filesep tmp.name filesep 'wc3kScaled_VSD.nii'];%MNI_tumour{1}.xxx;
     Patient = [patient_dir filesep tmp.name filesep 'wmkScaled_VSD.nii'];%MNI_patient{1}.xxx;
+    
     V1 = spm_vol(T1w);    T1w = spm_read_vols(V1);
     V2 = spm_vol(Tumour); Tumour = spm_read_vols(V2);
     V3 = spm_vol(Patient);Patient = spm_read_vols(V3);
