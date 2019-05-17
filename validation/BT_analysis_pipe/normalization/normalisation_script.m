@@ -193,30 +193,30 @@ for subject = 1:30
     end
  
     tmp = dir([patient_dir filesep 'VSD.Brain_*more*']);
-    Tumour = [patient_dir filesep tmp.name filesep 'wtVSD.nii'];%MNI_tumour{1}.xxx;
+    Tumour = [patient_dir filesep tmp.name filesep 'wtVSD.nii'];
 
     tmp = dir([patient_dir filesep 'VSD.Brain.XX.O.MR_T1.*']);
-    Patient = [patient_dir filesep tmp.name filesep 'wmkScaled_VSD.nii'];%MNI_patient{1}.xxx;
+    Patient = [patient_dir filesep tmp.name filesep 'wmkScaled_VSD.nii'];
     
     V1 = spm_vol(T1w);    T1w = spm_read_vols(V1);
-    V2 = spm_vol(Tumour); Tumour = spm_read_vols(V2);
+    V2 = spm_vol(Tumour); Tumour_Mask = spm_read_vols(V2);
     V3 = spm_vol(Patient);Patient = spm_read_vols(V3);
-    mask = Tumour > 0.1;
+    mask = Tumour_Mask > 0.1;
     T1w(mask) = Patient(mask);
     cd(Healthy_dir); local = dir;
     cd(local(subject+2).name)  
     V1.fname = [pwd filesep 'T1w_with_tumour_TEST.nii'];
     spm_write_vol(V1,T1w);
-
+    
     %get the correct bounding box
-    matlabbatch{1}.spm.util.bbox.image = {'C:\Users\s1835343\mri_stuff\BRAT\F1000\0025337\anat.nii,1'};
+    matlabbatch{1}.spm.util.bbox.image = {[pwd filesep 'anat.nii']};
     matlabbatch{1}.spm.util.bbox.bbdef.fov = 'fv';
     out = spm_jobman('run', matlabbatch);
     clear matlabbatch
 
-    %inverse normalise the healthy brain+tumour back into subject space
+    %inverse normalise the healthy brain+tumour AND brain mask back into subject space
     matlabbatch{1}.spm.spatial.normalise.write.subj.def = {[pwd filesep 'iy_anat.nii']};
-    matlabbatch{1}.spm.spatial.normalise.write.subj.resample = {[pwd filesep 'T1w_with_tumour.nii']};%{'C:\Users\s1835343\mri_stuff\BRAT\BRATS2015_Training\LGG\brats_2013_pat0002_1\VSD.Brain.XX.O.MR_T1.54633\Scaled_VSD.nii,1'};
+    matlabbatch{1}.spm.spatial.normalise.write.subj.resample = {[pwd filesep 'T1w_with_tumour.nii']};
     matlabbatch{1}.spm.spatial.normalise.write.woptions.bb = out{1}.bb;
     matlabbatch{1}.spm.spatial.normalise.write.woptions.vox = [1 1 1];
     matlabbatch{1}.spm.spatial.normalise.write.woptions.interp = 4;
@@ -231,10 +231,18 @@ for subject = 1:30
     matlabbatch{1}.spm.spatial.normalise.write.woptions.vox = [1 1 1];
     matlabbatch{1}.spm.spatial.normalise.write.woptions.interp = 4;
     matlabbatch{1}.spm.spatial.normalise.write.woptions.prefix = 'w_HV_';
-    spm_jobman('run', matlabbatch);
+    inv_mask = spm_jobman('run', matlabbatch);
+    clear matlabbatch
+    %move file into Healthy_dir
+    movefile(cell2mat(inv_mask{1}.XXX),[pwd filesep 'inv_wtVSD.nii']);
+    
+    %get the correct bounding box
+    matlabbatch{1}.spm.util.bbox.image = {[pwd filesep 'wT1w_with_tumour.nii']};
+    matlabbatch{1}.spm.util.bbox.bbdef.fov = 'fv';
+    out = spm_jobman('run', matlabbatch);
     clear matlabbatch
     
-    %inverse normalise the brain mask into healthy patient subject space
+    %inverse normalise the tumour mask into healthy patient subject space
     matlabbatch{1}.spm.spatial.normalise.write.subj.def = {[pwd filesep 'iy_anat.nii']};
     matlabbatch{1}.spm.spatial.normalise.write.subj.resample = {[pwd filesep 'brain_mask.nii']};
     matlabbatch{1}.spm.spatial.normalise.write.woptions.bb = out{1}.bb;
@@ -243,7 +251,7 @@ for subject = 1:30
     matlabbatch{1}.spm.spatial.normalise.write.woptions.prefix = 'w';
     spm_jobman('run', matlabbatch);
     clear matlabbatch
-    
+       
 end
 
 %% segment and compute similarity 
@@ -252,75 +260,70 @@ end
 
 for subject = 1:30
     cd(Healthy_dir); local = dir;
-    cd(local(subject+2).name)   
-    wT1w_skull_stripped = [pwd filesep 'wT1w_skull_stripped.nii']; 
-    brain_mask = [pwd filesep 'wbrain_mask.nii']; %brain mask from healthy subject
-    wT1w_with_tumour = [pwd filesep 'wT1w_with_tumour.nii']; 
-    
-    if subject < 11
-        tumour_type = 2;
-    else
-        tumour_type = 1;
-    end
-    
-    % loop in High Grade Glioma or Low Grade Glioma
-    % --------------------------------------------
-    BRAT_dir = eval(['BRAT_dir' num2str(tumour_type)]);
-    cd(BRAT_dir); folders = dir('brats*');
-    if tumour_type == 1
-        folders = folders(1:20);
-        patient_dir = [BRAT_dir filesep folders(subject-10).name];
-    else
-        folders = folders(1:10);
-        patient_dir = [BRAT_dir filesep folders(subject).name];
-    end
-    tmp = dir([patient_dir filesep 'VSD.Brain_*more*']);
-    inv_wtVSD = [patient_dir filesep tmp.name filesep 'ww_HV_wtVSD.nii'];
-    
-    cd(Healthy_dir); local = dir;
     cd(local(subject+2).name)
+    wT1w_skull_stripped = [pwd filesep 'wT1w_skull_stripped.nii'];
+    brain_mask = [pwd filesep 'wbrain_mask.nii']; %brain mask from healthy subject
+    wT1w_with_tumour = [pwd filesep 'wT1w_with_tumour.nii'];
+    inv_wtVSD = [patient_dir filesep tmp.name filesep 'inv_wtVSD.nii'];
     
     %standard SPM segmentation of wT1w_skull_stripped.nii from healthy subject
     standard_H =standard_spm_segment_job(wT1w_skull_stripped);
-    image_1 = [pwd filesep 'healthy_standard_segmentation' filesep 'c1wT1w_skull_stripped.nii'];
-    %[image_1{1,1}.tiss.c]
+    destination = [pwd filesep 'healthy_standard_segmentation'];
+    mkdir(destination)
+    movefile(cell2mat(standard_H{1}.tiss.c.XXX),[destination filesep 'c1wT1w_skull_stripped.nii']);
+    movefile(cell2mat(standard_H{1}.tiss.c.XXX),[destination filesep 'c2wT1w_skull_stripped.nii']);
+    movefile(cell2mat(standard_H{1}.tiss.c.XXX),[destination filesep 'c3wT1w_skull_stripped.nii']);
+    movefile(cell2mat(standard_H{1}.tiss.c.XXX),[destination filesep 'c4wT1w_skull_stripped.nii']);
+    movefile(cell2mat(standard_H{1}.tiss.c.XXX),[destination filesep 'c5wT1w_skull_stripped.nii']);
+    %get images
+    c1_image_1 = [pwd filesep 'healthy_standard_segmentation' filesep 'c1wT1w_skull_stripped.nii'];
+    c1_image_1 = spm_read_vols(spm_vol(c1_image_1));
     
     %standard SPM segmentation of wT1w_with_tumour.nii
-    
     standard_HT =standard_spm_segment_job(wT1w_with_tumour);
-    image_2 = [pwd filesep 'healthy_tumour_standard_segmentation' filesep 'c1wT1w_with_tumour.nii'];
+    destination = [pwd filesep 'healthy_tumour_standard_segmentation'];
+    mkdir(destination)
+    movefile(cell2mat(standard_HT{1}.tiss.c.XXX),[destination filesep 'c1wT1w_with_tumour.nii']);
+    movefile(cell2mat(standard_HT{1}.tiss.c.XXX),[destination filesep 'c2wT1w_with_tumour.nii']);
+    movefile(cell2mat(standard_HT{1}.tiss.c.XXX),[destination filesep 'c3wT1w_with_tumour.nii']);
+    movefile(cell2mat(standard_HT{1}.tiss.c.XXX),[destination filesep 'c4wT1w_with_tumour.nii']);
+    movefile(cell2mat(standard_HT{1}.tiss.c.XXX),[destination filesep 'c5wT1w_with_tumour.nii']);
+    %get images
+    c1_image_2 = [pwd filesep 'healthy_tumour_standard_segmentation' filesep 'c1wT1w_with_tumour.nii'];
+    c1_image_2 = spm_read_vols(spm_vol(c1_image_2));
     
     %USwL segmentation of wT1w_with_tumour.nii
-    seg_with_lesion_HT = segment_with_lesion(inv_wtVSD,wT1w_with_tumour);
-
+    for nbGaussian = 1:2
+        for affectedtissue = 1:2 % add +1 for GM+WM or GM+WM+CSF
+            seg_with_lesion_HT = segment_with_lesion(inv_wtVSD,wT1w_with_tumour,nbGaussian,affectedtissue);
+            destination = [pwd filesep 'healthy_tumour_USwLn'];
+            mkdir(destination)
+            movefile(cell2mat(seg_with_lesion_HT{1}.tiss.c.XXX),[destination filesep 'c1kwT1w_with_tumour.nii']);
+            movefile(cell2mat(seg_with_lesion_HT{1}.tiss.c.XXX),[destination filesep 'c2kwT1w_with_tumour.nii']);
+            movefile(cell2mat(seg_with_lesion_HT{1}.tiss.c.XXX),[destination filesep 'c3kwT1w_with_tumour.nii']);
+            movefile(cell2mat(seg_with_lesion_HT{1}.tiss.c.XXX),[destination filesep 'c4kwT1w_with_tumour.nii']);
+            movefile(cell2mat(seg_with_lesion_HT{1}.tiss.c.XXX),[destination filesep 'c5kwT1w_with_tumour.nii']);
+            movefile(cell2mat(seg_with_lesion_HT{1}.tiss.c.XXX),[destination filesep 'c6kwT1w_with_tumour.nii']);
+        end
+    end
+    %get images
+    image_3 = [pwd filesep 'healthy_tumour_USwL' filesep 'c1kwT1w_with_tumour.nii'];
+    c1_image_3 = spm_read_vols(spm_vol(image_3));
+    
     %image 1 vs image 2
     %measure similarity of whole brain
-    SSIM_1 = SSI(image_1,image_2,brain_mask,1);
+    SSIM_1 = SSI(c1_image_1,c1_image_2,brain_mask,1);
     
     %do we get the same values per voxel?
-    rms_1 = sqrt(mean((c1image1-c1image2).^2));
+    rms_1 = sqrt(mean((c1_image_1-c1_image_2).^2));
     
     %image 1 vs image 3
     %measure similarity of whole brain
-    SSIM_2 = SSI(image1,image3,roi,1);
+    SSIM_2 = SSI(c1_image_1,image_3,brain_mask,1);
     
     %do we get the same values per voxel?
-    rms_2 = sqrt(mean((c1image1-c1image2).^2));
-
+    rms_2 = sqrt(mean((c1_image_1-c1_image_3).^2));
+    
 end
-
-
-
-
-image1 --> standard SPM segmentation of wT1w_skull_stripped.nii from healthy subject
-roi --> brain_mask.nii from healthy subject
-image2 --> standard SPM segmentation of wT1w_with_tumour.nii
-SSIM = SSI(image1,image2,roi,1) % how similar the whole brain is
-rms = sqrt(mean((c1image1-c1image2).^2)); % do we get the same values per voxel
-4 times
-image3 --> segmentation with lesions of wT1w_with_tumour.nii
-SSIM = SSI(image1,image3,roi,1)
-rms = sqrt(mean((c1image1-c1image3).^2));
-
 
       
