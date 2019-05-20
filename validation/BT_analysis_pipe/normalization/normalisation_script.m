@@ -167,7 +167,7 @@ spm_jobman('initcfg')
 end
 
 %% set a tumour inside healthy brain
-
+ 
 for subject = 1:30
     
     cd(Healthy_dir); local = dir;
@@ -196,7 +196,7 @@ for subject = 1:30
     Tumour = [patient_dir filesep tmp.name filesep 'wtVSD.nii'];
 
     tmp = dir([patient_dir filesep 'VSD.Brain.XX.O.MR_T1.*']);
-    Patient = [patient_dir filesep tmp.name filesep 'wmkScaled_VSD.nii'];
+    Patient = [patient_dir filesep tmp.name filesep 'wScaled_VSD.nii'];
     
     V1 = spm_vol(T1w);    T1w = spm_read_vols(V1);
     V2 = spm_vol(Tumour); Tumour_Mask = spm_read_vols(V2);
@@ -205,7 +205,7 @@ for subject = 1:30
     T1w(mask) = Patient(mask);
     cd(Healthy_dir); local = dir;
     cd(local(subject+2).name)  
-    V1.fname = [pwd filesep 'T1w_with_tumour_TEST.nii'];
+    V1.fname = [pwd filesep 'T1w_with_tumour.nii'];
     spm_write_vol(V1,T1w);
     
     %get the correct bounding box
@@ -214,7 +214,7 @@ for subject = 1:30
     out = spm_jobman('run', matlabbatch);
     clear matlabbatch
 
-    %inverse normalise the healthy brain+tumour back into subject space
+    %inverse normalise the healthy brain+tumour AND tumour mask back into subject space
     matlabbatch{1}.spm.spatial.normalise.write.subj.def = {[pwd filesep 'iy_anat.nii']};
     matlabbatch{1}.spm.spatial.normalise.write.subj.resample = {[pwd filesep 'T1w_with_tumour.nii']
                                                                 [Tumour]
@@ -233,7 +233,7 @@ for subject = 1:30
     out = spm_jobman('run', matlabbatch);
     clear matlabbatch
     
-    %inverse normalise the tumour mask into healthy patient subject space
+    %inverse normalise the brain mask into healthy patient subject space
     matlabbatch{1}.spm.spatial.normalise.write.subj.def = {[pwd filesep 'iy_anat.nii']};
     matlabbatch{1}.spm.spatial.normalise.write.subj.resample = {[pwd filesep 'brain_mask.nii']};
     matlabbatch{1}.spm.spatial.normalise.write.woptions.bb = out{1}.bb;
@@ -253,9 +253,9 @@ for subject = 1:30
     cd(Healthy_dir); local = dir;
     cd(local(subject+2).name)
     wT1w_skull_stripped = [pwd filesep 'wT1w_skull_stripped.nii'];
-    brain_mask = [pwd filesep 'wbrain_mask.nii']; %brain mask from healthy subject
+    brain_mask = [pwd filesep 'wbrain_mask.nii']; %brain mask from healthy subject in subject space
     wT1w_with_tumour = [pwd filesep 'wT1w_with_tumour.nii'];
-    inv_wtVSD = [pwd filesep 'inv_wtVSD.nii'];
+    inv_wtVSD = [pwd filesep 'inv_wtVSD.nii']; %tumour mask in subject space
     
     %standard SPM segmentation of wT1w_skull_stripped.nii from healthy subject
     standard_H =standard_spm_segment_job(wT1w_skull_stripped);
