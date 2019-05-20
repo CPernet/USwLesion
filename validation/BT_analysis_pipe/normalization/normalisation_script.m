@@ -214,27 +214,18 @@ for subject = 1:30
     out = spm_jobman('run', matlabbatch);
     clear matlabbatch
 
-    %inverse normalise the healthy brain+tumour AND brain mask back into subject space
+    %inverse normalise the healthy brain+tumour back into subject space
     matlabbatch{1}.spm.spatial.normalise.write.subj.def = {[pwd filesep 'iy_anat.nii']};
-    matlabbatch{1}.spm.spatial.normalise.write.subj.resample = {[pwd filesep 'T1w_with_tumour.nii']};
+    matlabbatch{1}.spm.spatial.normalise.write.subj.resample = {[pwd filesep 'T1w_with_tumour.nii']
+                                                                [Tumour]
+                                                                };
     matlabbatch{1}.spm.spatial.normalise.write.woptions.bb = out{1}.bb;
     matlabbatch{1}.spm.spatial.normalise.write.woptions.vox = [1 1 1];
     matlabbatch{1}.spm.spatial.normalise.write.woptions.interp = 4;
     matlabbatch{1}.spm.spatial.normalise.write.woptions.prefix = 'w';
-    spm_jobman('run', matlabbatch);
+    inv = spm_jobman('run', matlabbatch);
     clear matlabbatch
-    
-    %inverse normalise the tumour mask into healthy patient subject space
-    matlabbatch{1}.spm.spatial.normalise.write.subj.def = {[pwd filesep 'iy_anat.nii']};
-    matlabbatch{1}.spm.spatial.normalise.write.subj.resample = {Tumour};
-    matlabbatch{1}.spm.spatial.normalise.write.woptions.bb = out{1}.bb;
-    matlabbatch{1}.spm.spatial.normalise.write.woptions.vox = [1 1 1];
-    matlabbatch{1}.spm.spatial.normalise.write.woptions.interp = 4;
-    matlabbatch{1}.spm.spatial.normalise.write.woptions.prefix = 'w_HV_';
-    inv_mask = spm_jobman('run', matlabbatch);
-    clear matlabbatch
-    %move file into Healthy_dir
-    movefile(cell2mat(inv_mask{1}.XXX),[pwd filesep 'inv_wtVSD.nii']);
+    movefile(cell2mat(inv{1}.files(2)),[pwd filesep 'inv_wtVSD.nii']);
     
     %get the correct bounding box
     matlabbatch{1}.spm.util.bbox.image = {[pwd filesep 'wT1w_with_tumour.nii']};
@@ -264,7 +255,7 @@ for subject = 1:30
     wT1w_skull_stripped = [pwd filesep 'wT1w_skull_stripped.nii'];
     brain_mask = [pwd filesep 'wbrain_mask.nii']; %brain mask from healthy subject
     wT1w_with_tumour = [pwd filesep 'wT1w_with_tumour.nii'];
-    inv_wtVSD = [patient_dir filesep tmp.name filesep 'inv_wtVSD.nii'];
+    inv_wtVSD = [pwd filesep 'inv_wtVSD.nii'];
     
     %standard SPM segmentation of wT1w_skull_stripped.nii from healthy subject
     standard_H =standard_spm_segment_job(wT1w_skull_stripped);
@@ -306,6 +297,7 @@ for subject = 1:30
             movefile(cell2mat(seg_with_lesion_HT{1}.tiss.c.XXX),[destination filesep 'c6kwT1w_with_tumour.nii']);
         end
     end
+    
     %get images
     image_3 = [pwd filesep 'healthy_tumour_USwL' filesep 'c1kwT1w_with_tumour.nii'];
     c1_image_3 = spm_read_vols(spm_vol(image_3));
