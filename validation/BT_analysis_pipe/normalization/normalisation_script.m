@@ -249,7 +249,7 @@ end
 
 % standard SPM segmentation of wT1w_skull_stripped.nii from healthy subject
 
-for subject = 1:30
+for subject = 2:30
     cd(Healthy_dir); local = dir;
     cd(local(subject+2).name)
     wT1w_skull_stripped = [pwd filesep 'wT1w_skull_stripped.nii'];
@@ -285,9 +285,10 @@ for subject = 1:30
 %     
     %USwL segmentation of wT1w_with_tumour.nii
     for nbGaussian = 1:2
-        for affectedtissue = 1:2 % add +1 for GM+WM or GM+WM+CSF
+        for affectedtissue = 1:2 % add +1 for GM+WM or GM+WM+CSF 
             seg_with_lesion_HT = segment_with_lesion(inv_wtVSD,wT1w_with_tumour,nbGaussian,affectedtissue);
             destination = [pwd filesep 'healthy_tumour_USwL'];
+            %cleanup
             mkdir(destination)
             movefile(char(seg_with_lesion_HT{1}.segmImg.c1),[destination filesep 'c1kwT1w_with_tumour.nii']);
             movefile(char(seg_with_lesion_HT{1}.segmImg.c2),[destination filesep 'c2kwT1w_with_tumour.nii']);
@@ -308,7 +309,20 @@ for subject = 1:30
             movefile(char(seg_with_lesion_HT{1}.wICVmsk),[destination filesep 'wicv_kwT1w_with_tumour.nii']);
             movefile(char(seg_with_lesion_HT{1}.Struc_1),[destination filesep 'kmkwT1w_with_tumour.nii']);
             movefile(char(seg_with_lesion_HT{1}.wStruc_1),[destination filesep 'kwmkwT1w_with_tumour.nii']);
-            movefile(char(seg_with_lesion_HT{1}.TPMI),[destination filesep 'TPM_les.nii']);
+            movefile(char(seg_with_lesion_HT{1}.TPM1),[destination filesep 'TPM_les.nii']);
+            movefile([pwd filesep 'BiasField_kwT1w_with_tumour.nii'],[destination filesep 'BiasField_kwT1w_with_tumour.nii']);
+            movefile([pwd filesep 'c5kwT1w_with_tumour.nii'],[destination filesep 'c5kwT1w_with_tumour.nii']);
+            movefile([pwd filesep 'c6kwT1w_with_tumour.nii'],[destination filesep 'c6kwT1w_with_tumour.nii']);
+            movefile([pwd filesep 'dtinv_wtVSD.nii'],[destination filesep 'dtinv_wtVSD.nii']);
+            movefile([pwd filesep 'iy_kwT1w_with_tumour.nii'],[destination filesep 'iy_kwT1w_with_tumour.nii']);
+            movefile([pwd filesep 'kwT1w_with_tumour.nii'],[destination filesep 'kwT1w_with_tumour.nii']);
+            movefile([pwd filesep 'kwT1w_with_tumour_seg8.nii'],[destination filesep 'kwT1w_with_tumour_seg8.nii']);
+            movefile([pwd filesep 'mkwT1w_with_tumour.nii'],[destination filesep 'mkwT1w_with_tumour.nii']);
+            movefile([pwd filesep 'swicv_kwT1w_with_tumour.nii'],[destination filesep 'swicv_kwT1w_with_tumour.nii']);
+            movefile([pwd filesep 'swinv_wtVSD.nii'],[destination filesep 'swinv_wtVSD.nii']);
+            movefile([pwd filesep 'winv_wtVSD.nii'],[destination filesep 'winv_wtVSD.nii']);
+            movefile([pwd filesep 'wmkwT1w_with_tumour.nii'],[destination filesep 'wmkwT1w_with_tumour.nii']);
+            movefile([pwd filesep 'y_kwT1w_with_tumour.nii'],[destination filesep 'y_kwT1w_with_tumour.nii']);
         end
     end
 %     %get images
