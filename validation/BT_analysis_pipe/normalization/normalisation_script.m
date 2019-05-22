@@ -247,9 +247,9 @@ end
 
 %% segment and compute similarity 
 
-% standard SPM segmentation of wT1w_skull_stripped.nii from healthy subject
+% standard segmentation/USwL segmentation 
 
-for subject = 1:30
+for subject = 3:30
     cd(Healthy_dir); local = dir;
     cd(local(subject+2).name)
     
@@ -257,15 +257,6 @@ for subject = 1:30
     wT1w_with_tumour = [pwd filesep 'wT1w_with_tumour.nii'];
     lesion_mask = [pwd filesep 'inv_wtVSD.nii']; lesion_mask_V = spm_read_vols(spm_vol(lesion_mask));
     
-    brain_mask = [pwd filesep 'wbrain_mask.nii']; %brain mask from healthy subject in subject space
-    % make brain mask minus the tumour mask
-    X = spm_vol(brain_mask); brain_mask_V = spm_read_vols(X);
-    Y = spm_vol(lesion_mask); lesion_mask = logical(spm_read_vols(Y));
-    brain_mask_V(lesion_mask) = 0;
-    X.fname = [pwd filesep 'brain_mask_minus_tumour.nii'];
-    spm_write_vol(X,brain_mask_V);
-    brain_mask_minus_tumour = [pwd filesep 'brain_mask_minus_tumour.nii'];
-
     %standard SPM segmentation of wT1w_skull_stripped.nii from healthy subject
     standard_H =standard_spm_segment_job(wT1w_skull_stripped);
     destination = [pwd filesep 'healthy_standard_segmentation'];
@@ -322,39 +313,62 @@ for subject = 1:30
     c1_image_2 = [pwd filesep 'healthy_tumour_standard_segmentation' filesep 'c1wT1w_with_tumour.nii'];
     c1_image_2V = spm_vol(c1_image_2); standard_healthy_tumour_c1 = spm_read_vols(c1_image_2V);
     
-    %USwL segmentation of wT1w_with_tumour.nii
-    for nbGaussian = 1:2
-        for affectedtissue = 1:2 % add +1 for GM+WM or GM+WM+CSF 
-            seg_with_lesion_HT = segment_with_lesion(inv_wtVSD,wT1w_with_tumour,nbGaussian,affectedtissue);
-            destination = [pwd filesep 'healthy_tumour_USwL'];
-            %cleanup
-            mkdir(destination)
-            movefile(char(seg_with_lesion_HT{1}.segmImg.c1),[destination filesep 'c1kwT1w_with_tumour.nii']);
-            movefile(char(seg_with_lesion_HT{1}.segmImg.c2),[destination filesep 'c2kwT1w_with_tumour.nii']);
-            movefile(char(seg_with_lesion_HT{1}.segmImg.c3),[destination filesep 'c3kwT1w_with_tumour.nii']);
-            movefile(char(seg_with_lesion_HT{1}.segmImg.c4),[destination filesep 'c4kwT1w_with_tumour.nii']);
-            movefile(char(seg_with_lesion_HT{1}.segmImg.wc1),[destination filesep 'wc1kwT1w_with_tumour.nii']);
-            movefile(char(seg_with_lesion_HT{1}.segmImg.wc2),[destination filesep 'wc2kwT1w_with_tumour.nii']);
-            movefile(char(seg_with_lesion_HT{1}.segmImg.wc3),[destination filesep 'wc3kwT1w_with_tumour.nii']);
-            movefile(char(seg_with_lesion_HT{1}.segmImg.wc4),[destination filesep 'wc4kwT1w_with_tumour.nii']);
-            movefile(char(seg_with_lesion_HT{1}.segmImg.mwc1),[destination filesep 'mwc1kwT1w_with_tumour.nii']);
-            movefile(char(seg_with_lesion_HT{1}.segmImg.mwc2),[destination filesep 'mwc2kwT1w_with_tumour.nii']);
-            movefile(char(seg_with_lesion_HT{1}.segmImg.mwc3),[destination filesep 'mwc3kwT1w_with_tumour.nii']);
-            movefile(char(seg_with_lesion_HT{1}.segmImg.mwc4),[destination filesep 'mwc4kwT1w_with_tumour.nii']);
-            movefile(char(seg_with_lesion_HT{1}.segmImg.rc1),[destination filesep 'rc1kwT1w_with_tumour.nii']);
-            movefile(char(seg_with_lesion_HT{1}.segmImg.rc2),[destination filesep 'rc2kwT1w_with_tumour.nii']);
-            movefile(char(seg_with_lesion_HT{1}.segmImg.rc3),[destination filesep 'rc3kwT1w_with_tumour.nii']);
-            movefile(char(seg_with_lesion_HT{1}.ICVmsk),[destination filesep 'icv_kwT1w_with_tumour.nii.nii']);
-            movefile(char(seg_with_lesion_HT{1}.wICVmsk),[destination filesep 'wicv_kwT1w_with_tumour.nii']);
-            movefile(char(seg_with_lesion_HT{1}.Struc_1),[destination filesep 'kmkwT1w_with_tumour.nii']);
-            movefile(char(seg_with_lesion_HT{1}.wStruc_1),[destination filesep 'kwmkwT1w_with_tumour.nii']);
-            movefile(char(seg_with_lesion_HT{1}.TPMl),[destination filesep 'TPM_les.nii']);
-        end
-    end
-    %get images
-    c1_image_3 = [pwd filesep 'healthy_tumour_USwL' filesep 'c1kwT1w_with_tumour.nii'];
-    c1_image_3V = spm_vol(c1_image_3); USwL_healthy_tumour_c1 = spm_read_vols(c1_image_3V);   
+%     %USwL segmentation of wT1w_with_tumour.nii
+%     for nbGaussian = 1:2
+%         for affectedtissue = 1:2 % add +1 for GM+WM or GM+WM+CSF 
+%             seg_with_lesion_HT = segment_with_lesion(lesion_mask,wT1w_with_tumour,nbGaussian,affectedtissue);
+%             destination = [pwd filesep 'healthy_tumour_USwL'];
+%             %cleanup
+%             mkdir(destination)
+%             movefile(char(seg_with_lesion_HT{1}.segmImg.c1),[destination filesep 'c1kwT1w_with_tumour.nii']);
+%             movefile(char(seg_with_lesion_HT{1}.segmImg.c2),[destination filesep 'c2kwT1w_with_tumour.nii']);
+%             movefile(char(seg_with_lesion_HT{1}.segmImg.c3),[destination filesep 'c3kwT1w_with_tumour.nii']);
+%             movefile(char(seg_with_lesion_HT{1}.segmImg.c4),[destination filesep 'c4kwT1w_with_tumour.nii']);
+%             movefile(char(seg_with_lesion_HT{1}.segmImg.wc1),[destination filesep 'wc1kwT1w_with_tumour.nii']);
+%             movefile(char(seg_with_lesion_HT{1}.segmImg.wc2),[destination filesep 'wc2kwT1w_with_tumour.nii']);
+%             movefile(char(seg_with_lesion_HT{1}.segmImg.wc3),[destination filesep 'wc3kwT1w_with_tumour.nii']);
+%             movefile(char(seg_with_lesion_HT{1}.segmImg.wc4),[destination filesep 'wc4kwT1w_with_tumour.nii']);
+%             movefile(char(seg_with_lesion_HT{1}.segmImg.mwc1),[destination filesep 'mwc1kwT1w_with_tumour.nii']);
+%             movefile(char(seg_with_lesion_HT{1}.segmImg.mwc2),[destination filesep 'mwc2kwT1w_with_tumour.nii']);
+%             movefile(char(seg_with_lesion_HT{1}.segmImg.mwc3),[destination filesep 'mwc3kwT1w_with_tumour.nii']);
+%             movefile(char(seg_with_lesion_HT{1}.segmImg.mwc4),[destination filesep 'mwc4kwT1w_with_tumour.nii']);
+%             movefile(char(seg_with_lesion_HT{1}.segmImg.rc1),[destination filesep 'rc1kwT1w_with_tumour.nii']);
+%             movefile(char(seg_with_lesion_HT{1}.segmImg.rc2),[destination filesep 'rc2kwT1w_with_tumour.nii']);
+%             movefile(char(seg_with_lesion_HT{1}.segmImg.rc3),[destination filesep 'rc3kwT1w_with_tumour.nii']);
+%             movefile(char(seg_with_lesion_HT{1}.ICVmsk),[destination filesep 'icv_kwT1w_with_tumour.nii.nii']);
+%             movefile(char(seg_with_lesion_HT{1}.wICVmsk),[destination filesep 'wicv_kwT1w_with_tumour.nii']);
+%             movefile(char(seg_with_lesion_HT{1}.Struc_1),[destination filesep 'kmkwT1w_with_tumour.nii']);
+%             movefile(char(seg_with_lesion_HT{1}.wStruc_1),[destination filesep 'kwmkwT1w_with_tumour.nii']);
+%             movefile(char(seg_with_lesion_HT{1}.TPMl),[destination filesep 'TPM_les.nii']);
+%         end
+%     end
+%     %get images
+%     c1_image_3 = [pwd filesep 'healthy_tumour_USwL' filesep 'c1kwT1w_with_tumour.nii'];
+%     c1_image_3V = spm_vol(c1_image_3); USwL_healthy_tumour_c1 = spm_read_vols(c1_image_3V);   
 
+cd ..
+
+end
+
+% test similarity 
+
+SSIM = NaN(54,4);
+rms = NaN(54,2);
+
+for subject = 1:54
+    cd(Healthy_dir); local = dir;
+    cd(local(subject+2).name)
+    
+    %generate brain mask without tumour
+    lesion_mask = [pwd filesep 'inv_wtVSD.nii']; lesion_mask_V = spm_read_vols(spm_vol(lesion_mask));
+    brain_mask = [pwd filesep 'wbrain_mask.nii']; %brain mask from healthy subject in subject space
+    X = spm_vol(brain_mask); brain_mask_V = spm_read_vols(X);
+    Y = spm_vol(lesion_mask); lesion_mask = logical(spm_read_vols(Y));
+    brain_mask_V(lesion_mask) = 0;
+    X.fname = [pwd filesep 'brain_mask_minus_tumour.nii'];
+    spm_write_vol(X,brain_mask_V);
+    brain_mask_minus_tumour = [pwd filesep 'brain_mask_minus_tumour.nii'];
+    
     standard_healthy_brain = [pwd filesep 'healthy_standard_segmentation' filesep 'mwT1w_skull_stripped.nii'];
     standard_healthy_brain = spm_read_vols(spm_vol(standard_healthy_brain));
     standard_healthy_tumour_brain = [pwd filesep 'healthy_tumour_standard_segmentation' filesep 'mwT1w_with_tumour.nii'];
@@ -363,14 +377,14 @@ for subject = 1:30
     USwL_healthy_tumour_brain = spm_read_vols(spm_vol(USwL_healthy_tumour_brain));
     
     %measure similarity of whole brain
-    SSIM_1 = SSI(standard_healthy_brain,standard_healthy_tumour_brain,lesion_mask_V,1);
-    SSIM_2 = SSI(standard_healthy_brain,standard_healthy_tumour_brain,brain_mask_minus_tumour,1);
-    SSIM_3 = SSI(standard_healthy_brain,USwL_healthy_tumour_brain,lesion_mask_V,1);
-    SSIM_4 = SSI(standard_healthy_brain,USwL_healthy_tumour_brain,brain_mask_minus_tumour,1);
+    SSIM{subject,1} = SSI(standard_healthy_brain,standard_healthy_tumour_brain,lesion_mask_V,1);
+    SSIM{subject,2} = SSI(standard_healthy_brain,standard_healthy_tumour_brain,brain_mask_minus_tumour,1);
+    SSIM{subject,3} = SSI(standard_healthy_brain,USwL_healthy_tumour_brain,lesion_mask_V,1);
+    SSIM{subject,4} = SSI(standard_healthy_brain,USwL_healthy_tumour_brain,brain_mask_minus_tumour,1);
     
     %do we get the same values per voxel?
-    rms_1 = sqrt(mean((standard_healthy_c1-standard_healthy_tumour_c1).^2));
-    rms_2 = sqrt(mean((standard_healthy_c1-USwL_healthy_tumour_c1).^2));
+    rms{subject,1} = sqrt(mean((standard_healthy_c1-standard_healthy_tumour_c1).^2));
+    rms{subject,2} = sqrt(mean((standard_healthy_c1-USwL_healthy_tumour_c1).^2));
     
 end
 
