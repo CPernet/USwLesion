@@ -45,6 +45,20 @@ for patient = 1:54
     
 end
 
+%% set origin to AC
+
+for patient = 1:54
+    cd(local(patient+2).name)
+    
+    folderinfo = dir(pwd);
+    ref_image = [folderinfo(5).name];
+    alt_image = [folderinfo(4).name];
+
+    %wrong
+%     V = cellstr([ref_image,alt_image]);
+%     spmup_auto_reorient([ref_image;alt_image],1);
+
+end
 
 
 
