@@ -249,14 +249,23 @@ end
 
 % standard SPM segmentation of wT1w_skull_stripped.nii from healthy subject
 
-for subject = 2:30
+for subject = 1:30
     cd(Healthy_dir); local = dir;
     cd(local(subject+2).name)
-    wT1w_skull_stripped = [pwd filesep 'wT1w_skull_stripped.nii'];
-    brain_mask = [pwd filesep 'wbrain_mask.nii']; %brain mask from healthy subject in subject space
-    wT1w_with_tumour = [pwd filesep 'wT1w_with_tumour.nii'];
-    inv_wtVSD = [pwd filesep 'inv_wtVSD.nii']; %tumour mask in subject space
     
+    wT1w_skull_stripped = [pwd filesep 'wT1w_skull_stripped.nii'];
+    wT1w_with_tumour = [pwd filesep 'wT1w_with_tumour.nii'];
+    lesion_mask = [pwd filesep 'inv_wtVSD.nii']; lesion_mask_V = spm_read_vols(spm_vol(lesion_mask));
+    
+    brain_mask = [pwd filesep 'wbrain_mask.nii']; %brain mask from healthy subject in subject space
+    % make brain mask minus the tumour mask
+    X = spm_vol(brain_mask); brain_mask_V = spm_read_vols(X);
+    Y = spm_vol(lesion_mask); lesion_mask = logical(spm_read_vols(Y));
+    brain_mask_V(lesion_mask) = 0;
+    X.fname = [pwd filesep 'brain_mask_minus_tumour.nii'];
+    spm_write_vol(X,brain_mask_V);
+    brain_mask_minus_tumour = [pwd filesep 'brain_mask_minus_tumour.nii'];
+
     %standard SPM segmentation of wT1w_skull_stripped.nii from healthy subject
     standard_H =standard_spm_segment_job(wT1w_skull_stripped);
     destination = [pwd filesep 'healthy_standard_segmentation'];
@@ -266,10 +275,25 @@ for subject = 2:30
     movefile(char(standard_H{1}.tiss(3).c),[destination filesep 'c3wT1w_skull_stripped.nii']);
     movefile(char(standard_H{1}.tiss(4).c),[destination filesep 'c4wT1w_skull_stripped.nii']);
     movefile(char(standard_H{1}.tiss(5).c),[destination filesep 'c5wT1w_skull_stripped.nii']);
-%     %get images
-%     c1_image_1 = [pwd filesep 'healthy_standard_segmentation' filesep 'c1wT1w_skull_stripped.nii'];
-%     c1_image_1 = spm_read_vols(spm_vol(c1_image_1));
-%         
+    movefile(char(standard_H{1}.tiss(1).wc),[destination filesep 'wc1wT1w_skull_stripped.nii']);
+    movefile(char(standard_H{1}.tiss(2).wc),[destination filesep 'wc2wT1w_skull_stripped.nii']);
+    movefile(char(standard_H{1}.tiss(3).wc),[destination filesep 'wc3wT1w_skull_stripped.nii']);
+    movefile(char(standard_H{1}.tiss(5).wc),[destination filesep 'wc5wT1w_skull_stripped.nii']);
+    movefile(char(standard_H{1}.tiss(6).wc),[destination filesep 'wc6wT1w_skull_stripped.nii']);
+    movefile(char(standard_H{1}.tiss(1).mwc),[destination filesep 'mwc1wT1w_skull_stripped.nii']);
+    movefile(char(standard_H{1}.tiss(2).mwc),[destination filesep 'mwc2wT1w_skull_stripped.nii']);
+    movefile(char(standard_H{1}.tiss(3).mwc),[destination filesep 'mwc3wT1w_skull_stripped.nii']);
+    movefile(char(standard_H{1}.tiss(5).mwc),[destination filesep 'mwc5wT1w_skull_stripped.nii']);
+    movefile(char(standard_H{1}.tiss(6).mwc),[destination filesep 'mwc6wT1w_skull_stripped.nii']);
+    movefile(char(standard_H{1}.fordef),[destination filesep 'y_wT1w_skull_stripped.nii']);
+    movefile(char(standard_H{1}.invdef),[destination filesep 'iy_wT1w_skull_stripped.nii']);
+    movefile(char(standard_H{1}.param),[destination filesep 'wT1w_skull_stripped_seg8.mat']);
+    movefile(char(standard_H{1}.channel.biasfield),[destination filesep 'BiasField_wT1w_skull_stripped.nii']);
+    movefile(char(standard_H{1}.channel.biascorr),[destination filesep 'mwT1w_skull_stripped.nii']);
+    %get images
+    c1_image_1 = [pwd filesep 'healthy_standard_segmentation' filesep 'c1wT1w_skull_stripped.nii'];
+    c1_image_1V = spm_vol(c1_image_1); standard_healthy_c1 = spm_read_vols(c1_image_1V);
+   
     %standard SPM segmentation of wT1w_with_tumour.nii
     standard_HT =standard_spm_segment_job(wT1w_with_tumour);
     destination = [pwd filesep 'healthy_tumour_standard_segmentation'];
@@ -279,10 +303,25 @@ for subject = 2:30
     movefile(char(standard_HT{1}.tiss(3).c),[destination filesep 'c3wT1w_with_tumour.nii']);
     movefile(char(standard_HT{1}.tiss(4).c),[destination filesep 'c4wT1w_with_tumour.nii']);
     movefile(char(standard_HT{1}.tiss(5).c),[destination filesep 'c5wT1w_with_tumour.nii']);
-%     %get images
-%     c1_image_2 = [pwd filesep 'healthy_tumour_standard_segmentation' filesep 'c1wT1w_with_tumour.nii'];
-%     c1_image_2 = spm_read_vols(spm_vol(c1_image_2));
-%     
+    movefile(char(standard_HT{1}.tiss(1).wc),[destination filesep 'wc1wT1w_with_tumour.nii']);
+    movefile(char(standard_HT{1}.tiss(2).wc),[destination filesep 'wc2wT1w_with_tumour.nii']);
+    movefile(char(standard_HT{1}.tiss(3).wc),[destination filesep 'wc3wT1w_with_tumour.nii']);
+    movefile(char(standard_HT{1}.tiss(5).wc),[destination filesep 'wc5wT1w_with_tumour.nii']);
+    movefile(char(standard_HT{1}.tiss(6).wc),[destination filesep 'wc6wT1w_with_tumour.nii']);
+    movefile(char(standard_HT{1}.tiss(1).mwc),[destination filesep 'mwc1wT1w_with_tumour.nii']);
+    movefile(char(standard_HT{1}.tiss(2).mwc),[destination filesep 'mwc2wT1w_with_tumour.nii']);
+    movefile(char(standard_HT{1}.tiss(3).mwc),[destination filesep 'mwc3wT1w_with_tumour.nii']);
+    movefile(char(standard_HT{1}.tiss(5).mwc),[destination filesep 'mwc5wT1w_with_tumour.nii']);
+    movefile(char(standard_HT{1}.tiss(6).mwc),[destination filesep 'mwc6wT1w_with_tumour.nii']);
+    movefile(char(standard_HT{1}.fordef),[destination filesep 'y_wT1w_with_tumour.nii']);
+    movefile(char(standard_HT{1}.invdef),[destination filesep 'iy_wT1w_with_tumour.nii']);
+    movefile(char(standard_HT{1}.param),[destination filesep 'wT1w_with_tumour_seg8.mat']);
+    movefile(char(standard_HT{1}.channel.biasfield),[destination filesep 'BiasField_wT1w_with_tumour.nii']);
+    movefile(char(standard_HT{1}.channel.biascorr),[destination filesep 'mwT1w_with_tumour.nii']);
+    %get images
+    c1_image_2 = [pwd filesep 'healthy_tumour_standard_segmentation' filesep 'c1wT1w_with_tumour.nii'];
+    c1_image_2V = spm_vol(c1_image_2); standard_healthy_tumour_c1 = spm_read_vols(c1_image_2V);
+    
     %USwL segmentation of wT1w_with_tumour.nii
     for nbGaussian = 1:2
         for affectedtissue = 1:2 % add +1 for GM+WM or GM+WM+CSF 
@@ -309,40 +348,30 @@ for subject = 2:30
             movefile(char(seg_with_lesion_HT{1}.wICVmsk),[destination filesep 'wicv_kwT1w_with_tumour.nii']);
             movefile(char(seg_with_lesion_HT{1}.Struc_1),[destination filesep 'kmkwT1w_with_tumour.nii']);
             movefile(char(seg_with_lesion_HT{1}.wStruc_1),[destination filesep 'kwmkwT1w_with_tumour.nii']);
-            movefile(char(seg_with_lesion_HT{1}.TPM1),[destination filesep 'TPM_les.nii']);
-            movefile([pwd filesep 'BiasField_kwT1w_with_tumour.nii'],[destination filesep 'BiasField_kwT1w_with_tumour.nii']);
-            movefile([pwd filesep 'c5kwT1w_with_tumour.nii'],[destination filesep 'c5kwT1w_with_tumour.nii']);
-            movefile([pwd filesep 'c6kwT1w_with_tumour.nii'],[destination filesep 'c6kwT1w_with_tumour.nii']);
-            movefile([pwd filesep 'dtinv_wtVSD.nii'],[destination filesep 'dtinv_wtVSD.nii']);
-            movefile([pwd filesep 'iy_kwT1w_with_tumour.nii'],[destination filesep 'iy_kwT1w_with_tumour.nii']);
-            movefile([pwd filesep 'kwT1w_with_tumour.nii'],[destination filesep 'kwT1w_with_tumour.nii']);
-            movefile([pwd filesep 'kwT1w_with_tumour_seg8.nii'],[destination filesep 'kwT1w_with_tumour_seg8.nii']);
-            movefile([pwd filesep 'mkwT1w_with_tumour.nii'],[destination filesep 'mkwT1w_with_tumour.nii']);
-            movefile([pwd filesep 'swicv_kwT1w_with_tumour.nii'],[destination filesep 'swicv_kwT1w_with_tumour.nii']);
-            movefile([pwd filesep 'swinv_wtVSD.nii'],[destination filesep 'swinv_wtVSD.nii']);
-            movefile([pwd filesep 'winv_wtVSD.nii'],[destination filesep 'winv_wtVSD.nii']);
-            movefile([pwd filesep 'wmkwT1w_with_tumour.nii'],[destination filesep 'wmkwT1w_with_tumour.nii']);
-            movefile([pwd filesep 'y_kwT1w_with_tumour.nii'],[destination filesep 'y_kwT1w_with_tumour.nii']);
+            movefile(char(seg_with_lesion_HT{1}.TPMl),[destination filesep 'TPM_les.nii']);
         end
     end
-%     %get images
-%     image_3 = [pwd filesep 'healthy_tumour_USwL' filesep 'c1kwT1w_with_tumour.nii'];
-%     c1_image_3 = spm_read_vols(spm_vol(image_3));
-%     
-%     %image 1 vs image 2
-%     %measure similarity of whole brain
-%     SSIM_1 = SSI(c1_image_1,c1_image_2,brain_mask,1);
-%     
-%     %do we get the same values per voxel?
-%     rms_1 = sqrt(mean((c1_image_1-c1_image_2).^2));
-%     
-%     %image 1 vs image 3
-%     %measure similarity of whole brain
-%     SSIM_2 = SSI(c1_image_1,image_3,brain_mask,1);
-%     
-%     %do we get the same values per voxel?
-%     rms_2 = sqrt(mean((c1_image_1-c1_image_3).^2));
-%     
+    %get images
+    c1_image_3 = [pwd filesep 'healthy_tumour_USwL' filesep 'c1kwT1w_with_tumour.nii'];
+    c1_image_3V = spm_vol(c1_image_3); USwL_healthy_tumour_c1 = spm_read_vols(c1_image_3V);   
+
+    standard_healthy_brain = [pwd filesep 'healthy_standard_segmentation' filesep 'mwT1w_skull_stripped.nii'];
+    standard_healthy_brain = spm_read_vols(spm_vol(standard_healthy_brain));
+    standard_healthy_tumour_brain = [pwd filesep 'healthy_tumour_standard_segmentation' filesep 'mwT1w_with_tumour.nii'];
+    standard_healthy_tumour_brain = spm_read_vols(spm_vol(standard_healthy_tumour_brain));
+    USwL_healthy_tumour_brain = [pwd filesep 'healthy_tumour_USwL' filesep 'kmkwT1w_with_tumour.nii'];
+    USwL_healthy_tumour_brain = spm_read_vols(spm_vol(USwL_healthy_tumour_brain));
+    
+    %measure similarity of whole brain
+    SSIM_1 = SSI(standard_healthy_brain,standard_healthy_tumour_brain,lesion_mask_V,1);
+    SSIM_2 = SSI(standard_healthy_brain,standard_healthy_tumour_brain,brain_mask_minus_tumour,1);
+    SSIM_3 = SSI(standard_healthy_brain,USwL_healthy_tumour_brain,lesion_mask_V,1);
+    SSIM_4 = SSI(standard_healthy_brain,USwL_healthy_tumour_brain,brain_mask_minus_tumour,1);
+    
+    %do we get the same values per voxel?
+    rms_1 = sqrt(mean((standard_healthy_c1-standard_healthy_tumour_c1).^2));
+    rms_2 = sqrt(mean((standard_healthy_c1-USwL_healthy_tumour_c1).^2));
+    
 end
 
       
