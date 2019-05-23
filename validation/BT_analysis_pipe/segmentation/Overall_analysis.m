@@ -1,4 +1,4 @@
-%% Data analysis script the details the different step taken the explain tests
+ %% Data analysis script the details the different step taken the explain tests
 
 
 %% deal with datapath; set the directory and defaults
