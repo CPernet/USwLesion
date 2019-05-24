@@ -442,14 +442,10 @@ for subject = 1:30
     SSIM(subject,4) = SSI(standard_healthy_brain,USwL_healthy_tumour_brain,brain_mask_minus_tumour,1);
     
     %do we get the same values per voxel?
-    rms_1 = sqrt(mean((standard_healthy_c1-standard_healthy_tumour_c1).^2));
-    rms(subject,1) = sum(rms_1(:));
-    rms_2 = sqrt(mean((standard_healthy_c1-USwL_healthy_tumour_c1).^2));
-    rms(subject,2) = sum(rms_2(:));
-    rms_3 = sqrt(mean((standard_healthy_c2-standard_healthy_tumour_c2).^2));
-    rms(subject,3) = sum(rms_3(:));
-    rms_4 = sqrt(mean((standard_healthy_c2-USwL_healthy_tumour_c2).^2));
-    rms(subject,4) = sum(rms_4(:));
+    rms(subject,1) = sqrt(mean((standard_healthy_c1(:)-standard_healthy_tumour_c1(:)).^2));
+    rms(subject,2) = sqrt(mean((standard_healthy_c1(:)-USwL_healthy_tumour_c1(:)).^2));
+    rms(subject,3) = sqrt(mean((standard_healthy_c2(:)-standard_healthy_tumour_c2(:)).^2));
+    rms(subject,4) = sqrt(mean((standard_healthy_c2(:)-USwL_healthy_tumour_c2(:)).^2));
 
     cd ..
 end
