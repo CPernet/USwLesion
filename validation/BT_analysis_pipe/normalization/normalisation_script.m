@@ -453,39 +453,21 @@ end
 %write results as table
 cd(fileparts(which('normalisation_script.m')))
 SSIM_title = {'lesion_standardhealthy_VS_standardtumour';'brainmask_standardhealthy_VS_standardtumour';'lesion_standardhealthy_VS_USwL';'brainmask_standardhealthy_VS_USwL'};
-SSIM_results = array2table(SSIM,'VariableNames',SSIM_title);
+SSIM_results = array2table([SSIM,'VariableNames',SSIM_title);
 writetable(SSIM_results,[pwd filesep 'SSIM_results.csv']);
 
 rms_title = {'standardc1_VS_standardtumourc1';'standardc1_VS_USwLc1';'standardc2_VS_standardtumourc2';'standardc2_VS_USwLc2'};
-rms_results = array2table(rms,'VariableNames',rms_title);
+rms_results = array2table(,'VariableNames',rms_title);
 writetable(rms_results,[pwd filesep 'rms_results.csv']);
 
 % test whether there is a statistical difference in similarity
+[medianssim(m,:),CIssim(:,:)] = rst_data_plot(SSIM_results,'estimator','median','newfig','yes');
+[diffssim,CIdssim,pssim,alphav,hssim]= rst_multicompare(results,[1 2;3 4],'alphav',0.05,'estimator','median','newfig','yes')
 
-SSIM_lesion_1 = SSIMresults(:,1); SSIM_lesion_2 = SSIMresults(:,3);
-SSIM_lesion = horzcat(SSIM_lesion_1,SSIM_lesion_2);
+[medianrms(m,:),CIrms(:,:)] = rst_data_plot(SSIM_results,'estimator','median','newfig','yes');
+[diffssim,CIdssim,pssim,alphav,hssim]= rst_multicompare(results,[1 2;3 4],'alphav',0.05,'estimator','median','newfig','yes')
 
-SSIM_brainmask_1 = SSIMresults(:,2); SSIM_brainmask_2 = SSIMresults(:,4);
-SSIM_brainmask = horzcat(SSIM_brainmask_1,SSIM_brainmask_2);
 
-rms_c1 = rmsresults(:,1:2); rms_c1_standard = rmsresults(:,1); rms_c1_USwL = rmsresults(:,2);
-rms_c2 = rmsresults(:,3:4); rms_c2_standard = rmsresults(:,3); rms_c2_USwL = rmsresults(:,4);
-
-%one-sample t-test
-[h1,p1] = ttest(SSIM_lesion);
-[h2,p2] = ttest(SSIM_brainmask);
-[h3,p3] = ttest(rms_c1);
-[h4,p4] = ttest(rms_c2);
-
-%one-sample one-tailed ttest
-Z = ttest(rms_c1_USwL,0.0577,'Tail','right');
-Z1 = ttest(rms_c2_USwL,0.0528,'Tail','right');
-
-%paired-sample t-test
-[h5,p5] = ttest(SSIM_lesion_2,SSIM_lesion_1);
-[h6,p6] = ttest(SSIM_brainmask_2,SSIM_brainmask_1);
-[h7,p7] = ttest(rms_c1_USwL,rms_c1_standard);
-[h8,p8] = ttest(rms_c2_USwL,rms_c2_standard);
 
 
       
