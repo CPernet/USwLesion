@@ -229,7 +229,7 @@ end
 % load previous data from segmentation and put it all together
 cd([fileparts(which('crc_STAPLE')) filesep 'validation' filesep 'BT_analysis_pipe' filesep 'segmentation'])
 IMP   = importdata('mJ_results.csv');  data  = IMP.data(:,31:34); results(:,1) = mJ; results(:,2) = max(data')';
-IMP   = importdata('mHd_results.csv'); data  = IMP.data(:,31:34); results(:,3) = mHd; results(:,4) = max(data')';
+IMP   = importdata('mHd_results.csv'); data  = IMP.data(:,31:34); results(:,3) = mHd; results(:,4) = min(data')';
 IMP   = importdata('overlap_mcc_results.csv');  data  = IMP.data(:,31:34); results(:,5) = MCC; results(:,6) = max(data')';
 IMP   = importdata('ground_truth_volumes.csv'); ref_vol = IMP.data;
 IMP   = importdata('mask_volumes.csv'); data  = IMP.data(:,31:34); results(:,7) = volumes'-ref_vol; results(:,8) = min([data-ref_vol]')';
