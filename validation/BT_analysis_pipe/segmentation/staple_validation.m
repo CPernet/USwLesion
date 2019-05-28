@@ -156,7 +156,7 @@ for tumour_type = 1:2
         matlabbatch{15}.spm.util.imcalc.input(4) = cfg_dep('US with lesion: c4 image', substruct('.','val', '{}',{14}, '.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1}), substruct('.','segmImg', '.','c4'));
         matlabbatch{15}.spm.util.imcalc.output = 'maskc3_3GaussiansGMWMCSF';
         matlabbatch{15}.spm.util.imcalc.outdir(1) = cfg_dep('Make Directory: Make Directory ''lesion_masks''', substruct('.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1}), substruct('.','dir'));
-        matlabbatch{15}.spm.util.imcalc.expression = '(i3>i1) & (i3>i2)&(i3>i4)';
+        matlabbatch{15}.spm.util.imcalc.expression = '(i3>i1) & (i3>i2) & (i3>i4)';
         matlabbatch{15}.spm.util.imcalc.var = struct('name', {}, 'value', {});
         matlabbatch{15}.spm.util.imcalc.options.dmtx = 0;
         matlabbatch{15}.spm.util.imcalc.options.mask = 0;
@@ -218,23 +218,38 @@ for tumour_type = 1:2
         ground_truth = [patient_dir filesep tmp.name filesep 'VSD.nii'];
         
         % check staple vs ground truth
+        img = spm_read_vols(spm_vol(staple_mask));
+        volumes(subject) = sum(img(:)>0);
         [mJ(subject),mHd(subject),overlap] = image_overlap(ground_truth,staple_mask);
         MCC(subject) = overlap.voxel.mcc;
-        Kappa(subject) = overlap.voxel.CK;
         subject = subject +1;
     end
 end
 
-% load previous data from segmentation
-
-
-% put it all together
-
+% load previous data from segmentation and put it all together
+cd([fileparts(which('crc_STAPLE')) filesep 'validation' filesep 'BT_analysis_pipe' filesep 'segmentation'])
+IMP   = importdata('mJ_results.csv');  data  = IMP.data(:,31:34); results(:,1) = mJ; results(:,2) = max(data')';
+IMP   = importdata('mHd_results.csv'); data  = IMP.data(:,31:34); results(:,3) = mHd; results(:,4) = max(data')';
+IMP   = importdata('overlap_mcc_results.csv');  data  = IMP.data(:,31:34); results(:,5) = MCC; results(:,6) = max(data')';
+IMP   = importdata('ground_truth_volumes.csv'); ref_vol = IMP.data;
+IMP   = importdata('mask_volumes.csv'); data  = IMP.data(:,31:34); results(:,7) = volumes'-ref_vol; results(:,8) = min([data-ref_vol]')';
 
 % save
-baseline = table(mJ1', mJ2', mHd1', mHd2', Dice1', Dice2', MCC1', MCC2', Kappa1', Kappa2', ...
-    'VariableNames',{'Jaccard1', 'Jaccard2', 'Hausdorff1', 'Hausdorff2', 'Dice1', 'Dice2', 'MatthewCorrCoef1', 'MatthewCorrCoef2', 'KappaCoef1', 'KappaCoef2'});
-writetable(baseline,[save_in filesep 'baseline_measures.csv'])
+staple_results = table(results(:,1),results(:,2),results(:,3),results(:,4),results(:,5),results(:,6), results(:,7),results(:,8),...
+    'VariableNames',{'JaccardStaple', 'JaccardBest', 'HausdorffStaple', 'HausdorffBest', 'MCCStaple', 'MCCBest','VolumeStaple', 'VolumeBest'});
+writetable(staple_results,'staple_results.csv')
 
-cd(BRAT_dir); save temp_data
+% simple stats
+index = 1;figure;
+for m=1:4
+    subplot(1,4,m);
+    [mediansim(m,:),CI(:,:)] = rst_data_plot(results(:,[index index+1]),'estimator','median','newfig','no');
+    if m == 1; title('Jaccard');
+    elseif m == 2; title('Hausdorff');
+    elseif m == 3; title('MCC');
+    else title('Volumes')
+    end
+    index = index+2;
+end
 
+[diff,CI,p,alphav,h]= rst_multicompare(results,[1 2;3 4; 5 6;7 8],'alphav',0.05,'estimator','median','newfig','yes')
