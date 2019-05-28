@@ -73,6 +73,6 @@ else
     C2 = (0.03*max([range(image1(:)) range(image2(:))])).^2;
 end
 
-S = cov(image1(roi),image2(roi));
+S = nancov(image1(roi),image2(roi));
 SSIM = ((2*nanmean(image1(roi))*nanmean(image2(roi))+C1)*(2*S(1,2)+C2)) / ...
     (nanmean(image1(roi))^2+nanmean(image2(roi))^2+C1)*(nanvar(image1(roi))+nanvar(image2(roi))+C2);
