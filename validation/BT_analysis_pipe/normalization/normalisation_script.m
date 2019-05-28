@@ -486,7 +486,7 @@ writetable(rms_results,[pwd filesep 'rms_results.csv']);
 
 % test whether there is a statistical difference in similarity
 s = [1:30]; s(19)=[];
-[medianssim(:),CIssim(:)] = rst_data_plot(SSIM(s,[2 4]),'estimator','median','newfig','yes');
+[medianssim,CIssim] = rst_data_plot(SSIM(s,[1 3 2 4]),'estimator','median','newfig','yes');
 [diffssim,CIdssim,pssim,alphav,hssim]= rst_multicompare(SSIM,[1 3;2 4],'alphav',0.05,'estimator','median','newfig','yes');
 
 [medianrms,CIrms] = rst_data_plot(rms(:,[1 3 2 4]),'estimator','median','newfig','yes');
