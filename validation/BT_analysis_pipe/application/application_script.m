@@ -51,12 +51,17 @@ for patient = 1:54
     cd(local(patient+2).name)
     
     folderinfo = dir(pwd);
-    ref_image = [folderinfo(5).name];
-    alt_image = [folderinfo(4).name];
+    alt_image = folderinfo(3).name;
+    
+    if strfind (folderinfo(4).name,'T1w')
+        ref_image =folderinfo(4).name;
+    elseif strfind (folderinfo(5).name,'T1w')
+        ref_image =folderinfo(5).name;
+    end
+    
 
-    %wrong
-%     V = cellstr([ref_image,alt_image]);
-%     spmup_auto_reorient([ref_image;alt_image],1);
+%     spm_select(XXX)
+%     spmup_auto_reorient(XXX,1);
 
 end
 
