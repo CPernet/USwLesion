@@ -24,14 +24,17 @@ function [W, p, q] = crc_STAPLE(varargin)
 if nargin == 0
     help crc_STAPLE
     return
-elseif nargin == 1
-    threshold = 0.5;
 else 
     P = varargin{1};
     if ~iscell(P)
         error('argument in must be a cell array of names')
     end
-    threshold = varargin{2};
+    
+    if nargin == 1
+        threshold = 0.5;
+    else
+        threshold = varargin{2};
+    end
     clear varargin
 end
 
@@ -40,13 +43,14 @@ if nargin > 2
 end
 
 %% deal with images
+if size(P,1) == 1; P=P'; end
 N = size(P,1);
 dim = NaN(N,3);
 for img = 1:N
-    try
-        V(img) = spm_vol(P(img,:));
-    catch
+    if iscell(P)
         V(img) = spm_vol(P{img});
+    else
+        V(img) = spm_vol(P(img,:));
     end
     dim(img,:) = V(img).dim;
 end 
