@@ -381,7 +381,7 @@ for subject = 1:30
     
     cd(Healthy_dir); local = dir;
     cd(local(subject+2).name)
-    Tumour = [pwd filesep filesep 'inv_wtVSD.nii'];
+    Tumour = [pwd filesep 'inv_wtVSD.nii'];
     
     %generate brain mask without tumour
     lesion_mask = [Tumour]; lesion_mask_V = spm_read_vols(spm_vol(lesion_mask));
@@ -408,66 +408,89 @@ for subject = 1:30
     matlabbatch{1}.spm.spatial.normalise.write.woptions.vox = [1 1 1];
     matlabbatch{1}.spm.spatial.normalise.write.woptions.interp = 4;
     matlabbatch{1}.spm.spatial.normalise.write.woptions.prefix = 'w';
-    spm_jobman('run', matlabbatch);
-    clear matlabbatch
-    
-    %get the images
+    out = spm_jobman('run', matlabbatch);
+    SSIM_brain_mask_minus_tumour = out{1}.files{1};
+    SSIM_lesion_mask = out{1}.files{2};
+    SSIM_brain_mask_minus_tumour = spm_read_vols(spm_vol(SSIM_brain_mask_minus_tumour));
+    SSIM_lesion_mask = spm_read_vols(spm_vol(SSIM_lesion_mask));
+    clear matlabbatch out
+   
+    %get the images for measuring similarity of whole brain
     standard_healthy_brain = [pwd filesep 'healthy_standard_segmentation' filesep 'wmwT1w_skull_stripped.nii'];
     standard_healthy_brain = spm_read_vols(spm_vol(standard_healthy_brain));
     standard_healthy_tumour_brain = [pwd filesep 'healthy_tumour_standard_segmentation' filesep 'wmwT1w_with_tumour.nii'];
     standard_healthy_tumour_brain = spm_read_vols(spm_vol(standard_healthy_tumour_brain));
     USwL_healthy_tumour_brain = [pwd filesep 'healthy_tumour_USwL' filesep 'wmkwT1w_with_tumour.nii'];
     USwL_healthy_tumour_brain = spm_read_vols(spm_vol(USwL_healthy_tumour_brain));
-    c1_image_1 = [pwd filesep 'healthy_standard_segmentation' filesep 'c1wT1w_skull_stripped.nii'];
-    c1_image_1V = spm_vol(c1_image_1); standard_healthy_c1 = spm_read_vols(c1_image_1V);
-    c2_image_1 = [pwd filesep 'healthy_standard_segmentation' filesep 'c2wT1w_skull_stripped.nii'];
-    c2_image_1V = spm_vol(c2_image_1); standard_healthy_c2 = spm_read_vols(c2_image_1V);
-    c1_image_2 = [pwd filesep 'healthy_tumour_standard_segmentation' filesep 'c1wT1w_with_tumour.nii'];
-    c1_image_2V = spm_vol(c1_image_2); standard_healthy_tumour_c1 = spm_read_vols(c1_image_2V);
-    c2_image_2 = [pwd filesep 'healthy_tumour_standard_segmentation' filesep 'c2wT1w_with_tumour.nii'];
-    c2_image_2V = spm_vol(c2_image_2); standard_healthy_tumour_c2 = spm_read_vols(c2_image_2V);
-    c1_image_3 = [pwd filesep 'healthy_tumour_USwL' filesep 'c1kwT1w_with_tumour.nii'];
-    c1_image_3V = spm_vol(c1_image_3); USwL_healthy_tumour_c1 = spm_read_vols(c1_image_3V);
-    c2_image_3 = [pwd filesep 'healthy_tumour_USwL' filesep 'c2kwT1w_with_tumour.nii'];
-    c2_image_3V = spm_vol(c2_image_3); USwL_healthy_tumour_c2 = spm_read_vols(c2_image_3V);
-    brain_mask_minus_tumour = [pwd filesep 'wbrain_mask_minus_tumour.nii'];
-    brain_mask_minus_tumour = spm_read_vols(spm_vol(brain_mask_minus_tumour));
-    lesion_mask = [pwd filesep 'winv_wtVSD.nii'];
-    lesion_mask = spm_read_vols(spm_vol(lesion_mask));
     
     %measure similarity of whole brain
-    SSIM(subject,1) = SSI(standard_healthy_brain,standard_healthy_tumour_brain,lesion_mask,1);
-    SSIM(subject,2) = SSI(standard_healthy_brain,standard_healthy_tumour_brain,brain_mask_minus_tumour,1);
-    SSIM(subject,3) = SSI(standard_healthy_brain,USwL_healthy_tumour_brain,lesion_mask,1);
-    SSIM(subject,4) = SSI(standard_healthy_brain,USwL_healthy_tumour_brain,brain_mask_minus_tumour,1);
+    SSIM(subject,1) = SSI(standard_healthy_brain,standard_healthy_tumour_brain,SSIM_lesion_mask,1);
+    SSIM(subject,2) = SSI(standard_healthy_brain,standard_healthy_tumour_brain,SSIM_brain_mask_minus_tumour,1);
+    SSIM(subject,3) = SSI(standard_healthy_brain,USwL_healthy_tumour_brain,SSIM_lesion_mask,1);
+    SSIM(subject,4) = SSI(standard_healthy_brain,USwL_healthy_tumour_brain,SSIM_brain_mask_minus_tumour,1);
+
+    % get dimensions of rms mwc1 (has different dimensions)
+    matlabbatch{1}.spm.util.bbox.image = {[pwd filesep 'healthy_tumour_standard_segmentation' filesep 'mwc1wT1w_with_tumour.nii']};
+    matlabbatch{1}.spm.util.bbox.bbdef.fov = 'fv';
+    out = spm_jobman('run', matlabbatch);
+    clear matlabbatch 
+    
+    %normalise brain mask (minus lesion mask) and lesion mask so they are in same dimensions as rms mwc1
+    matlabbatch{1}.spm.spatial.normalise.write.subj.def = {[pwd filesep 'y_anat.nii']};
+    matlabbatch{1}.spm.spatial.normalise.write.subj.resample = {[pwd filesep 'brain_mask_minus_tumour.nii']
+                                                                [Tumour]
+                                                               };
+    matlabbatch{1}.spm.spatial.normalise.write.woptions.bb = out{1}.bb;
+    matlabbatch{1}.spm.spatial.normalise.write.woptions.vox = [1.5 1.5 1.5];
+    matlabbatch{1}.spm.spatial.normalise.write.woptions.interp = 4;
+    matlabbatch{1}.spm.spatial.normalise.write.woptions.prefix = 'rms';
+    spm_jobman('run', matlabbatch);
+    rms_brain_mask_minus_tumour = [pwd filesep 'rmsbrain_mask_minus_tumour.nii']; 
+    rms_lesion_mask = [pwd filesep 'rmsinv_wtVSD.nii'];
+    rms_brain_mask_minus_tumour = spm_read_vols(spm_vol(rms_brain_mask_minus_tumour));
+    rms_lesion_mask = spm_read_vols(spm_vol(rms_lesion_mask));
+    clear matlabbatch 
+   
+    %get the images for measuring rms
+    c1_image_1 = [pwd filesep 'healthy_standard_segmentation' filesep 'mwc1wT1w_skull_stripped.nii'];
+    c1_image_1V = spm_vol(c1_image_1); standard_healthy_c1 = spm_read_vols(c1_image_1V);
+    c1_image_2 = [pwd filesep 'healthy_tumour_standard_segmentation' filesep 'mwc1wT1w_with_tumour.nii'];
+    c1_image_2V = spm_vol(c1_image_2); standard_healthy_tumour_c1 = spm_read_vols(c1_image_2V);
+    c1_image_3 = [pwd filesep 'healthy_tumour_USwL' filesep 'mwc1kwT1w_with_tumour.nii'];
+    c1_image_3V = spm_vol(c1_image_3); USwL_healthy_tumour_c1 = spm_read_vols(c1_image_3V);
     
     %do we get the same values per voxel?
-    rms(subject,1) = sqrt(mean((standard_healthy_c1(:)-standard_healthy_tumour_c1(:)).^2));
-    rms(subject,2) = sqrt(mean((standard_healthy_c1(:)-USwL_healthy_tumour_c1(:)).^2));
-    rms(subject,3) = sqrt(mean((standard_healthy_c2(:)-standard_healthy_tumour_c2(:)).^2));
-    rms(subject,4) = sqrt(mean((standard_healthy_c2(:)-USwL_healthy_tumour_c2(:)).^2));
+    img1 = standard_healthy_c1(logical(rms_lesion_mask)); 
+    img2 = standard_healthy_tumour_c1(logical(rms_lesion_mask));
+    rms(subject,1) = sqrt(mean((img1(:)-img2(:)).^2));
+    img1 = standard_healthy_c1(logical(logical(rms_brain_mask_minus_tumour))); 
+    img2 = standard_healthy_tumour_c1(logical(rms_brain_mask_minus_tumour));
+    rms(subject,2) = sqrt(mean((img1(:)-img2(:)).^2));
+    img1 = standard_healthy_c1(logical(rms_lesion_mask)); 
+    img2 = USwL_healthy_tumour_c1(logical(rms_lesion_mask));
+    rms(subject,3) = sqrt(mean((img1(:)-img2(:)).^2));
+    img1 = standard_healthy_c1(logical(logical(rms_brain_mask_minus_tumour))); 
+    img2 = USwL_healthy_tumour_c1(logical(rms_brain_mask_minus_tumour));
+    rms(subject,4) = sqrt(mean((img1(:)-img2(:)).^2));
 
     cd ..
 end
 
 %write results as table
 cd(fileparts(which('normalisation_script.m')))
-SSIM_title = {'lesion_standardhealthy_VS_standardtumour';'brainmask_standardhealthy_VS_standardtumour';'lesion_standardhealthy_VS_USwL';'brainmask_standardhealthy_VS_USwL'};
-SSIM_results = array2table([SSIM,'VariableNames',SSIM_title);
+title = {'lesion_standardhealthy_VS_standardtumour';'brainmask_standardhealthy_VS_standardtumour';'lesion_standardhealthy_VS_USwL';'brainmask_standardhealthy_VS_USwL'};
+SSIM_results = array2table(SSIM,'VariableNames',title);
 writetable(SSIM_results,[pwd filesep 'SSIM_results.csv']);
-
-rms_title = {'standardc1_VS_standardtumourc1';'standardc1_VS_USwLc1';'standardc2_VS_standardtumourc2';'standardc2_VS_USwLc2'};
-rms_results = array2table(,'VariableNames',rms_title);
+rms_results = array2table(rms,'VariableNames',title);
 writetable(rms_results,[pwd filesep 'rms_results.csv']);
 
 % test whether there is a statistical difference in similarity
-[medianssim(m,:),CIssim(:,:)] = rst_data_plot(SSIM_results,'estimator','median','newfig','yes');
-[diffssim,CIdssim,pssim,alphav,hssim]= rst_multicompare(results,[1 2;3 4],'alphav',0.05,'estimator','median','newfig','yes')
+s = [1:30]; s(19)=[];
+[medianssim(:),CIssim(:)] = rst_data_plot(SSIM(s,[2 4]),'estimator','median','newfig','yes');
+[diffssim,CIdssim,pssim,alphav,hssim]= rst_multicompare(SSIM,[1 3;2 4],'alphav',0.05,'estimator','median','newfig','yes');
 
-[medianrms(m,:),CIrms(:,:)] = rst_data_plot(SSIM_results,'estimator','median','newfig','yes');
-[diffssim,CIdssim,pssim,alphav,hssim]= rst_multicompare(results,[1 2;3 4],'alphav',0.05,'estimator','median','newfig','yes')
-
-
+[medianrms,CIrms] = rst_data_plot(rms(:,[1 3 2 4]),'estimator','median','newfig','yes');
+[diffrms,CIdrms,prms,alphav,hrms]= rst_multicompare(rms,[1 3;2 4],'alphav',0.05,'estimator','median','newfig','yes');
 
 
       
