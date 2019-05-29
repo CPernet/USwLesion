@@ -50,21 +50,39 @@ end
 for patient = 1:54
     cd(local(patient+2).name)
     
-    folderinfo = dir(pwd);
-    alt_image = folderinfo(3).name;
+    [t,sts] = spm_select(2,'image','Select files...',{},pwd,'.*','1');
+    V = cellstr(t);
+    spmup_auto_reorient(V,1);
     
-    if strfind (folderinfo(4).name,'T1w')
-        ref_image =folderinfo(4).name;
-    elseif strfind (folderinfo(5).name,'T1w')
-        ref_image =folderinfo(5).name;
-    end
-    
-
-%     spm_select(XXX)
-%     spmup_auto_reorient(XXX,1);
-
+    cd ..
 end
 
+%% flip images so the tumour is on the same side (left)
+
+for patient = [3 6:8 14:18 21:22 26:27 29 36 41 45 50 53:54]
+    cd(local(patient+2).name)
+    
+    folderinfo = dir(pwd);
+    image_1 = folderinfo(3).name;
+    
+    if strfind (folderinfo(4).name,'T1w')
+        image_2 =folderinfo(4).name;
+    elseif strfind (folderinfo(5).name,'T1w')
+        image_2 =folderinfo(5).name;
+    end
+    
+    image_1_vol = spm_vol(image_1);
+    image_1_read = spm_read_vols(image_1_vol);
+    image_2_vol = spm_vol(image_2);
+    image_2_read = spm_read_vols(image_2_vol);
+    A = flipud(image_1_read);
+    B = flipud(image_2_read);
+    
+    image_1 = spm_write_vol(image_1_vol,A);
+    image_2 = spm_write_vol(image_2_vol,B);
+    
+    cd ..
+end
 
 
 
