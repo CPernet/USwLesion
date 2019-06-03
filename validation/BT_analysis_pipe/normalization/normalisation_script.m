@@ -485,10 +485,80 @@ rms_results = array2table(rms,'VariableNames',title);
 writetable(rms_results,[pwd filesep 'rms_results.csv']);
 
 % test whether there is a statistical difference in similarity
-s = [1:30]; s(19)=[];
-[medianssim,CIssim] = rst_data_plot(SSIM(s,[1 3 2 4]),'estimator','median','newfig','yes');
-[diffssim,CIdssim,pssim,alphav,hssim]= rst_multicompare(SSIM,[1 3;2 4],'alphav',0.05,'estimator','median','newfig','yes');
 
+s = 1:30; 
+o = s([2 19 27 28 29]);
+s([2 19 27 28 29]) = [];
+SSIM_lesion = SSIM(:,[1 3]);
+SSIM_lesion_norm = SSIM_lesion(s,:);
+SSIM_lesion_outlier = SSIM_lesion(o,:);
+SSIM_brain = SSIM(:,[2 4]);
+SSIM_brain_norm = SSIM_brain(s,:);
+SSIM_brain_outlier = SSIM_brain(o,:);
+
+%plot for SSIM within tumour (non-outlier results)
+for sub = 1:25
+    t = [1:25];
+    x = repmat(t,25);
+    scatter(x(:,1),SSIM(s,1));
+    hold on;
+    scatter(x(:,2),SSIM(s,3));
+    hold on;
+    plot([1 2],SSIM_lesion_norm(sub,[1 2]));
+    hold on;
+    title('SSIM of tumour')
+    xlabel('normalisation method');
+    ylabel('SSIM');
+end
+
+
+%plot for SSIM within tumour (outlier results)
+for sub = 1:5
+    t = [1:5];
+    x = repmat(t,5);
+    scatter(x(:,1),SSIM(o,1));
+    hold on;
+    scatter(x(:,2),SSIM(o,3));
+    hold on;
+    plot([1 2],SSIM_lesion_outlier(sub,[1 2]));
+    hold on;
+    title('SSIM of tumour (outliers)')
+    xlabel('normalisation method');
+    ylabel('SSIM');
+end
+
+%plot for SSIM of brain minus tumour
+for sub = 1:25
+    t = [1:25];
+    x = repmat(t,25);
+    scatter(x(:,1),SSIM(s,2));
+    hold on;
+    scatter(x(:,2),SSIM(s,4));
+    hold on;
+    plot([1 2],SSIM_brain_norm(sub,[1 2]));
+    hold on;
+    title('SSIM of brain minus tumour')
+    xlabel('normalisation method');
+    ylabel('SSIM');
+end
+
+%plot for SSIM of brain minus tumour (outlier)
+for sub = 1:5
+    t = [1:5];
+    x = repmat(t,5);
+    scatter(x(:,1),SSIM(o,2));
+    hold on;
+    scatter(x(:,2),SSIM(o,4));
+    hold on;
+    plot([1 2],SSIM_brain_outlier(sub,[1 2]));
+    hold on;
+    title('SSIM of brain minus tumour (outliers)')
+    xlabel('normalisation method');
+    ylabel('SSIM');
+end
+
+[medianssim,CIssim] = rst_data_plot(SSIM(:,[1 3 2 4]),'estimator','median','newfig','yes');
+[diffssim,CIdssim,pssim,alphav,hssim]= rst_multicompare(SSIM,[1 3;2 4],'alphav',0.05,'estimator','median','newfig','yes');
 [medianrms,CIrms] = rst_data_plot(rms(:,[1 3 2 4]),'estimator','median','newfig','yes');
 [diffrms,CIdrms,prms,alphav,hrms]= rst_multicompare(rms,[1 3;2 4],'alphav',0.05,'estimator','median','newfig','yes');
 
