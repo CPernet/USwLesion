@@ -630,9 +630,9 @@ for sub = 1:5
     ylabel('rms');
 end
 
-[medianssim,CIssim] = rst_data_plot(SSIM(:,[1 3 2 4]),'estimator','median','newfig','yes');
+% [medianssim,CIssim] = rst_data_plot(SSIM(:,[1 3 2 4]),'estimator','median','newfig','yes');
 [diffssim,CIdssim,pssim,alphav,hssim]= rst_multicompare(SSIM,[1 3;2 4],'alphav',0.05,'estimator','median','newfig','yes');
-[medianrms,CIrms] = rst_data_plot(rms(:,[1 3 2 4]),'estimator','median','newfig','yes');
+% [medianrms,CIrms] = rst_data_plot(rms(:,[1 3 2 4]),'estimator','median','newfig','yes');
 [diffrms,CIdrms,prms,alphav,hrms]= rst_multicompare(rms,[1 3;2 4],'alphav',0.05,'estimator','median','newfig','yes');
 
 
