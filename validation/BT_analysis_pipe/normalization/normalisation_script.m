@@ -485,6 +485,7 @@ rms_results = array2table(rms,'VariableNames',title);
 writetable(rms_results,[pwd filesep 'rms_results.csv']);
 
 % test whether there is a statistical difference in similarity
+%SSIM
 
 s = 1:30; 
 o = s([2 19 27 28 29]);
@@ -555,6 +556,78 @@ for sub = 1:5
     title('SSIM of brain minus tumour (outliers)')
     xlabel('normalisation method');
     ylabel('SSIM');
+end
+
+%RMS
+s = 1:30; 
+o = s([2 19 27 28 29]);
+s([2 19 27 28 29]) = [];
+rms_lesion = rms(:,[1 3]);
+rms_lesion_norm = rms_lesion(s,:);
+rms_lesion_outlier = rms_lesion(o,:);
+rms_brain = rms(:,[2 4]);
+rms_brain_norm = rms_brain(s,:);
+rms_brain_outlier = rms_brain(o,:);
+
+%plot for rms within tumour (non-outlier results)
+for sub = 1:25
+    t = [1:25];
+    x = repmat(t,25);
+    scatter(x(:,1),rms(s,1));
+    hold on;
+    scatter(x(:,2),rms(s,3));
+    hold on;
+    plot([1 2],rms_lesion_norm(sub,[1 2]));
+    hold on;
+    title('rms of tumour')
+    xlabel('normalisation method');
+    ylabel('rms');
+end
+
+
+%plot for SSIM within tumour (outlier results)
+for sub = 1:5
+    t = [1:5];
+    x = repmat(t,5);
+    scatter(x(:,1),rms(o,1));
+    hold on;
+    scatter(x(:,2),rms(o,3));
+    hold on;
+    plot([1 2],rms_lesion_outlier(sub,[1 2]));
+    hold on;
+    title('rms of tumour (outliers)')
+    xlabel('normalisation method');
+    ylabel('rms');
+end
+
+%plot for SSIM of brain minus tumour
+for sub = 1:25
+    t = [1:25];
+    x = repmat(t,25);
+    scatter(x(:,1),rms(s,2));
+    hold on;
+    scatter(x(:,2),rms(s,4));
+    hold on;
+    plot([1 2],rms_brain_norm(sub,[1 2]));
+    hold on;
+    title('rms of brain minus tumour')
+    xlabel('normalisation method');
+    ylabel('rms');
+end
+
+%plot for SSIM of brain minus tumour (outlier)
+for sub = 1:5
+    t = [1:5];
+    x = repmat(t,5);
+    scatter(x(:,1),rms(o,2));
+    hold on;
+    scatter(x(:,2),rms(o,4));
+    hold on;
+    plot([1 2],rms_brain_outlier(sub,[1 2]));
+    hold on;
+    title('rms of brain minus tumour (outliers)')
+    xlabel('normalisation method');
+    ylabel('rms');
 end
 
 [medianssim,CIssim] = rst_data_plot(SSIM(:,[1 3 2 4]),'estimator','median','newfig','yes');
