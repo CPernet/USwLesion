@@ -85,7 +85,7 @@ for patient = [3 6:8 14:18 21:22 26:27 29 36 41 45 50 53:54]
 end
 
 %% USwL normalise/segment
-
+ 
 for patient = 2:6
     cd(local(patient+2).name)
     
@@ -150,6 +150,4 @@ for patient = 2:6
     
     cd ..
 end
-
-
 
