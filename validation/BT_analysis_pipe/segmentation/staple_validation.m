@@ -240,6 +240,7 @@ staple_results = table(results(:,1),results(:,2),results(:,3),results(:,4),resul
 writetable(staple_results,'staple_results.csv')
 
 % simple stats
+IMP   = importdata('staple_results.csv'); results = IMP.data;
 index = 1;figure;
 for m=1:4
     subplot(1,4,m);
