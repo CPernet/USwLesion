@@ -484,151 +484,117 @@ writetable(SSIM_results,[pwd filesep 'SSIM_results.csv']);
 rms_results = array2table(rms,'VariableNames',title);
 writetable(rms_results,[pwd filesep 'rms_results.csv']);
 
+IMP = importdata('SSIM_results.csv'); SSIM = IMP.data;
+IMP = importdata('rms_results.csv'); rms = IMP.data;
+
 % test whether there is a statistical difference in similarity
 %SSIM
 
-s = 1:30; 
-o = s([2 19 27 28 29]);
-s([2 19 27 28 29]) = [];
 SSIM_lesion = SSIM(:,[1 3]);
-SSIM_lesion_norm = SSIM_lesion(s,:);
-SSIM_lesion_outlier = SSIM_lesion(o,:);
 SSIM_brain = SSIM(:,[2 4]);
-SSIM_brain_norm = SSIM_brain(s,:);
-SSIM_brain_outlier = SSIM_brain(o,:);
 
+s = 1:30; s(19) = [];
+SSIM_lesion_norm = SSIM_lesion(s,:);
 %plot for SSIM within tumour (non-outlier results)
-for sub = 1:25
-    t = [1:25];
-    x = repmat(t,25);
-    scatter(x(:,1),SSIM(s,1));
+figure; 
+for sub = 1:29
+    t = [1:29];
+    x = repmat(t,29);
+    scatter(x(:,1),SSIM(s,1),30,'filled');
     hold on;
-    scatter(x(:,2),SSIM(s,3));
+    scatter(x(:,2),SSIM(s,3),30,'filled');
     hold on;
-    plot([1 2],SSIM_lesion_norm(sub,[1 2]));
+    plot([1 2],SSIM_lesion_norm(sub,[1 2]),'LineWidth',2);
     hold on;
-    title('SSIM of tumour')
-    xlabel('normalisation method');
-    ylabel('SSIM');
 end
+box on; grid on
+axis([0.9 2.1 -1*10^5 7*10^5])
+title('SSIM of normalized tumour area compared to healthy area','FontSize',16)
+ylabel('SSIM','FontSize',14)
 
+o = 19; SSIM_lesion_outlier = SSIM_lesion(o,:);
+%plot for SSIM within tumour (outlier result)
+figure;
+scatter(1,SSIM(o,1),30,'filled');
+hold on;
+scatter(2,SSIM(o,3),30,'filled');
+hold on;
+plot([1 2],SSIM_lesion_outlier(1,[1 2]),'LineWidth',2);
+hold on;
+box on; grid on
+axis([0.9 2.1 1*10^10 2*10^10])
+title('SSIM of normalized tumour area compared to healthy area','FontSize',16)
+ylabel('SSIM','FontSize',14)
 
-%plot for SSIM within tumour (outlier results)
-for sub = 1:5
-    t = [1:5];
-    x = repmat(t,5);
-    scatter(x(:,1),SSIM(o,1));
-    hold on;
-    scatter(x(:,2),SSIM(o,3));
-    hold on;
-    plot([1 2],SSIM_lesion_outlier(sub,[1 2]));
-    hold on;
-    title('SSIM of tumour (outliers)')
-    xlabel('normalisation method');
-    ylabel('SSIM');
-end
-
+s = 1:30; s([2 19 27 28 29]) = []; SSIM_brain_norm = SSIM_brain(s,:);
 %plot for SSIM of brain minus tumour
+figure;
 for sub = 1:25
     t = [1:25];
     x = repmat(t,25);
-    scatter(x(:,1),SSIM(s,2));
+    scatter(x(:,1),SSIM(s,2),30,'filled');
     hold on;
-    scatter(x(:,2),SSIM(s,4));
+    scatter(x(:,2),SSIM(s,4),30,'filled');
     hold on;
-    plot([1 2],SSIM_brain_norm(sub,[1 2]));
+    plot([1 2],SSIM_brain_norm(sub,[1 2]),'LineWidth',2);
     hold on;
-    title('SSIM of brain minus tumour')
-    xlabel('normalisation method');
-    ylabel('SSIM');
 end
+box on; grid on
+axis([0.9 2.1 0*10^5 18*10^6])
+title('SSIM of normalized brain (minus tumour) compared to healthy brain (minus tumour)','FontSize',16)
+ylabel('SSIM','FontSize',14)
 
-%plot for SSIM of brain minus tumour (outlier)
+o = [2 19 27 28 29]; SSIM_brain_outlier = SSIM_brain(o,:);
+%plot for SSIM of brain minus tumour (outliers)
+figure;
 for sub = 1:5
     t = [1:5];
     x = repmat(t,5);
-    scatter(x(:,1),SSIM(o,2));
+    scatter(x(:,1),SSIM(o,2),30,'filled');
     hold on;
-    scatter(x(:,2),SSIM(o,4));
+    scatter(x(:,2),SSIM(o,4),30,'filled');
     hold on;
-    plot([1 2],SSIM_brain_outlier(sub,[1 2]));
+    plot([1 2],SSIM_brain_outlier(sub,[1 2]),'LineWidth',2);
     hold on;
-    title('SSIM of brain minus tumour (outliers)')
-    xlabel('normalisation method');
-    ylabel('SSIM');
 end
+box on; grid on
+axis([0.9 2.1 3*10^9 5*10^9])
+title('SSIM of normalized brain (minus tumour) compared to healthy brain (minus tumour)','FontSize',16)
+ylabel('SSIM','FontSize',14)
 
 %RMS
 s = 1:30; 
-o = s([2 19 27 28 29]);
-s([2 19 27 28 29]) = [];
-rms_lesion = rms(:,[1 3]);
-rms_lesion_norm = rms_lesion(s,:);
-rms_lesion_outlier = rms_lesion(o,:);
-rms_brain = rms(:,[2 4]);
-rms_brain_norm = rms_brain(s,:);
-rms_brain_outlier = rms_brain(o,:);
-
-%plot for rms within tumour (non-outlier results)
-for sub = 1:25
-    t = [1:25];
-    x = repmat(t,25);
-    scatter(x(:,1),rms(s,1));
+%plot for rms within tumour 
+figure;
+for sub = 1:30
+    t = [1:30];
+    x = repmat(t,30);
+    scatter(x(:,1),rms(s,1),30,'filled');
     hold on;
-    scatter(x(:,2),rms(s,3));
+    scatter(x(:,2),rms(s,3),30,'filled');
     hold on;
-    plot([1 2],rms_lesion_norm(sub,[1 2]));
+    plot([1 2],rms_lesion_norm(sub,[1 2]),'LineWidth',2);
     hold on;
-    title('rms of tumour')
-    xlabel('normalisation method');
-    ylabel('rms');
 end
+box on; grid on
+title('RMS of normalized tumour area compared to healthy area','FontSize',16)
+ylabel('SSIM','FontSize',14)
 
-
-%plot for SSIM within tumour (outlier results)
-for sub = 1:5
-    t = [1:5];
-    x = repmat(t,5);
-    scatter(x(:,1),rms(o,1));
+%plot for rms of brain minus tumour
+figure;
+for sub = 1:30
+    t = [1:30];
+    x = repmat(t,30);
+    scatter(x(:,1),rms(s,2),30,'filled');
     hold on;
-    scatter(x(:,2),rms(o,3));
+    scatter(x(:,2),rms(s,4),30,'filled');
     hold on;
-    plot([1 2],rms_lesion_outlier(sub,[1 2]));
+    plot([1 2],rms_brain_norm(sub,[1 2]),'LineWidth',2);
     hold on;
-    title('rms of tumour (outliers)')
-    xlabel('normalisation method');
-    ylabel('rms');
 end
-
-%plot for SSIM of brain minus tumour
-for sub = 1:25
-    t = [1:25];
-    x = repmat(t,25);
-    scatter(x(:,1),rms(s,2));
-    hold on;
-    scatter(x(:,2),rms(s,4));
-    hold on;
-    plot([1 2],rms_brain_norm(sub,[1 2]));
-    hold on;
-    title('rms of brain minus tumour')
-    xlabel('normalisation method');
-    ylabel('rms');
-end
-
-%plot for SSIM of brain minus tumour (outlier)
-for sub = 1:5
-    t = [1:5];
-    x = repmat(t,5);
-    scatter(x(:,1),rms(o,2));
-    hold on;
-    scatter(x(:,2),rms(o,4));
-    hold on;
-    plot([1 2],rms_brain_outlier(sub,[1 2]));
-    hold on;
-    title('rms of brain minus tumour (outliers)')
-    xlabel('normalisation method');
-    ylabel('rms');
-end
+box on; grid on
+title('RMS of normalized brain (minus tumour) compared to healthy brain (minus tumour)','FontSize',16)
+ylabel('SSIM','FontSize',14)
 
 % [medianssim,CIssim] = rst_data_plot(SSIM(:,[1 3 2 4]),'estimator','median','newfig','yes');
 [diffssim,CIdssim,pssim,alphav,hssim]= rst_multicompare(SSIM,[1 3;2 4],'alphav',0.05,'estimator','median','newfig','yes');
