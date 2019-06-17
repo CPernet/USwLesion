@@ -86,7 +86,8 @@ end
 
 %% USwL normalise/segment
  
-for patient = 2:6
+s = 23:54; s(18) = []; 
+for patient = s
     cd(local(patient+2).name)
     
     folderinfo = dir(pwd);
@@ -141,13 +142,63 @@ for patient = 2:6
             movefile([pwd filesep 'swicv*.nii'],[destination filesep 'swicv']);
             movefile([pwd filesep 'wmkr*.nii'],[destination filesep 'wmk_alt']);
             movefile([pwd filesep 'wmk*.nii'],[destination filesep 'wmk_T1']);
+            movefile([pwd filesep 'ksub*.mat'],[destination filesep 'ksub']);
             delete([pwd filesep 'c5*.nii']);
             delete([pwd filesep 'c6*.nii']);
-            delete([pwd filesep 'ksub*.mat']);
 
         end
     end
     
     cd ..
 end
+
+%% get images for group 1/2
+
+%compute mean of mwc1 images
+for patient = 1:54
+    cd(local(patient+2).name)
+    mwc1_1 = [pwd filesep 'nbG1_tissue2' filesep 'mwc1.nii']; mwc1_1_vol = spm_vol(mwc1_1) ; mwc1_1 = spm_read_vols(mwc1_1_vol);
+    mwc1_2 = [pwd filesep 'nbG1_tissue3' filesep 'mwc1.nii']; mwc1_2_vol = spm_vol(mwc1_2) ; mwc1_2 = spm_read_vols(mwc1_2_vol);
+    mwc1_3 = [pwd filesep 'nbG2_tissue2' filesep 'mwc1.nii']; mwc1_3_vol = spm_vol(mwc1_3) ; mwc1_3 = spm_read_vols(mwc1_3_vol);
+    mwc1_4 = [pwd filesep 'nbG2_tissue3' filesep 'mwc1.nii']; mwc1_4_vol = spm_vol(mwc1_4) ; mwc1_4 = spm_read_vols(mwc1_4_vol);
+    
+    mwc1_mean = (mwc1_1 + mwc1_2 + mwc1_3 + mwc1_4)/4;
+    mwc1_1_vol.fname = [mwc1_1_vol.fname(1:end-21) 'mwc1_mean.nii'];
+    spm_write_vol(mwc1_1_vol,mwc1_mean);
+    
+    %smooth the mean image
+    matlabbatch{1}.spm.spatial.smooth.data = {[pwd filesep 'mwc1_mean.nii']};
+    matlabbatch{1}.spm.spatial.smooth.fwhm = [8 8 8];
+    matlabbatch{1}.spm.spatial.smooth.dtype = 0;
+    matlabbatch{1}.spm.spatial.smooth.im = 0;
+    matlabbatch{1}.spm.spatial.smooth.prefix = 's';
+    spm_jobman('run', matlabbatch);
+    clear matlabbatch
+    
+    cd ..
+end
+
+%% get the Total Intracranial Volume
+
+for patient = 1:54
+    cd(local(patient+2).name)
+    for nbGaussian = 1:2
+        for affectedtissue = 1:2 % add +1 for GM+WM or GM+WM+CSF
+            folder_name = [pwd filesep 'nbG' num2str(nbGaussian) '_tissue' num2str(affectedtissue+1)];
+            seg8 = [folder_name filesep 'ksub.mat'];            
+            matlabbatch{1}.spm.util.tvol.matfiles = {seg8};
+            matlabbatch{1}.spm.util.tvol.tmax = 4;
+            matlabbatch{1}.spm.util.tvol.mask = {'C:\Users\s1835343\mri_stuff\spm12\tpm\mask_ICV.nii,1'};
+            matlabbatch{1}.spm.util.tvol.outf = 'volumes';
+            spm_jobman('run', matlabbatch);
+            clear matlabbatch
+     
+        end
+    end
+    cd ..
+end
+
+
+
+
 
