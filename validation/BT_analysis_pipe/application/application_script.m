@@ -86,7 +86,7 @@ end
 
 %% USwL normalise/segment
  
-s = 23:54; s(18) = []; 
+s = 1:54; s(40) = [];
 for patient = s
     cd(local(patient+2).name)
     
@@ -145,7 +145,7 @@ for patient = s
             movefile([pwd filesep 'ksub*.mat'],[destination filesep 'ksub']);
             delete([pwd filesep 'c5*.nii']);
             delete([pwd filesep 'c6*.nii']);
-
+            
         end
     end
     
@@ -155,7 +155,9 @@ end
 %% get images for group 1/2
 
 %compute mean of mwc1 images
-for patient = 1:54
+
+s = 1:54; s(40) = [];
+for patient = s
     cd(local(patient+2).name)
     mwc1_1 = [pwd filesep 'nbG1_tissue2' filesep 'mwc1.nii']; mwc1_1_vol = spm_vol(mwc1_1) ; mwc1_1 = spm_read_vols(mwc1_1_vol);
     mwc1_2 = [pwd filesep 'nbG1_tissue3' filesep 'mwc1.nii']; mwc1_2_vol = spm_vol(mwc1_2) ; mwc1_2 = spm_read_vols(mwc1_2_vol);
@@ -180,25 +182,33 @@ end
 
 %% get the Total Intracranial Volume
 
-for patient = 1:54
+s = 14:54; s(27) = [];
+for patient = s
     cd(local(patient+2).name)
+    
     for nbGaussian = 1:2
         for affectedtissue = 1:2 % add +1 for GM+WM or GM+WM+CSF
-            folder_name = [pwd filesep 'nbG' num2str(nbGaussian) '_tissue' num2str(affectedtissue+1)];
-            seg8 = [folder_name filesep 'ksub.mat'];            
-            matlabbatch{1}.spm.util.tvol.matfiles = {seg8};
+            
+            destination = [pwd filesep 'nbG' num2str(nbGaussian) '_tissue' num2str(affectedtissue+1)];
+            movefile([destination filesep '*'],[pwd])
+            
+            matlabbatch{1}.spm.util.tvol.matfiles = {[pwd filesep 'seg8.mat']};
             matlabbatch{1}.spm.util.tvol.tmax = 4;
             matlabbatch{1}.spm.util.tvol.mask = {'C:\Users\s1835343\mri_stuff\spm12\tpm\mask_ICV.nii,1'};
             matlabbatch{1}.spm.util.tvol.outf = 'volumes';
             spm_jobman('run', matlabbatch);
             clear matlabbatch
-     
+            
+            movefile([pwd filesep '*'],[destination]);
+            movefile([destination filesep 'nbG*'],[pwd]);
+            movefile([destination filesep 'lesion mask.nii'],[pwd]);
+            movefile([destination filesep 'mwc1_mean.nii'],[pwd]);
+            movefile([destination filesep 'smwc1_mean.nii'],[pwd]);
+            movefile([destination filesep 'rsub*'],[pwd]);
+            movefile([destination filesep 'sub*'],[pwd]);
+    
         end
     end
     cd ..
 end
-
-
-
-
 
