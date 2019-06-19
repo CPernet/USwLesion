@@ -217,7 +217,7 @@ end
 
 TIV = NaN(54,1);
 s = 1:54; s(40) = [];
-for patient = 1:16
+for patient = s
     cd(local(patient+2).name)
 
     IMP = importdata([pwd filesep 'nbG1_tissue2' filesep 'volumes.csv']); nbG1_tiss2_vols = IMP.data;
@@ -235,4 +235,47 @@ end
 
 cd('C:\Users\s1835343\mri_stuff\spm12\toolbox\USwLesion\validation\BT_analysis_pipe\application')
 csvwrite('TIV.csv',TIV);
+
+%% do stats
+
+group_1 = [1 5 7 8 12 14 15 18 21 24 30 31 32 44 46 47 49 51];
+group_2 = [2 3 4 6 9 10 11 13 16 17 19 20 22 23 25 26 27 28 29 33 34 35 36 37 38 39 41 42 43 45 48 50 52 53 54];
+
+%group 1 -> motor tumours
+group1_smwc1 = cell(18,1);
+index = 1;
+for patient = group_1
+    cd(local(patient+2).name)
+    smwc1 = [pwd filesep 'smwc1_mean.nii'];
+    group1_smwc1(index,1) = cellstr(smwc1);
+    index = index + 1;
+    cd ..
+end
+
+%group 2 -> non-motor tumours
+group2_smwc1 = cell(35,1);
+index = 1;
+for patient = group_2
+    cd(local(patient+2).name)
+    smwc1 = [pwd filesep 'smwc1_mean.nii'];
+    group2_smwc1(index,1) = cellstr(smwc1);
+    index = index + 1;
+    cd ..
+end
+
+group1_TIV = TIV(group_1); group2_TIV = TIV(group_2);
+reordered_TIV = cell2mat(vertcat(group1_TIV,group2_TIV));
+
+%load stats batch
+matlabbatch = load('C:\Users\s1835343\mri_stuff\VBM_stats_batch.mat');
+matlabbatch.matlabbatch{1,2}.spm.stats.factorial_design.des.t2.scans1 = [group1_smwc1]; %Group 1 smwc1_mean.nii images
+matlabbatch.matlabbatch{1,2}.spm.stats.factorial_design.des.t2.scans2 = [group2_smwc1]; %Group 2 smwc1_mean.nii images
+matlabbatch.matlabbatch{1,2}.spm.stats.factorial_design.cov.c = [reordered_TIV]; %vector of TIVs -> X-by-1 array must be entered
+out = spm_jobman('run', matlabbatch.matlabbatch);
+
+
+
+
+
+
 
