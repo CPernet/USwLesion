@@ -170,7 +170,7 @@ for patient = s
     
     %smooth the mean image
     matlabbatch{1}.spm.spatial.smooth.data = {[pwd filesep 'mwc1_mean.nii']};
-    matlabbatch{1}.spm.spatial.smooth.fwhm = [8 8 8];
+    matlabbatch{1}.spm.spatial.smooth.fwhm = [6 6 6];
     matlabbatch{1}.spm.spatial.smooth.dtype = 0;
     matlabbatch{1}.spm.spatial.smooth.im = 0;
     matlabbatch{1}.spm.spatial.smooth.prefix = 's';
@@ -183,7 +183,7 @@ end
 %% get the Total Intracranial Volume
 
 % get volumes
-s = 14:54; s(27) = [];
+s = 1:54; s(40) = []; 
 for patient = s
     cd(local(patient+2).name)
     
@@ -238,11 +238,11 @@ csvwrite('TIV.csv',TIV);
 
 %% do stats
 
-group_1 = [1 5 7 8 12 14 15 18 21 24 30 31 32 44 46 47 49 51];
+group_1 = [1 5 7 8 12 14 15 18 21 24 30 32 44 46 47 49 51];
 group_2 = [2 3 4 6 9 10 11 13 16 17 19 20 22 23 25 26 27 28 29 33 34 35 36 37 38 39 41 42 43 45 48 50 52 53 54];
 
 %group 1 -> non-motor tumours
-group1_smwc1 = cell(18,1);
+group1_smwc1 = cell(17,1);
 index = 1;
 for patient = group_1
     cd(local(patient+2).name)
@@ -264,7 +264,7 @@ for patient = group_2
 end
 
 group1_TIV = TIV(group_1); group2_TIV = TIV(group_2);
-reordered_TIV = cell2mat(vertcat(group1_TIV,group2_TIV));
+reordered_TIV = [group1_TIV;group2_TIV]; % cell2mat(vertcat(group1_TIV,group2_TIV));
 
 %load stats batch
 matlabbatch = load('C:\Users\s1835343\mri_stuff\VBM_stats_batch.mat');
@@ -273,9 +273,26 @@ matlabbatch.matlabbatch{1,2}.spm.stats.factorial_design.des.t2.scans2 = [group2_
 matlabbatch.matlabbatch{1,2}.spm.stats.factorial_design.cov.c = [reordered_TIV]; %vector of TIVs -> X-by-1 array must be entered
 out = spm_jobman('run', matlabbatch.matlabbatch);
 
+%% Run STAPLE on lesion masks
 
+group_1 = [1 5 7 8 12 14 15 18 21 24 30 31 32 44 46 47 49 51];
+group_2 = [2 3 4 6 9 10 11 13 16 17 19 20 22 23 25 26 27 28 29 33 34 35 36 37 38 39 41 42 43 45 48 50 52 53 54];
 
+%group 1 -> non-motor tumours
+index = 1;
+for patient = group_1
+    cd(local(patient+2).name)
+    mask = [pwd filesep 'nbG1_tissue3' filesep 'wlesion mask.nii'];
+    mask_vol = spm_vol(mask); group1_masks{index} = spm_read_vols(mask_vol);
+    index = index + 1;
+    cd ..
+end
 
+s = 1:54; s(40) = [];
 
-
-
+test = cell(54,1);
+index = 1;
+for patient = s
+    x = [pwd filesep ];
+    test(index,1) = [];
+end
