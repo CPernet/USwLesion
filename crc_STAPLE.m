@@ -55,9 +55,9 @@ for img = 1:N
     dim(img,:) = V(img).dim;
 end 
     
-if sum(sum(dim==dim(1,:)) == N) ~= 3
-    error('imput images do not all have the same dimensions');
-end
+% if sum(sum(dim==dim(1,:)) == N) ~= 3
+%     error('imput images do not all have the same dimensions');
+% end
 
 %% make the matrix D
 M = prod(dim(1,:));
