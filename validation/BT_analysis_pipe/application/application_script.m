@@ -365,5 +365,196 @@ matlabbatch.matlabbatch{1,2}.spm.stats.factorial_design.des.t2.scans2 = [group2_
 matlabbatch.matlabbatch{1,2}.spm.stats.factorial_design.cov.c = [reordered_TIV]; %vector of TIVs -> X-by-1 array must be entered
 out = spm_jobman('run', matlabbatch.matlabbatch);
 
+%% Use SPM summarize to extract data at specific coordinates 
 
+group_1 = [1 5 7 8 12 14 15 18 21 24 30 32 44 46 47 49 51];
+group_2 = [2 3 4 6 9 10 11 13 16 17 19 20 22 23 25 26 27 28 29 33 34 35 36 37 38 39 41 42 43 45 48 50 52 53 54];
+
+% MOTOR THALAMUS
+
+index = 1;
+Lthal_gr1 = NaN(17,1);
+for patient = group_1
+    cd(local(patient+2).name)
+    swc1_img = [pwd filesep 'swc1_mean.nii'];
+    [Lthal_gr1(index,1), xY] = spm_summarise(swc1_img,struct('def','sphere', 'spec',8, 'xyz',[-15 -23 4]'),@mean);
+    index = index+1;
+    cd ..
+end
+
+index = 1;
+Lthal_gr2 = NaN(35,1);
+for patient = group_2
+    cd(local(patient+2).name)
+    swc1_img = [pwd filesep 'swc1_mean.nii'];
+    [Lthal_gr2(index,1), xY] = spm_summarise(swc1_img,struct('def','sphere', 'spec',8, 'xyz',[-15 -23 4]'),@mean);
+    index = index+1;
+    cd ..
+end
+
+index = 1;
+Rthal_gr1 = NaN(17,1);
+for patient = group_1
+    cd(local(patient+2).name)
+    swc1_img = [pwd filesep 'swc1_mean.nii'];
+    [Rthal_gr1(index,1), xY] = spm_summarise(swc1_img,struct('def','sphere', 'spec',8, 'xyz',[18 -24 4]'),@mean);
+    index = index+1;
+    cd ..
+end
+
+index = 1;
+Rthal_gr2 = NaN(35,1);
+for patient = group_2
+    cd(local(patient+2).name)
+    swc1_img = [pwd filesep 'swc1_mean.nii'];
+    [Rthal_gr2(index,1), xY] = spm_summarise(swc1_img,struct('def','sphere', 'spec',8, 'xyz',[18 -24 4]'),@mean);
+    index = index+1;
+    cd ..
+end
+
+ThData = NaN(35,4); 
+ThData(1:17,1) = Lthal_gr1; ThData(:,2) = Lthal_gr2;
+ThData(1:17,3) = Rthal_gr1; ThData(:,4) = Rthal_gr2;
+[est_thal,HDI_thal] = rst_data_plot(ThData,'estimator','median','newfig','yes');
+
+% MOTOR (HANDS)
+
+index = 1;
+Lmotor_hands_gr1 = NaN(17,1);
+for patient = group_1
+    cd(local(patient+2).name)
+    swc1_img = [pwd filesep 'swc1_mean.nii'];
+    [Lmotor_hands_gr1(index,1), xY] = spm_summarise(swc1_img,struct('def','sphere', 'spec',8, 'xyz',[-38 -25 57]'),@mean);
+    index = index+1;
+    cd ..
+end
+
+index = 1;
+Lmotor_hands_gr2 = NaN(35,1);
+for patient = group_2
+    cd(local(patient+2).name)
+    swc1_img = [pwd filesep 'swc1_mean.nii'];
+    [Lmotor_hands_gr2(index,1), xY] = spm_summarise(swc1_img,struct('def','sphere', 'spec',8, 'xyz',[-38 -25 57]'),@mean);
+    index = index+1;
+    cd ..
+end
+
+index = 1;
+Rmotor_hands_gr1 = NaN(17,1);
+for patient = group_1
+    cd(local(patient+2).name)
+    swc1_img = [pwd filesep 'swc1_mean.nii'];
+    [Rmotor_hands_gr1(index,1), xY] = spm_summarise(swc1_img,struct('def','sphere', 'spec',8, 'xyz',[40 -25 57]'),@mean);
+    index = index+1;
+    cd ..
+end
+
+index = 1;
+Rmotor_hands_gr2 = NaN(35,1);
+for patient = group_2
+    cd(local(patient+2).name)
+    swc1_img = [pwd filesep 'swc1_mean.nii'];
+    [Rmotor_hands_gr2(index,1), xY] = spm_summarise(swc1_img,struct('def','sphere', 'spec',8, 'xyz',[40 -25 57]'),@mean);
+    index = index+1;
+    cd ..
+end
+
+motorhandsData = NaN(35,4); 
+motorhandsData(1:17,1) = Lmotor_hands_gr1; motorhandsData(:,2) = Lmotor_hands_gr2;
+motorhandsData(1:17,3) = Rmotor_hands_gr1; motorhandsData(:,4) = Rmotor_hands_gr2;
+[est_motor_hands,HDI_motor_hands] = rst_data_plot(motorhandsData,'estimator','median','newfig','yes');
+
+% MOTOR (FEET)
+
+index = 1;
+Lmotor_feet_gr1 = NaN(17,1);
+for patient = group_1
+    cd(local(patient+2).name)
+    swc1_img = [pwd filesep 'swc1_mean.nii'];
+    [Lmotor_feet_gr1(index,1), xY] = spm_summarise(swc1_img,struct('def','sphere', 'spec',8, 'xyz',[-5 -28 58]'),@mean);
+    index = index+1;
+    cd ..
+end
+
+index = 1;
+Lmotor_feet_gr2 = NaN(35,1);
+for patient = group_2
+    cd(local(patient+2).name)
+    swc1_img = [pwd filesep 'swc1_mean.nii'];
+    [Lmotor_feet_gr2(index,1), xY] = spm_summarise(swc1_img,struct('def','sphere', 'spec',8, 'xyz',[-5 -28 58]'),@mean);
+    index = index+1;
+    cd ..
+end
+
+index = 1;
+Rmotor_feet_gr1 = NaN(17,1);
+for patient = group_1
+    cd(local(patient+2).name)
+    swc1_img = [pwd filesep 'swc1_mean.nii'];
+    [Rmotor_feet_gr1(index,1), xY] = spm_summarise(swc1_img,struct('def','sphere', 'spec',8, 'xyz',[5 -28 58]'),@mean);
+    index = index+1;
+    cd ..
+end
+
+index = 1;
+Rmotor_feet_gr2 = NaN(35,1);
+for patient = group_2
+    cd(local(patient+2).name)
+    swc1_img = [pwd filesep 'swc1_mean.nii'];
+    [Rmotor_feet_gr2(index,1), xY] = spm_summarise(swc1_img,struct('def','sphere', 'spec',8, 'xyz',[5 -28 58]'),@mean);
+    index = index+1;
+    cd ..
+end
+
+motorfeetData = NaN(35,4); 
+motorfeetData(1:17,1) = Lmotor_feet_gr1; motorfeetData(:,2) = Lmotor_feet_gr2;
+motorfeetData(1:17,3) = Rmotor_feet_gr1; motorfeetData(:,4) = Rmotor_feet_gr2;
+[est_motor_feet,HDI_motor_feet] = rst_data_plot(motorfeetData,'estimator','median','newfig','yes');
+
+% VI CEREBELLUM
+
+index = 1;
+LVI_cerebellum_gr1 = NaN(17,1);
+for patient = group_1
+    cd(local(patient+2).name)
+    swc1_img = [pwd filesep 'swc1_mean.nii'];
+    [LVI_cerebellum_gr1(index,1), xY] = spm_summarise(swc1_img,struct('def','sphere', 'spec',8, 'xyz',[-26 -54 -26]'),@mean);
+    index = index+1;
+    cd ..
+end
+
+index = 1;
+LVI_cerebellum_gr2 = NaN(35,1);
+for patient = group_2
+    cd(local(patient+2).name)
+    swc1_img = [pwd filesep 'swc1_mean.nii'];
+    [LVI_cerebellum_gr2(index,1), xY] = spm_summarise(swc1_img,struct('def','sphere', 'spec',8, 'xyz',[-26 -54 -26]'),@mean);
+    index = index+1;
+    cd ..
+end
+
+index = 1;
+RVI_cerebellum_gr1 = NaN(17,1);
+for patient = group_1
+    cd(local(patient+2).name)
+    swc1_img = [pwd filesep 'swc1_mean.nii'];
+    [RVI_cerebellum_gr1(index,1), xY] = spm_summarise(swc1_img,struct('def','sphere', 'spec',8, 'xyz',[28 -54 -26]'),@mean);
+    index = index+1;
+    cd ..
+end
+
+index = 1;
+RVI_cerebellum_gr2 = NaN(35,1);
+for patient = group_2
+    cd(local(patient+2).name)
+    swc1_img = [pwd filesep 'swc1_mean.nii'];
+    [RVI_cerebellum_gr2(index,1), xY] = spm_summarise(swc1_img,struct('def','sphere', 'spec',8, 'xyz',[28 -54 -26]'),@mean);
+    index = index+1;
+    cd ..
+end
+
+VI_cerebellum_Data = NaN(35,4); 
+VI_cerebellum_Data(1:17,1) = LVI_cerebellum_gr1; VI_cerebellum_Data(:,2) = LVI_cerebellum_gr2;
+VI_cerebellum_Data(1:17,3) = RVI_cerebellum_gr1; VI_cerebellum_Data(:,4) = RVI_cerebellum_gr2;
+[est_VI_cerebellum,HDI_VI_cerebellum] = rst_data_plot(VI_cerebellum_Data,'estimator','median','newfig','yes'); 
 
