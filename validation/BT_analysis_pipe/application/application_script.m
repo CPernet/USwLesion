@@ -165,6 +165,7 @@ for patient = s
             wc3 = [folder filesep 'wc3.nii']; wc3 = cellstr(wc3);
             wc4 = [folder filesep 'wc4.nii']; wc4 = cellstr(wc4);
             masks = [wc1;wc2;wc3;wc4];
+            
             matlabbatch{1}.spm.util.imcalc.input = [masks];
             matlabbatch{1}.spm.util.imcalc.output = 'thresholded_mask';
             matlabbatch{1}.spm.util.imcalc.outdir = {folder};
@@ -174,9 +175,10 @@ for patient = s
             matlabbatch{1}.spm.util.imcalc.options.mask = 0;
             matlabbatch{1}.spm.util.imcalc.options.interp = 0;
             matlabbatch{1}.spm.util.imcalc.options.dtype = 4;
-            matlabbatch{1}.spm.tools.USwLtools.USwLutils.FxLesMsk.fnMsk(1) = cfg_dep('Image Calculator: ImCalc Computed Image: maskc3_2GaussiansGMWMCSF', substruct('.','val', '{}',{9}, '.','val', '{}',{1}, '.','val', '{}',{1}), substruct('.','files'));
-            matlabbatch{1}.spm.tools.USwLtools.USwLutils.FxLesMsk.options.minVol = Inf;
-            matlabbatch{1}.spm.tools.USwLtools.USwLutils.FxLesMsk.options.fnOth = '';
+            
+            matlabbatch{2}.spm.tools.USwLtools.USwLutils.FxLesMsk.fnMsk(1) = cfg_dep('Image Calculator: ImCalc Computed Image: thresholded_mask', substruct('.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1}), substruct('.','files'));
+            matlabbatch{2}.spm.tools.USwLtools.USwLutils.FxLesMsk.options.minVol = Inf;
+            matlabbatch{2}.spm.tools.USwLtools.USwLutils.FxLesMsk.options.fnOth = '';
             spm_jobman('run', matlabbatch);
             clear matlabbatch
             
@@ -198,51 +200,46 @@ end
 group_1 = [1 5 7 8 12 14 15 18 21 24 30 32 44 46 47 49 51];
 group_2 = [2 3 4 6 9 10 11 13 16 17 19 20 22 23 25 26 27 28 29 33 34 35 36 37 38 39 41 42 43 45 48 50 52 53 54];
 
-%group 1 -> non-motor tumours
-
 i = 1;
 for patient = group_1
     cd(local(patient+2).name)
-    STAPLE_mask = [pwd filesep 'nbG1_tissue2' filesep 'staple_mask.nii'];
-    group1_mask{i} = spm_read_vols(spm_vol(STAPLE_mask));
+    STAPLE_mask_gr1{i} = [pwd filesep 'nbG1_tissue2' filesep 'tstaple_mask.nii'];
     i = i +1;
     cd ..
 end
-
-i = 1;
-for patient = 1:17
-    if patient == 1
-    group1_sum_staple = group1_mask{i} + group1_mask{i+1};
-    else
-    group1_sum_staple = group1_sum_staple + group1_mask{i+1};
-    end
-end
-
-V = spm_vol(STAPLE_mask); V.fname = 'group1_sum_staple.nii';
-spm_write_vol(V,group1_sum_staple);
-
-%group 2 -> motor tumours
+STAPLE_mask_gr1 = cellstr(STAPLE_mask_gr1');
 
 i = 1;
 for patient = group_2
     cd(local(patient+2).name)
-    STAPLE_mask = [pwd filesep 'nbG1_tissue2' filesep 'staple_mask.nii'];
-    group2_mask{i} = spm_read_vols(spm_vol(STAPLE_mask));
-    i = i+1;
+    STAPLE_mask_gr2{i} = [pwd filesep 'nbG1_tissue2' filesep 'tstaple_mask.nii'];
+    i = i +1;
     cd ..
 end
+STAPLE_mask_gr2 = cellstr(STAPLE_mask_gr2');
 
-i = 1;
-for patient = 1:35
-    if patient == 1
-    group2_sum_staple = group2_mask{i} + group2_mask{i+1};
-    else
-    group2_sum_staple = group2_sum_staple + group2_mask{i+1};
-    end
-end
+matlabbatch{1}.spm.util.imcalc.input = [STAPLE_mask_gr1];
+matlabbatch{1}.spm.util.imcalc.output = 'group1_sum_of_masks';
+matlabbatch{1}.spm.util.imcalc.outdir = {''};
+matlabbatch{1}.spm.util.imcalc.expression = 'sum(X,1)';
+matlabbatch{1}.spm.util.imcalc.var = struct('name', {}, 'value', {});
+matlabbatch{1}.spm.util.imcalc.options.dmtx = 1;
+matlabbatch{1}.spm.util.imcalc.options.mask = 0;
+matlabbatch{1}.spm.util.imcalc.options.interp = 1;
+matlabbatch{1}.spm.util.imcalc.options.dtype = 4;
+spm_jobman('run', matlabbatch);
 
-V = spm_vol(STAPLE_mask); V.fname = 'group2_sum_staple.nii';
-spm_write_vol(V,group2_sum_staple);
+matlabbatch{1}.spm.util.imcalc.input = [STAPLE_mask_gr2];
+matlabbatch{1}.spm.util.imcalc.output = 'group2_sum_of_masks';
+matlabbatch{1}.spm.util.imcalc.outdir = {''};
+matlabbatch{1}.spm.util.imcalc.expression = 'sum(X,1)';
+matlabbatch{1}.spm.util.imcalc.var = struct('name', {}, 'value', {});
+matlabbatch{1}.spm.util.imcalc.options.dmtx = 1;
+matlabbatch{1}.spm.util.imcalc.options.mask = 0;
+matlabbatch{1}.spm.util.imcalc.options.interp = 1;
+matlabbatch{1}.spm.util.imcalc.options.dtype = 4;
+spm_jobman('run', matlabbatch);
+
 
 %% get images for group 1/2
 
