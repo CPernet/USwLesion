@@ -152,24 +152,116 @@ for patient = s
     cd ..
 end
 
-%% get images for group 1/2
+%threshold and calculate STAPLE
 
-%compute mean of mwc1 images
-
-s = 1:54; s(40) = [];
+s = 1:54; s(40) = []; s(31) = [];
 for patient = s
     cd(local(patient+2).name)
-    mwc1_1 = [pwd filesep 'nbG1_tissue2' filesep 'mwc1.nii']; mwc1_1_vol = spm_vol(mwc1_1) ; mwc1_1 = spm_read_vols(mwc1_1_vol);
-    mwc1_2 = [pwd filesep 'nbG1_tissue3' filesep 'mwc1.nii']; mwc1_2_vol = spm_vol(mwc1_2) ; mwc1_2 = spm_read_vols(mwc1_2_vol);
-    mwc1_3 = [pwd filesep 'nbG2_tissue2' filesep 'mwc1.nii']; mwc1_3_vol = spm_vol(mwc1_3) ; mwc1_3 = spm_read_vols(mwc1_3_vol);
-    mwc1_4 = [pwd filesep 'nbG2_tissue3' filesep 'mwc1.nii']; mwc1_4_vol = spm_vol(mwc1_4) ; mwc1_4 = spm_read_vols(mwc1_4_vol);
+    for nbGaussian = 1:2
+        for affectedtissue = 1:2 % add +1 for GM+WM or GM+WM+CSF
+            folder = [pwd filesep 'nbG' num2str(nbGaussian) '_tissue' num2str(affectedtissue+1)];
+            wc1 = [folder filesep 'wc1.nii']; wc1 = cellstr(wc1);
+            wc2 = [folder filesep 'wc2.nii']; wc2 = cellstr(wc2);
+            wc3 = [folder filesep 'wc3.nii']; wc3 = cellstr(wc3);
+            wc4 = [folder filesep 'wc4.nii']; wc4 = cellstr(wc4);
+            masks = [wc1;wc2;wc3;wc4];
+            matlabbatch{1}.spm.util.imcalc.input = [masks];
+            matlabbatch{1}.spm.util.imcalc.output = 'thresholded_mask';
+            matlabbatch{1}.spm.util.imcalc.outdir = {folder};
+            matlabbatch{1}.spm.util.imcalc.expression = '(i3>i1) & (i3>i2)&(i3>i4)';
+            matlabbatch{1}.spm.util.imcalc.var = struct('name', {}, 'value', {});
+            matlabbatch{1}.spm.util.imcalc.options.dmtx = 0;
+            matlabbatch{1}.spm.util.imcalc.options.mask = 0;
+            matlabbatch{1}.spm.util.imcalc.options.interp = 0;
+            matlabbatch{1}.spm.util.imcalc.options.dtype = 4;
+            matlabbatch{1}.spm.tools.USwLtools.USwLutils.FxLesMsk.fnMsk(1) = cfg_dep('Image Calculator: ImCalc Computed Image: maskc3_2GaussiansGMWMCSF', substruct('.','val', '{}',{9}, '.','val', '{}',{1}, '.','val', '{}',{1}), substruct('.','files'));
+            matlabbatch{1}.spm.tools.USwLtools.USwLutils.FxLesMsk.options.minVol = Inf;
+            matlabbatch{1}.spm.tools.USwLtools.USwLutils.FxLesMsk.options.fnOth = '';
+            spm_jobman('run', matlabbatch);
+            clear matlabbatch
+            
+        end
+    end
     
-    mwc1_mean = (mwc1_1 + mwc1_2 + mwc1_3 + mwc1_4)/4;
-    mwc1_1_vol.fname = [mwc1_1_vol.fname(1:end-21) 'mwc1_mean.nii'];
-    spm_write_vol(mwc1_1_vol,mwc1_mean);
+    mask_1 = [pwd filesep 'nbG1_tissue2' filesep 'thresholded_mask.nii']; mask_1 = cellstr(mask_1);
+    mask_2 = [pwd filesep 'nbG1_tissue3' filesep 'thresholded_mask.nii']; mask_2 = cellstr(mask_2);
+    mask_3 = [pwd filesep 'nbG2_tissue2' filesep 'thresholded_mask.nii']; mask_3 = cellstr(mask_3);
+    mask_4 = [pwd filesep 'nbG2_tissue3' filesep 'thresholded_mask.nii']; mask_4 = cellstr(mask_4);
+    P = [mask_1;mask_2;mask_3;mask_4];
+    crc_STAPLE(P);
+    
+    cd ..
+end
+
+% create sum of (STAPLE) lesion masks for motor/non-motor
+
+group_1 = [1 5 7 8 12 14 15 18 21 24 30 32 44 46 47 49 51];
+group_2 = [2 3 4 6 9 10 11 13 16 17 19 20 22 23 25 26 27 28 29 33 34 35 36 37 38 39 41 42 43 45 48 50 52 53 54];
+
+%group 1 -> non-motor tumours
+
+i = 1;
+for patient = group_1
+    cd(local(patient+2).name)
+    STAPLE_mask = [pwd filesep 'nbG1_tissue2' filesep 'staple_mask.nii'];
+    group1_mask{i} = spm_read_vols(spm_vol(STAPLE_mask));
+    i = i +1;
+    cd ..
+end
+
+i = 1;
+for patient = 1:17
+    if patient == 1
+    group1_sum_staple = group1_mask{i} + group1_mask{i+1};
+    else
+    group1_sum_staple = group1_sum_staple + group1_mask{i+1};
+    end
+end
+
+V = spm_vol(STAPLE_mask); V.fname = 'group1_sum_staple.nii';
+spm_write_vol(V,group1_sum_staple);
+
+%group 2 -> motor tumours
+
+i = 1;
+for patient = group_2
+    cd(local(patient+2).name)
+    STAPLE_mask = [pwd filesep 'nbG1_tissue2' filesep 'staple_mask.nii'];
+    group2_mask{i} = spm_read_vols(spm_vol(STAPLE_mask));
+    i = i+1;
+    cd ..
+end
+
+i = 1;
+for patient = 1:35
+    if patient == 1
+    group2_sum_staple = group2_mask{i} + group2_mask{i+1};
+    else
+    group2_sum_staple = group2_sum_staple + group2_mask{i+1};
+    end
+end
+
+V = spm_vol(STAPLE_mask); V.fname = 'group2_sum_staple.nii';
+spm_write_vol(V,group2_sum_staple);
+
+%% get images for group 1/2
+
+%compute mean of wc1 images
+
+s = 1:54; s(40) = []; s(31) = [];
+for patient = s
+    cd(local(patient+2).name)
+    wc1_1 = [pwd filesep 'nbG1_tissue2' filesep 'wc1.nii']; wc1_1_vol = spm_vol(wc1_1) ; wc1_1 = spm_read_vols(wc1_1_vol);
+    wc1_2 = [pwd filesep 'nbG1_tissue3' filesep 'wc1.nii']; wc1_2_vol = spm_vol(wc1_2) ; wc1_2 = spm_read_vols(wc1_2_vol);
+    wc1_3 = [pwd filesep 'nbG2_tissue2' filesep 'wc1.nii']; wc1_3_vol = spm_vol(wc1_3) ; wc1_3 = spm_read_vols(wc1_3_vol);
+    wc1_4 = [pwd filesep 'nbG2_tissue3' filesep 'wc1.nii']; wc1_4_vol = spm_vol(wc1_4) ; wc1_4 = spm_read_vols(wc1_4_vol);
+    
+    wc1_mean = (wc1_1 + wc1_2 + wc1_3 + wc1_4)/4;
+    wc1_1_vol.fname = [wc1_1_vol.fname(1:end-20) 'wc1_mean.nii'];
+    spm_write_vol(wc1_1_vol,wc1_mean);
     
     %smooth the mean image
-    matlabbatch{1}.spm.spatial.smooth.data = {[pwd filesep 'mwc1_mean.nii']};
+    matlabbatch{1}.spm.spatial.smooth.data = {[pwd filesep 'wc1_mean.nii']};
     matlabbatch{1}.spm.spatial.smooth.fwhm = [6 6 6];
     matlabbatch{1}.spm.spatial.smooth.dtype = 0;
     matlabbatch{1}.spm.spatial.smooth.im = 0;
@@ -242,57 +334,36 @@ group_1 = [1 5 7 8 12 14 15 18 21 24 30 32 44 46 47 49 51];
 group_2 = [2 3 4 6 9 10 11 13 16 17 19 20 22 23 25 26 27 28 29 33 34 35 36 37 38 39 41 42 43 45 48 50 52 53 54];
 
 %group 1 -> non-motor tumours
-group1_smwc1 = cell(17,1);
+group1_swc1 = cell(17,1);
 index = 1;
 for patient = group_1
     cd(local(patient+2).name)
-    smwc1 = [pwd filesep 'smwc1_mean.nii'];
-    group1_smwc1(index,1) = cellstr(smwc1);
+    swc1 = [pwd filesep 'swc1_mean.nii'];
+    group1_swc1(index,1) = cellstr(swc1);
     index = index + 1;
     cd ..
 end
 
 %group 2 -> motor tumours
-group2_smwc1 = cell(35,1);
+group2_swc1 = cell(35,1);
 index = 1;
 for patient = group_2
     cd(local(patient+2).name)
-    smwc1 = [pwd filesep 'smwc1_mean.nii'];
-    group2_smwc1(index,1) = cellstr(smwc1);
+    swc1 = [pwd filesep 'swc1_mean.nii'];
+    group2_swc1(index,1) = cellstr(swc1);
     index = index + 1;
     cd ..
 end
 
 group1_TIV = TIV(group_1); group2_TIV = TIV(group_2);
-reordered_TIV = [group1_TIV;group2_TIV]; % cell2mat(vertcat(group1_TIV,group2_TIV));
+reordered_TIV = [group1_TIV;group2_TIV]; 
 
 %load stats batch
 matlabbatch = load('C:\Users\s1835343\mri_stuff\VBM_stats_batch.mat');
-matlabbatch.matlabbatch{1,2}.spm.stats.factorial_design.des.t2.scans1 = [group1_smwc1]; %Group 1 smwc1_mean.nii images
-matlabbatch.matlabbatch{1,2}.spm.stats.factorial_design.des.t2.scans2 = [group2_smwc1]; %Group 2 smwc1_mean.nii images
+matlabbatch.matlabbatch{1,2}.spm.stats.factorial_design.des.t2.scans1 = [group1_swc1]; %Group 1 smwc1_mean.nii images
+matlabbatch.matlabbatch{1,2}.spm.stats.factorial_design.des.t2.scans2 = [group2_swc1]; %Group 2 smwc1_mean.nii images
 matlabbatch.matlabbatch{1,2}.spm.stats.factorial_design.cov.c = [reordered_TIV]; %vector of TIVs -> X-by-1 array must be entered
 out = spm_jobman('run', matlabbatch.matlabbatch);
 
-%% Run STAPLE on lesion masks
 
-group_1 = [1 5 7 8 12 14 15 18 21 24 30 31 32 44 46 47 49 51];
-group_2 = [2 3 4 6 9 10 11 13 16 17 19 20 22 23 25 26 27 28 29 33 34 35 36 37 38 39 41 42 43 45 48 50 52 53 54];
 
-%group 1 -> non-motor tumours
-index = 1;
-for patient = group_1
-    cd(local(patient+2).name)
-    mask = [pwd filesep 'nbG1_tissue3' filesep 'wlesion mask.nii'];
-    mask_vol = spm_vol(mask); group1_masks{index} = spm_read_vols(mask_vol);
-    index = index + 1;
-    cd ..
-end
-
-s = 1:54; s(40) = [];
-
-test = cell(54,1);
-index = 1;
-for patient = s
-    x = [pwd filesep ];
-    test(index,1) = [];
-end
