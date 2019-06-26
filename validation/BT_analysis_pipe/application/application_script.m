@@ -185,10 +185,10 @@ for patient = s
         end
     end
     
-    mask_1 = [pwd filesep 'nbG1_tissue2' filesep 'thresholded_mask.nii']; mask_1 = cellstr(mask_1);
-    mask_2 = [pwd filesep 'nbG1_tissue3' filesep 'thresholded_mask.nii']; mask_2 = cellstr(mask_2);
-    mask_3 = [pwd filesep 'nbG2_tissue2' filesep 'thresholded_mask.nii']; mask_3 = cellstr(mask_3);
-    mask_4 = [pwd filesep 'nbG2_tissue3' filesep 'thresholded_mask.nii']; mask_4 = cellstr(mask_4);
+    mask_1 = [pwd filesep 'nbG1_tissue2' filesep 'tthresholded_mask.nii']; mask_1 = cellstr(mask_1);
+    mask_2 = [pwd filesep 'nbG1_tissue3' filesep 'tthresholded_mask.nii']; mask_2 = cellstr(mask_2);
+    mask_3 = [pwd filesep 'nbG2_tissue2' filesep 'tthresholded_mask.nii']; mask_3 = cellstr(mask_3);
+    mask_4 = [pwd filesep 'nbG2_tissue3' filesep 'tthresholded_mask.nii']; mask_4 = cellstr(mask_4);
     P = [mask_1;mask_2;mask_3;mask_4];
     crc_STAPLE(P);
     
@@ -197,8 +197,8 @@ end
 
 % create sum of (STAPLE) lesion masks for motor/non-motor
 
-group_1 = [1 5 7 8 12 14 15 18 21 24 30 32 44 46 47 49 51];
-group_2 = [2 3 4 6 9 10 11 13 16 17 19 20 22 23 25 26 27 28 29 33 34 35 36 37 38 39 41 42 43 45 48 50 52 53 54];
+group_1 = [1 2 4 5 6 7 8 9 10 11 12 14 15 16 17 18 20 21 22 23 24 25 26 27 29 30 32 33 34 38 39 43 44 46 47 49 50 51 52];
+group_2 = [3 13 19 28 35 37 41 42 45 48 53 54];
 
 i = 1;
 for patient = group_1
@@ -245,7 +245,7 @@ spm_jobman('run', matlabbatch);
 
 %compute mean of wc1 images
 
-s = 1:54; s(40) = []; s(31) = [];
+s = 1:54; s(40) = []; s(31) = []; s(36) = [];
 for patient = s
     cd(local(patient+2).name)
     wc1_1 = [pwd filesep 'nbG1_tissue2' filesep 'wc1.nii']; wc1_1_vol = spm_vol(wc1_1) ; wc1_1 = spm_read_vols(wc1_1_vol);
@@ -305,7 +305,7 @@ end
 % sum volumes to get TIV and take mean across 4 segmentations
 
 TIV = NaN(54,1);
-s = 1:54; s(40) = [];
+s = 1:54; s(40) = []; s(36) = []; s(31) = []; 
 for patient = s
     cd(local(patient+2).name)
 
@@ -327,11 +327,14 @@ csvwrite('TIV.csv',TIV);
 
 %% do stats
 
-group_1 = [1 5 7 8 12 14 15 18 21 24 30 32 44 46 47 49 51];
-group_2 = [2 3 4 6 9 10 11 13 16 17 19 20 22 23 25 26 27 28 29 33 34 35 36 37 38 39 41 42 43 45 48 50 52 53 54];
+% group_1 = [1 2 4 5 6 7 8 9 10 11 12 14 15 16 17 18 20 21 22 23 24 25 26 27 29 30 32 33 34 38 39 43 44 46 47 49 50 51 52];
+% group_2 = [3 13 19 28 35 37 41 42 45 48 53 54];
+
+group_1 = [1 4 5 6 7 8 9 10 11 12 14 17 18 21 22 23 24 25 27 29 30 32 33 34 38 39 43 44 46 49 50 51 52];
+group_2 = [2 3 13 15 16 19 20 26 28 35 37 41 42 45 47 48 53 54];
 
 %group 1 -> non-motor tumours
-group1_swc1 = cell(17,1);
+group1_swc1 = cell(33,1);
 index = 1;
 for patient = group_1
     cd(local(patient+2).name)
@@ -342,7 +345,7 @@ for patient = group_1
 end
 
 %group 2 -> motor tumours
-group2_swc1 = cell(35,1);
+group2_swc1 = cell(18,1);
 index = 1;
 for patient = group_2
     cd(local(patient+2).name)
@@ -364,13 +367,10 @@ out = spm_jobman('run', matlabbatch.matlabbatch);
 
 %% Use SPM summarize to extract data at specific coordinates 
 
-group_1 = [1 5 7 8 12 14 15 18 21 24 30 32 44 46 47 49 51];
-group_2 = [2 3 4 6 9 10 11 13 16 17 19 20 22 23 25 26 27 28 29 33 34 35 36 37 38 39 41 42 43 45 48 50 52 53 54];
-
 % MOTOR THALAMUS
 
 index = 1;
-Lthal_gr1 = NaN(17,1);
+Lthal_gr1 = NaN(39,1);
 for patient = group_1
     cd(local(patient+2).name)
     swc1_img = [pwd filesep 'swc1_mean.nii'];
@@ -380,7 +380,7 @@ for patient = group_1
 end
 
 index = 1;
-Lthal_gr2 = NaN(35,1);
+Lthal_gr2 = NaN(12,1);
 for patient = group_2
     cd(local(patient+2).name)
     swc1_img = [pwd filesep 'swc1_mean.nii'];
@@ -390,7 +390,7 @@ for patient = group_2
 end
 
 index = 1;
-Rthal_gr1 = NaN(17,1);
+Rthal_gr1 = NaN(39,1);
 for patient = group_1
     cd(local(patient+2).name)
     swc1_img = [pwd filesep 'swc1_mean.nii'];
@@ -400,7 +400,7 @@ for patient = group_1
 end
 
 index = 1;
-Rthal_gr2 = NaN(35,1);
+Rthal_gr2 = NaN(12,1);
 for patient = group_2
     cd(local(patient+2).name)
     swc1_img = [pwd filesep 'swc1_mean.nii'];
@@ -409,15 +409,15 @@ for patient = group_2
     cd ..
 end
 
-ThData = NaN(35,4); 
-ThData(1:17,1) = Lthal_gr1; ThData(:,2) = Lthal_gr2;
-ThData(1:17,3) = Rthal_gr1; ThData(:,4) = Rthal_gr2;
+ThData = NaN(39,4); 
+ThData(:,1) = Lthal_gr1; ThData(1:12,2) = Lthal_gr2;
+ThData(:,3) = Rthal_gr1; ThData(1:12,4) = Rthal_gr2;
 [est_thal,HDI_thal] = rst_data_plot(ThData,'estimator','median','newfig','yes');
 
 % MOTOR (HANDS)
 
 index = 1;
-Lmotor_hands_gr1 = NaN(17,1);
+Lmotor_hands_gr1 = NaN(39,1);
 for patient = group_1
     cd(local(patient+2).name)
     swc1_img = [pwd filesep 'swc1_mean.nii'];
@@ -427,7 +427,7 @@ for patient = group_1
 end
 
 index = 1;
-Lmotor_hands_gr2 = NaN(35,1);
+Lmotor_hands_gr2 = NaN(12,1);
 for patient = group_2
     cd(local(patient+2).name)
     swc1_img = [pwd filesep 'swc1_mean.nii'];
@@ -437,7 +437,7 @@ for patient = group_2
 end
 
 index = 1;
-Rmotor_hands_gr1 = NaN(17,1);
+Rmotor_hands_gr1 = NaN(39,1);
 for patient = group_1
     cd(local(patient+2).name)
     swc1_img = [pwd filesep 'swc1_mean.nii'];
@@ -447,7 +447,7 @@ for patient = group_1
 end
 
 index = 1;
-Rmotor_hands_gr2 = NaN(35,1);
+Rmotor_hands_gr2 = NaN(12,1);
 for patient = group_2
     cd(local(patient+2).name)
     swc1_img = [pwd filesep 'swc1_mean.nii'];
@@ -456,15 +456,15 @@ for patient = group_2
     cd ..
 end
 
-motorhandsData = NaN(35,4); 
-motorhandsData(1:17,1) = Lmotor_hands_gr1; motorhandsData(:,2) = Lmotor_hands_gr2;
-motorhandsData(1:17,3) = Rmotor_hands_gr1; motorhandsData(:,4) = Rmotor_hands_gr2;
+motorhandsData = NaN(39,4); 
+motorhandsData(:,1) = Lmotor_hands_gr1; motorhandsData(1:12,2) = Lmotor_hands_gr2;
+motorhandsData(:,3) = Rmotor_hands_gr1; motorhandsData(1:12,4) = Rmotor_hands_gr2;
 [est_motor_hands,HDI_motor_hands] = rst_data_plot(motorhandsData,'estimator','median','newfig','yes');
 
 % MOTOR (FEET)
 
 index = 1;
-Lmotor_feet_gr1 = NaN(17,1);
+Lmotor_feet_gr1 = NaN(39,1);
 for patient = group_1
     cd(local(patient+2).name)
     swc1_img = [pwd filesep 'swc1_mean.nii'];
@@ -474,7 +474,7 @@ for patient = group_1
 end
 
 index = 1;
-Lmotor_feet_gr2 = NaN(35,1);
+Lmotor_feet_gr2 = NaN(12,1);
 for patient = group_2
     cd(local(patient+2).name)
     swc1_img = [pwd filesep 'swc1_mean.nii'];
@@ -484,7 +484,7 @@ for patient = group_2
 end
 
 index = 1;
-Rmotor_feet_gr1 = NaN(17,1);
+Rmotor_feet_gr1 = NaN(39,1);
 for patient = group_1
     cd(local(patient+2).name)
     swc1_img = [pwd filesep 'swc1_mean.nii'];
@@ -494,7 +494,7 @@ for patient = group_1
 end
 
 index = 1;
-Rmotor_feet_gr2 = NaN(35,1);
+Rmotor_feet_gr2 = NaN(12,1);
 for patient = group_2
     cd(local(patient+2).name)
     swc1_img = [pwd filesep 'swc1_mean.nii'];
@@ -503,15 +503,15 @@ for patient = group_2
     cd ..
 end
 
-motorfeetData = NaN(35,4); 
-motorfeetData(1:17,1) = Lmotor_feet_gr1; motorfeetData(:,2) = Lmotor_feet_gr2;
-motorfeetData(1:17,3) = Rmotor_feet_gr1; motorfeetData(:,4) = Rmotor_feet_gr2;
+motorfeetData = NaN(39,4); 
+motorfeetData(:,1) = Lmotor_feet_gr1; motorfeetData(1:12,2) = Lmotor_feet_gr2;
+motorfeetData(:,3) = Rmotor_feet_gr1; motorfeetData(1:12,4) = Rmotor_feet_gr2;
 [est_motor_feet,HDI_motor_feet] = rst_data_plot(motorfeetData,'estimator','median','newfig','yes');
 
 % VI CEREBELLUM
 
 index = 1;
-LVI_cerebellum_gr1 = NaN(17,1);
+LVI_cerebellum_gr1 = NaN(39,1);
 for patient = group_1
     cd(local(patient+2).name)
     swc1_img = [pwd filesep 'swc1_mean.nii'];
@@ -521,7 +521,7 @@ for patient = group_1
 end
 
 index = 1;
-LVI_cerebellum_gr2 = NaN(35,1);
+LVI_cerebellum_gr2 = NaN(12,1);
 for patient = group_2
     cd(local(patient+2).name)
     swc1_img = [pwd filesep 'swc1_mean.nii'];
@@ -531,7 +531,7 @@ for patient = group_2
 end
 
 index = 1;
-RVI_cerebellum_gr1 = NaN(17,1);
+RVI_cerebellum_gr1 = NaN(39,1);
 for patient = group_1
     cd(local(patient+2).name)
     swc1_img = [pwd filesep 'swc1_mean.nii'];
@@ -541,7 +541,7 @@ for patient = group_1
 end
 
 index = 1;
-RVI_cerebellum_gr2 = NaN(35,1);
+RVI_cerebellum_gr2 = NaN(12,1);
 for patient = group_2
     cd(local(patient+2).name)
     swc1_img = [pwd filesep 'swc1_mean.nii'];
@@ -550,8 +550,8 @@ for patient = group_2
     cd ..
 end
 
-VI_cerebellum_Data = NaN(35,4); 
-VI_cerebellum_Data(1:17,1) = LVI_cerebellum_gr1; VI_cerebellum_Data(:,2) = LVI_cerebellum_gr2;
-VI_cerebellum_Data(1:17,3) = RVI_cerebellum_gr1; VI_cerebellum_Data(:,4) = RVI_cerebellum_gr2;
+VI_cerebellum_Data = NaN(39,4); 
+VI_cerebellum_Data(:,1) = LVI_cerebellum_gr1; VI_cerebellum_Data(1:12,2) = LVI_cerebellum_gr2;
+VI_cerebellum_Data(:,3) = RVI_cerebellum_gr1; VI_cerebellum_Data(1:12,4) = RVI_cerebellum_gr2;
 [est_VI_cerebellum,HDI_VI_cerebellum] = rst_data_plot(VI_cerebellum_Data,'estimator','median','newfig','yes'); 
 
