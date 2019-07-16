@@ -304,9 +304,8 @@ end
 
 % sum volumes to get TIV and take mean across 4 segmentations
 
-TIV = NaN(51,1);
+TIV = NaN(54,1);
 s = 1:54; s(40) = []; s(36) = []; s(31) = []; 
-index = 1;
 for patient = s
     cd(local(patient+2).name)
 
@@ -319,8 +318,8 @@ for patient = s
     IMP = importdata([pwd filesep 'nbG2_tissue3' filesep 'volumes.csv']); nbG2_tiss3_vols = IMP.data;
     nbG2_tiss3_sum = sum(nbG2_tiss3_vols(:));
     
-    TIV(index,1) = (nbG1_tiss2_sum + nbG1_tiss3_sum + nbG2_tiss2_sum + nbG2_tiss3_sum)/4;
-    index = index+1;
+    TIV(patient,1) = (nbG1_tiss2_sum + nbG1_tiss3_sum + nbG2_tiss2_sum + nbG2_tiss3_sum)/4;
+    %index = index+1;
     cd ..
 end
 
