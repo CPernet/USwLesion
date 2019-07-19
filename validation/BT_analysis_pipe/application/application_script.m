@@ -323,50 +323,11 @@ end
 cd('C:\Users\s1835343\mri_stuff\spm12\toolbox\USwLesion\validation\BT_analysis_pipe\application')
 csvwrite('TIV.csv',TIV);
 
-%% do stats
-
-% group_1 = [1 2 4 5 6 7 8 9 10 11 12 14 15 16 17 18 21 22 23 24 25 26 27 29 30 32 34 38 39 43 44 46 47 49 50 51 52 54];
-% group_2 = [3 13 19 20 28 33 35 37 41 42 45 48 53];
-% 
-% %group 1 -> non-motor tumours
-% group1_swc1 = cell(length(group_1),1);
-% index = 1;
-% for patient = group_1
-%     cd(local(patient+2).name)
-%     swc1 = [pwd filesep 'swc1_mean.nii'];
-%     group1_swc1(index,1) = cellstr(swc1);
-%     index = index + 1;
-%     cd ..
-% end
-% 
-% %group 2 -> motor tumours
-% group2_swc1 = cell(length(group_2),1);
-% index = 1;
-% for patient = group_2
-%     cd(local(patient+2).name)
-%     swc1 = [pwd filesep 'swc1_mean.nii'];
-%     group2_swc1(index,1) = cellstr(swc1);
-%     index = index + 1;
-%     cd ..
-% end
-% 
-% group1_TIV = TIV(group_1); group2_TIV = TIV(group_2);
-% reordered_TIV = [group1_TIV;group2_TIV]; 
-% 
-% %load stats batch
-% matlabbatch = load('C:\Users\s1835343\mri_stuff\VBM_stats_batch.mat');
-% matlabbatch.matlabbatch{1,2}.spm.stats.factorial_design.des.t2.scans1 = [group1_swc1]; %Group 1 smwc1_mean.nii images
-% matlabbatch.matlabbatch{1,2}.spm.stats.factorial_design.des.t2.scans2 = [group2_swc1]; %Group 2 smwc1_mean.nii images
-% matlabbatch.matlabbatch{1,2}.spm.stats.factorial_design.cov.c = [reordered_TIV]; %vector of TIVs -> X-by-1 array must be entered
-% out = spm_jobman('run', matlabbatch.matlabbatch);
-
 %% Use SPM summarize to extract data at specific coordinates 
-
-% group_1 = [1 2 4 5 6 7 8 9 10 11 12 14 15 16 17 18 21 22 23 24 25 26 27 29 30 32 34 38 39 43 44 46 48 49 50 51 52 54];
-% group_2 = [3 13 19 20 28 33 35 37 41 42 45 47 53];
 
 group_1 = [1 4 5 6 7 8 9 10 11 12 14 15 16 17 18 21 22 23 24 25 26 27 29 30 32 34 38 39 43 44 46 49 50 51 52];
 group_2 = [2 3 13 19 20 28 33 35 37 41 42 45 47 48 53 54];
+
 group1_TIV = TIV(group_1); group2_TIV = TIV(group_2); 
 
 % MOTOR THALAMUS
@@ -463,7 +424,7 @@ motorhandsData(:,1) = Lmotor_hands_gr1; motorhandsData(1:length(group_2),2) = Lm
 motorhandsData(:,3) = Rmotor_hands_gr1; motorhandsData(1:length(group_2),4) = Rmotor_hands_gr2;
 [est_motor_hands,HDI_motor_hands] = rst_data_plot(motorhandsData,'estimator','median','newfig','yes');
 
-% MOTOR (FEET) - 4a/p
+% MOTOR (FEET) - SMA
 
 index = 1;
 Lmotor_feet_gr1 = NaN(length(group_1),1);
@@ -604,52 +565,52 @@ Insula_Data(:,1) = L_insula_gr1; Insula_Data(1:length(group_2),2) = L_insula_gr2
 Insula_Data(:,3) = R_insula_gr1; Insula_Data(1:length(group_2),4) = R_insula_gr2;
 [est_insula,HDI_insula] = rst_data_plot(Insula_Data,'estimator','median','newfig','yes'); 
 
-% Putamen
+% Parietal operculum
 
 index = 1;
-L_putamen_gr1 = NaN(length(group_1),1);
+L_parietal_gr1 = NaN(length(group_1),1);
 for patient = group_1
     cd(local(patient+2).name)
     wc1_img = [pwd filesep 'mwc1_mean.nii'];
-    [L_putamen_gr1(index,1), xY] = spm_summarise(wc1_img,struct('def','sphere', 'spec',8, 'xyz',[-44.9 -0.5 9.2]'),@mean);
+    [L_parietal_gr1(index,1), xY] = spm_summarise(wc1_img,struct('def','sphere', 'spec',8, 'xyz',[-23.1 -5.3 8.7]'),@mean);
     index = index+1;
     cd ..
 end
 
 index = 1;
-L_putamen_gr2 = NaN(length(group_2),1);
+L_parietal_gr2 = NaN(length(group_2),1);
 for patient = group_2
     cd(local(patient+2).name)
     wc1_img = [pwd filesep 'mwc1_mean.nii'];
-    [L_putamen_gr2(index,1), xY] = spm_summarise(wc1_img,struct('def','sphere', 'spec',8, 'xyz',[-44.9 -0.5 9.2]'),@mean);
+    [L_parietal_gr2(index,1), xY] = spm_summarise(wc1_img,struct('def','sphere', 'spec',8, 'xyz',[-23.1 -5.3 8.7]'),@mean);
     index = index+1;
     cd ..
 end
 
 index = 1;
-R_putamen_gr1 = NaN(length(group_1),1);
+R_parietal_gr1 = NaN(length(group_1),1);
 for patient = group_1
     cd(local(patient+2).name)
     wc1_img = [pwd filesep 'mwc1_mean.nii'];
-    [R_putamen_gr1(index,1), xY] = spm_summarise(wc1_img,struct('def','sphere', 'spec',8, 'xyz',[44.9 -0.5 9.2]'),@mean);
+    [R_parietal_gr1(index,1), xY] = spm_summarise(wc1_img,struct('def','sphere', 'spec',8, 'xyz',[23.1 -5.3 8.7]'),@mean);
     index = index+1;
     cd ..
 end
 
 index = 1;
-R_putamen_gr2 = NaN(length(group_2),1);
+R_parietal_gr2 = NaN(length(group_2),1);
 for patient = group_2
     cd(local(patient+2).name)
     wc1_img = [pwd filesep 'mwc1_mean.nii'];
-    [R_putamen_gr2(index,1), xY] = spm_summarise(wc1_img,struct('def','sphere', 'spec',8, 'xyz',[44.9 -0.5 9.2]'),@mean);
+    [R_parietal_gr2(index,1), xY] = spm_summarise(wc1_img,struct('def','sphere', 'spec',8, 'xyz',[23.1 -5.3 8.7]'),@mean);
     index = index+1;
     cd ..
 end
 
-Putamen_Data = NaN(length(group_1),4); 
-Putamen_Data(:,1) = L_putamen_gr1; Putamen_Data(1:length(group_2),2) = L_putamen_gr2;
-Putamen_Data(:,3) = R_putamen_gr1; Putamen_Data(1:length(group_2),4) = R_putamen_gr2;
-[est_putamen,HDI_putamen] = rst_data_plot(Putamen_Data,'estimator','median','newfig','yes'); 
+Parietal_Data = NaN(length(group_1),4); 
+Parietal_Data(:,1) = L_parietal_gr1; Parietal_Data(1:length(group_2),2) = L_parietal_gr2;
+Parietal_Data(:,3) = R_parietal_gr1; Parietal_Data(1:length(group_2),4) = R_parietal_gr2;
+[est_parietal,HDI_parietal] = rst_data_plot(Parietal_Data,'estimator','median','newfig','yes'); 
 
 
 %correct for difference in total intracranial volume
@@ -683,16 +644,60 @@ adj_insulaData = NaN(length(group_1),4);
 [~,~,adj_insulaData(:,3)] = regress(Insula_Data(:,3),group1_TIV);
 [~,~,adj_insulaData(1:length(group_2),4)] = regress(Insula_Data(1:length(group_2),4),group2_TIV);
 
-adj_putamenData = NaN(length(group_1),4);
-[~,~,adj_putamenData(:,1)] = regress(Putamen_Data(:,1),group1_TIV);
-[~,~,adj_putamenData(1:length(group_2),2)] = regress(Putamen_Data(1:length(group_2),2),group2_TIV);
-[~,~,adj_putamenData(:,3)] = regress(Putamen_Data(:,3),group1_TIV);
-[~,~,adj_putamenData(1:length(group_2),4)] = regress(Putamen_Data(1:length(group_2),4),group2_TIV);
+adj_parietalData = NaN(length(group_1),4);
+[~,~,adj_parietalData(:,1)] = regress(Parietal_Data(:,1),group1_TIV);
+[~,~,adj_parietalData(1:length(group_2),2)] = regress(Parietal_Data(1:length(group_2),2),group2_TIV);
+[~,~,adj_parietalData(:,3)] = regress(Parietal_Data(:,3),group1_TIV);
+[~,~,adj_parietalData(1:length(group_2),4)] = regress(Parietal_Data(1:length(group_2),4),group2_TIV);
 
 %test for statistical difference between groups at specific motor areas
 
-adj_group1 = horzcat(adj_ThData(:,[1 3]),adj_handData(:,[1 3]),adj_feetData(:,[1 3]),adj_cerebellData(:,[1 3]),adj_insulaData(:,[1 3]),adj_putamenData(:,[1 3]));
-adj_group2 = horzcat(adj_ThData(:,[2 4]),adj_handData(:,[2 4]),adj_feetData(:,[2 4]),adj_cerebellData(:,[2 4]),adj_insulaData(:,[2 4]),adj_putamenData(:,[2 4]));
+adj_group1 = horzcat(adj_ThData(:,[1 3]),adj_handData(:,[1 3]),adj_feetData(:,[1 3]),adj_cerebellData(:,[1 3]),adj_insulaData(:,[1 3]),adj_parietalData(:,[1 3]));
+adj_group2 = horzcat(adj_ThData(:,[2 4]),adj_handData(:,[2 4]),adj_feetData(:,[2 4]),adj_cerebellData(:,[2 4]),adj_insulaData(:,[2 4]),adj_parietalData(:,[2 4]));
 
 [diff,CI,p,alphav,h]=rst_gp_multicompare(adj_group1,adj_group2,'alphav',0.05,'estimator','median','newfig','yes');
 
+%% finding if tumour vol makes a difference
+
+reordered_TIV = vertcat(group1_TIV,group2_TIV);
+
+group1_tumour_vol = NaN(51,1);
+index = 1;
+for patient = group_1
+    cd(local(patient+2).name)
+
+    IMP = importdata([pwd filesep 'nbG1_tissue2' filesep 'volumes.csv']); nbG1_tiss2_vols = IMP.data;
+    nbG1_tiss2_tumvol = nbG1_tiss2_vols(3);
+    IMP = importdata([pwd filesep 'nbG1_tissue3' filesep 'volumes.csv']); nbG1_tiss3_vols = IMP.data;
+    nbG1_tiss3_tumvol = nbG1_tiss3_vols(3);
+    IMP = importdata([pwd filesep 'nbG2_tissue2' filesep 'volumes.csv']); nbG2_tiss2_vols = IMP.data;
+    nbG2_tiss2_tumvol = nbG2_tiss2_vols(3);
+    IMP = importdata([pwd filesep 'nbG2_tissue3' filesep 'volumes.csv']); nbG2_tiss3_vols = IMP.data;
+    nbG2_tiss3_tumvol = nbG2_tiss3_vols(3);
+    
+    group1_tumour_vol(index,1) = (nbG1_tiss2_tumvol + nbG1_tiss3_tumvol + nbG2_tiss2_tumvol + nbG2_tiss3_tumvol)/4;
+    index = index+1;
+    cd ..
+end
+group1_tumour_vol(isnan(group1_tumour_vol))=0;
+
+group2_tumour_vol = NaN(51,1);
+index = 36;
+for patient = group_2
+    cd(local(patient+2).name)
+
+    IMP = importdata([pwd filesep 'nbG1_tissue2' filesep 'volumes.csv']); nbG1_tiss2_vols = IMP.data;
+    nbG1_tiss2_tumvol = nbG1_tiss2_vols(3);
+    IMP = importdata([pwd filesep 'nbG1_tissue3' filesep 'volumes.csv']); nbG1_tiss3_vols = IMP.data;
+    nbG1_tiss3_tumvol = nbG1_tiss3_vols(3);
+    IMP = importdata([pwd filesep 'nbG2_tissue2' filesep 'volumes.csv']); nbG2_tiss2_vols = IMP.data;
+    nbG2_tiss2_tumvol = nbG2_tiss2_vols(3);
+    IMP = importdata([pwd filesep 'nbG2_tissue3' filesep 'volumes.csv']); nbG2_tiss3_vols = IMP.data;
+    nbG2_tiss3_tumvol = nbG2_tiss3_vols(3);
+    
+    group2_tumour_vol(index,1) = (nbG1_tiss2_tumvol + nbG1_tiss3_tumvol + nbG2_tiss2_tumvol + nbG2_tiss3_tumvol)/4;
+    index = index+1;
+    cd ..
+end
+
+group2_tumour_vol(isnan(group2_tumour_vol))=0;
