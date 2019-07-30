@@ -659,9 +659,7 @@ adj_group2 = horzcat(adj_ThData(:,[2 4]),adj_handData(:,[2 4]),adj_feetData(:,[2
 
 %% finding if tumour vol makes a difference
 
-reordered_TIV = vertcat(group1_TIV,group2_TIV);
-
-group1_tumour_vol = NaN(51,1);
+group1_tumour_vol = NaN(35,1);
 index = 1;
 for patient = group_1
     cd(local(patient+2).name)
@@ -679,10 +677,10 @@ for patient = group_1
     index = index+1;
     cd ..
 end
-group1_tumour_vol(isnan(group1_tumour_vol))=0;
+% group1_tumour_vol(isnan(group1_tumour_vol))=0;
 
-group2_tumour_vol = NaN(51,1);
-index = 36;
+group2_tumour_vol = NaN(35,1);
+index = 1;
 for patient = group_2
     cd(local(patient+2).name)
 
@@ -700,4 +698,38 @@ for patient = group_2
     cd ..
 end
 
-group2_tumour_vol(isnan(group2_tumour_vol))=0;
+adj_tumvol_group1 = NaN(35,12);
+for index = 1:12
+[~,~,adj_tumvol_group1(:,index)] = regress(adj_group1(:,index),group1_tumour_vol);
+end
+
+adj_tumvol_group2 = NaN(35,12);
+for index = 1:12
+[~,~,adj_tumvol_group2(:,index)] = regress(adj_group2(:,index),group2_tumour_vol);
+end    
+
+[diff1,CI1,p1,alphav1,h1]=rst_gp_multicompare(adj_group1,adj_tumvol_group1,'alphav',0.05,'estimator','median','newfig','yes');
+[diff2,CI2,p2,alphav2,h2]=rst_gp_multicompare(adj_group2,adj_tumvol_group2,'alphav',0.05,'estimator','median','newfig','yes');
+
+% see if 
+
+%% Look at individual motor patient results against CI for non-motor group
+
+[~,allci] = rst_data_plot(adj_group1,'estimator','median');
+figure; plot([1:12],allci); hold on;
+fillhandle=fill([[1:12],[12:-1:1]],[[allci(1,:),fliplr(allci(2,:))]],[0 0 1]);
+set(fillhandle,'EdgeColor',[0 0 1],'FaceAlpha',0.2,'EdgeAlpha',0.8);%set edge color
+grid on; axis([0.5 12.5 -0.35 0.25]);
+for s=1:16; plot(1:12,adj_group2(s,:),'-*','LineWidth',2); end
+
+%before adjustment for TIV
+all_data1 = horzcat(ThData(:,[1 3]),motorhandsData(:,[1 3]),motorfeetData(:,[1 3]),VI_cerebellum_Data(:,[1 3]),Insula_Data(:,[1 3]),Parietal_Data(:,[1 3]));;
+all_data2 = horzcat(ThData(:,[2 4]),motorhandsData(:,[2 4]),motorfeetData(:,[2 4]),VI_cerebellum_Data(:,[2 4]),Insula_Data(:,[2 4]),Parietal_Data(:,[2 4]));
+
+[~,allci2] = rst_data_plot(all_data1,'estimator','median');
+figure; plot([1:12],allci2); hold on
+fillhandle=fill([[1:12],[12:-1:1]],[[allci2(1,:),fliplr(allci2(2,:))]],[0 0 1]);
+set(fillhandle,'EdgeColor',[0 0 1],'FaceAlpha',0.2,'EdgeAlpha',0.8);%set edge color
+grid on; axis([0.5 12.5 -0.05 0.9])
+for s=1:13; plot(1:12,all_data2(s,:),'-*','LineWidth',2); end
+
