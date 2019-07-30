@@ -711,7 +711,10 @@ end
 [diff1,CI1,p1,alphav1,h1]=rst_gp_multicompare(adj_group1,adj_tumvol_group1,'alphav',0.05,'estimator','median','newfig','yes');
 [diff2,CI2,p2,alphav2,h2]=rst_gp_multicompare(adj_group2,adj_tumvol_group2,'alphav',0.05,'estimator','median','newfig','yes');
 
-% see if 
+% see if tumour volume correlates with results
+
+[r1,t1,h1,outid1,hboot1,CI1] = skipped_correlation(adj_group1,group1_tumour_vol,1);
+[r2,t2,h2,outid2,hboot2,CI2] = skipped_correlation(adj_group1,group1_tumour_vol,1);
 
 %% Look at individual motor patient results against CI for non-motor group
 
